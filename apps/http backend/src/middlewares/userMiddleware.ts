@@ -1,9 +1,10 @@
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config";
+import { NextFunction, Request,Response } from "express";
 
 export const userMiddleware = (req: any, res: any, next: any) => {
 
-  const token = req.cookies.Authentication
+  const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
     return res.status(400).json({
       message: "unauthorized",
@@ -20,9 +21,7 @@ export const userMiddleware = (req: any, res: any, next: any) => {
       message:"unauthorized"
     })
    }
-   req.user = {
-      id: decoded.userId,
-    };
+   req.userId = decoded.userId;
     next();
   } catch (error) {
     return res.status(400).json({

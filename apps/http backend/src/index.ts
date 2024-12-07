@@ -10,8 +10,8 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Hello World");
 });
 
-app.post("/api/v1/auth",authRouter)
-app.post("/api/v1/session",sessionRouter)
+app.use("/api/v1/auth",authRouter)
+app.use("/api/v1/session",sessionRouter)
 
 app.listen(3001, () => {
   console.log("Server is running on port 3001");

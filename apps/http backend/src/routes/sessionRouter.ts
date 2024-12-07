@@ -1,11 +1,42 @@
 import {Router,Request,Response} from "express"
+import { sessionSchema } from "../types/types";
+import { userMiddleware } from "../middlewares/userMiddleware";
+import client from "@repo/db/client";
+
+export const SessionStatus = {
+  PENDING: 'PENDING',
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE'
+} as const;
 
 const sessionRouter = Router();
 
-sessionRouter.post("/",(req:Request,res:Response)=>{
-  try{
+sessionRouter.post("/session", userMiddleware, async (req:any, res: any) => {
+  try {
+    const parsedData = sessionSchema.safeParse(req.body);
+    if(!parsedData.success){
+      return res.status(400).json({
+        message:"invalid input"
+      })
+    }
+    const {title,startTime} = parsedData.data;
+    const userId = req.userId;
+    if(!userId){
+      return res.status(400).json({
+        message:"unauthorized"
+      })
+    }
+    const session = await client.session.create({
+      data:{
+        userId,
+        title,
+        startTime,
+        status:SessionStatus.PENDING
+      }
+    })
     res.status(200).json({
-        message:"session created successfully"
+        message:"session created successfully",
+        sessionId:session.id
     })
   }catch(error){
     res.status(500).json({
@@ -13,5 +44,146 @@ sessionRouter.post("/",(req:Request,res:Response)=>{
     })
   }
 })
+
+sessionRouter.get("/sessions",userMiddleware,async(req:any,res:any)=>{
+  try{
+    const userId = req.userId;
+    if(!userId){
+      return res.status(400).json({
+        message:"unauthorized"
+      })
+    }
+    const sessions = await client.session.findMany({})
+    res.status(200).json({
+      sessions
+    })
+
+  }catch(error){
+    res.status(500).json({
+      message:"internal server error"
+    })
+  }
+})
+
+
+sessionRouter.get("/session/:sessionId",userMiddleware,async(req:any,res:any)=>{
+  try{
+    const sessionId = req.params.sessionId;
+    const session = await client.session.findUnique({
+      where:{
+        id:sessionId
+      }
+    })
+    res.status(200).json({
+      session
+    })
+  }catch(error){
+    res.status(500).json({
+      message:"internal server error"
+    })
+  }
+})
+
+sessionRouter.get("/sessions/:userId",userMiddleware,async(req:any,res:any)=>{
+  try{
+    const userId = req.params.userId;
+    if(!userId){
+      return res.status(400).json({
+        message:"unauthorized"
+      })
+    }
+    const sessions = await client.session.findMany({
+      where:{
+        userId
+      }
+    })
+    res.status(200).json({
+      sessions
+    })
+  }catch(error){
+    res.status(500).json({
+      message:"internal server error"
+    })
+  }
+})
+
+sessionRouter.delete("/session/:sessionId",userMiddleware,async(req:any,res:any)=>{
+  try{
+    const sessionId = req.params.sessionId;
+    const session = await client.session.delete({
+      where:{
+        id:sessionId
+      }
+    })
+    if(!session){
+      return res.status(400).json({
+        message:"session not found"
+      })
+    }
+    res.status(200).json({
+      message:"session deleted successfully"
+    })
+  }catch(error){
+    res.status(500).json({
+      message:"internal server error"
+    })
+  }
+})
+
+sessionRouter.put("/session/:sessionId/start",userMiddleware,async(req:any,res:any)=>{
+  try{
+    const sessionId = req.params.sessionId;
+    if(!sessionId){
+      return res.status(400).json({
+        message:"session id is required"
+      })
+    }
+    const session = await client.session.update({
+      where:{
+        id:sessionId
+      },
+      data:{
+        status:SessionStatus.ACTIVE
+      }
+    })
+    res.status(200).json({
+      message:"session started successfully",
+      session
+    })
+  }catch(error){
+    res.status(500).json({
+      message:"internal server error"
+    })
+  }
+})
+
+sessionRouter.put("/session/:sessionId/end",userMiddleware,async(req:any,res:any)=>{
+  try{
+    const sessionId = req.params.sessionId;
+    if(!sessionId){
+      return res.status(400).json({
+        message:"session id is required"
+      })
+    } 
+    const session = await client.session.update({
+      where:{
+        id:sessionId
+      },
+      data:{
+        status:SessionStatus.INACTIVE
+      }
+    })
+    res.status(200).json({
+      message:"session ended successfully",
+      session
+    })
+  }catch(error){
+    res.status(500).json({
+      message:"internal server error"
+    })
+  }
+})
+
+
 
 export default sessionRouter;

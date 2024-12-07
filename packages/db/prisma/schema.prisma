@@ -13,12 +13,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Users{
-   id    String @id @default(cuid())
-   username  String
-   email String @unique
-   password String
-   googleId String?
-   createdAt DateTime @default(now())
-   updatedAt DateTime @updatedAt
+model User {
+  id String @id @default(cuid())
+  email String @unique
+  password String
+  username String
+  googleId String?
+  sessions Session[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
+
+model Session{
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  title String
+  startTime DateTime
+  status SessionStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+}
+
+enum SessionStatus{
+  PENDING
+  ACTIVE
+  INACTIVE
+} 
+

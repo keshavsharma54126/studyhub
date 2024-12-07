@@ -14,11 +14,11 @@ authRouter.post("/signup", async (req: Request, res: Response): Promise<any> => 
         message:"invalid Input"
       })
     }
-    const {email,passowrd,username} = req.body;
+    const {email,password,username} = req.body;
     
-    const hashedPassword = await bcrypt.hash(passowrd,10);
+    const hashedPassword = await bcrypt.hash(password,10);
 
-    const existingUser = await client.users.findUnique({
+    const existingUser = await client.user.findUnique({
       where:{
         email
       }
@@ -29,14 +29,13 @@ authRouter.post("/signup", async (req: Request, res: Response): Promise<any> => 
       })
     }
 
-    const user = await client.users.create({
+    const user = await client.user.create({
       data:{
         email,
         password:hashedPassword,
         username
       }
     })
-    
     res.status(201).json({
         message:"user created successfully",
         userId:user.id,
@@ -44,7 +43,8 @@ authRouter.post("/signup", async (req: Request, res: Response): Promise<any> => 
     })
   }catch(error){
     res.status(500).json({
-        message:"internal server error"
+        message:"internal server error",
+        error:error
     })
   }
 })
@@ -63,7 +63,7 @@ authRouter.post("/signin",async(req:Request,res:Response):Promise<any>=>{
         message:"Bad Request"
       })
     }
-    const existingUser = await client.users.findUnique({
+    const existingUser = await client.user.findUnique({
       where:{
         email,
       }

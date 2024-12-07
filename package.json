@@ -21,6 +21,7 @@
     "packages/*"
   ],
   "dependencies": {
+    "@prisma/client": "^5.22.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.7",
     "bcryptjs": "^2.4.3",
