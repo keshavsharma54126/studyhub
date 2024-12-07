@@ -1,13 +1,35 @@
-import {Router,Request,Response} from "express"
+import {Router,Request,Response, application} from "express"
 import { sessionSchema } from "../types/types";
 import { userMiddleware } from "../middlewares/userMiddleware";
 import client from "@repo/db/client";
+import multer from "multer"
+import amqp from "amqplib"
 
 export const SessionStatus = {
   PENDING: 'PENDING',
   ACTIVE: 'ACTIVE',
   INACTIVE: 'INACTIVE'
 } as const;
+
+const RABBITMQ_URL = process.env.RABBITMQ_URL || "amqp://localhost:5672"
+const QUEUE_NAME = "upload-pdf"
+
+let channel:amqp.Channel|null = null;
+
+async function initializeRabbitMQ(){
+  try{
+    const connection = await amqp.connect(RABBITMQ_URL)
+    channel = await connection.createChannel()
+    await channel.assertQueue(QUEUE_NAME,{
+      durable:true
+    })
+  }catch(error){
+    console.error("Error initializing RabbitMQ:", error);
+    setTimeout(initializeRabbitMQ,1000)
+  }
+}
+
+initializeRabbitMQ()
 
 const sessionRouter = Router();
 
@@ -184,6 +206,43 @@ sessionRouter.put("/session/:sessionId/end",userMiddleware,async(req:any,res:any
   }
 })
 
+sessionRouter.post("/session/:sessionId/slides/pdf",userMiddleware,async(req:any,res:any)=>{
+  try{
+    const sessionId = req.params.sessionId;
+    const {url} = req.body;
+    if(!url){
+      return res.status(400).json({
+        message:"url is required"
+      })
+    }
 
+
+    if(!sessionId){
+      return res.status(400).json({
+        message:"session id is required"
+      })
+    }
+    const session = await client.session.findUnique({
+      where:{
+        id:sessionId
+      }
+    })
+    if(!session){
+      return res.status(400).json({
+        message:"session not found"
+      })
+    }
+    channel?.sendToQueue(QUEUE_NAME,Buffer.from(JSON.stringify({url,sessionId})))
+    res.status(200).json({
+      message:"pdf uploaded successfully"
+    })
+  }catch(error){
+    res.status(500).json({
+      message:"internal server error"
+    })
+  }
+})
+
+sessionRouter.get("")
 
 export default sessionRouter;

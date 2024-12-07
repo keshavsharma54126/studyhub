@@ -1,0 +1,28 @@
+{
+  "name": "uploadworker",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node dist/index.js",
+    "dev": "npm run build && npm run start",
+    "build": "npx esbuild src/index.ts --bundle --outfile=dist/index.js --platform=node --tsconfig=tsconfig.json --loader:.html=text --external:mock-aws-s3 --external:aws-sdk --external:nock"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.705.0",
+    "@aws-sdk/s3-request-presigner": "^3.705.0",
+    "@repo/db": "*",
+    "@types/express": "^5.0.0",
+    "@types/fs-extra": "^11.0.4",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {
+    "@types/fluent-ffmpeg": "^2.1.27"
+  }
+}
