@@ -5,11 +5,11 @@ import amqp from 'amqplib';
 import dotenv from "dotenv";
 import path from "path";
 import fs, { createWriteStream } from "fs-extra";
+import pdfParse from "pdf-parse";
+import pdfPoppler from "pdf-poppler";
 
 
 dotenv.config();
-
-
 
 const s3 = new S3Client({
     region:process.env.AWS_REGION as string,
@@ -19,8 +19,12 @@ const s3 = new S3Client({
     }
 })
 
-const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://localhost:5672';
-const QUEUE_NAME = 'video-processing';
+const convertPdfToImage = async(inputPath:string,outputPath:string)=>{
+    const poppler = new pdfPoppler()
+}
+
+const RABBITMQ_URL = process.env.RABBITMQ_URL || "amqp://localhost:5672"
+const QUEUE_NAME = "upload-pdf"
 
 async function startConsumer() {
     try {
@@ -36,10 +40,10 @@ async function startConsumer() {
             if (!msg) return;
             
             try {
-                const { videoId, videoUrl, userId, videoTitle } = JSON.parse(msg.content.toString());
-                console.log(`Processing video ${videoId} for user ${userId}`);
+                const { pdfUrl,sessionId } = JSON.parse(msg.content.toString());
+                console.log(`Processing pdf ${pdfUrl} for session ${sessionId}`);
                 
-                const url = new URL(videoUrl);
+                const url = new URL(pdfUrl);
                 const bucketName = url.hostname.split(".")[0];
                 const key = url.pathname.slice(1);
         
@@ -48,7 +52,7 @@ async function startConsumer() {
                 await fs.ensureDir(inputDir)
                 await fs.ensureDir(outputDir)
         
-                const inputPath= path.join(inputDir,videoId)
+                const inputPath= path.join(inputDir,sessionId)
                 const writeStream = createWriteStream(inputPath)
                 const getObjectCommand = new GetObjectCommand({
                     Bucket:bucketName,
@@ -68,7 +72,7 @@ async function startConsumer() {
                         writeStream.on('error', reject);
                     });
                 }
-        
+
                 
             
                 
