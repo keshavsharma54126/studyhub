@@ -246,13 +246,75 @@ sessionRouter.post("/session/:sessionId/slides/uplaod",userMiddleware,async(req:
 sessionRouter.get("/session/:sessionId/slides/images",userMiddleware,async(req:any,res:any)=>{
   try{
     const sessionId = req.params.sessionId;
-  const images = await client.image.findMany({
+  const images = await client.slide.findMany({
     where:{
-      sessionId
-    }
+      sessionId, 
+    } 
   })
     res.status(200).json({
       images
+    })
+  }catch(error){
+    res.status(500).json({
+      message:"internal server error"
+    })
+  }
+})
+
+sessionRouter.post("/session/:sessionId/slides",userMiddleware,async(req:any,res:any)=>{
+  try{
+    const sessionId = req.paras.sessionId ;
+    if(!sessionId){
+      return res.status(400).json({
+        message:"session id not available"
+      })
+    }
+    const session = await client.session.findUnique({
+      where:{
+        id:sessionId
+      }
+    })
+    if(!session){
+      return res.status(400).json({
+        message:"session not present"
+      })
+    }
+    await client.slide.create({
+      data:{
+        sessionId,
+        url:"https://img.freepik.com/free-vector/vector-paper-sheet-isolated-gray-background-with-red-pins_134830-1039.jpg?semt=ais_hybrid"
+      }
+    })
+    return res.status(200).json({
+      message:"empty sliide added successfully"
+    })
+
+
+  }catch(error){
+    res.status(500).json({
+      message:"internal server error"
+    })
+  }
+})
+
+sessionRouter.delete("/session/:sessionId/slides/:slideId",userMiddleware,async(req:any,res:any)=>{
+  try{
+    const slideId = req.params.slideId;
+    const sessionId = req.params.sessionId;
+    if(!slideId || !sessionId){
+      return res.status(400).json({
+        message:"slide id is required"
+      })
+    }
+
+    await client.slide.delete({
+      where:{
+        id:slideId,
+        sessionId:sessionId
+      }
+    })
+    res.status(200).json({
+      message:"slide deleted successfully"
     })
   }catch(error){
     res.status(500).json({

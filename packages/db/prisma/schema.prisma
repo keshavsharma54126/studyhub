@@ -31,14 +31,14 @@ model Session{
   title String
   startTime DateTime
   status SessionStatus @default(PENDING)
-  images Image[]
+  slides Slide[]
   createdAt DateTime @default(now())
   expiresAt DateTime?
 }
 
-model Image{
+model Slide{
   id String @id @default(cuid())
-  sessionId String
+  sessionId String  @unique
   session Session @relation(fields: [sessionId], references: [id])
   url String
   createdAt DateTime @default(now())
