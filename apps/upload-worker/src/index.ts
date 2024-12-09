@@ -3,10 +3,9 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import amqp from 'amqplib';
 import dotenv from "dotenv";
 import path from "path";
-import fs, { createWriteStream } from "fs-extra";
-//@ts-ignore
+import fs, { createReadStream, createWriteStream } from "fs-extra";
 import { fromPath } from 'pdf2pic';
-import  pdfParse  from 'pdf-parse';
+import client from "@repo/db/client";
 
 
 dotenv.config();
@@ -48,6 +47,12 @@ const convertPdfToImages = async(inputPath: string, outputDir: string, sessionId
 
 const RABBITMQ_URL = process.env.RABBITMQ_URL || "amqp://localhost:5672"
 const QUEUE_NAME = "upload-pdf"
+
+const generatePresignedUrl = async (bucketName: string, key: string) => {
+    const command = new GetObjectCommand({ Bucket: bucketName, Key: key });
+    const url = await getSignedUrl(s3, command, { expiresIn: 60 * 60 * 24 * 365 * 10 }); // 10 years
+    return url;
+};
 
 async function startConsumer() {
     try {
@@ -98,6 +103,31 @@ async function startConsumer() {
 
                 await convertPdfToImages(inputPath, outputDir, sessionId);
                 channel.ack(msg);
+
+                const files =  await fs.readdir(outputDir)
+                for(const file of files){
+                    const filePath = path.join(outputDir,file);
+                    const fileStream = createReadStream(filePath);
+
+                    const putObjectCommand = new PutObjectCommand({
+                        Bucket:bucketName,
+                        Key:`${sessionId}/${file}`,
+                        Body:fileStream,
+                        ContentType:"image/png"
+                    })
+                    await s3.send(putObjectCommand)
+
+                    // Generate presigned URL
+                    const presignedUrl = await generatePresignedUrl(bucketName, `${sessionId}/${file}`);
+                    console.log(`Presigned URL for ${file}: ${presignedUrl}`);
+                    await client.image.create({
+                        data:{
+                            sessionId,
+                            url:presignedUrl
+                        }
+                    })
+                }
+
                 
             } catch (error) {
                 console.error('Error processing PDF:', error);

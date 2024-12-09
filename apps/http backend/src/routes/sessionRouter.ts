@@ -206,7 +206,7 @@ sessionRouter.put("/session/:sessionId/end",userMiddleware,async(req:any,res:any
   }
 })
 
-sessionRouter.post("/session/:sessionId/slides/pdf",userMiddleware,async(req:any,res:any)=>{
+sessionRouter.post("/session/:sessionId/slides/uplaod",userMiddleware,async(req:any,res:any)=>{
   try{
     const sessionId = req.params.sessionId;
     const {pdfUrl} = req.body;
@@ -243,6 +243,22 @@ sessionRouter.post("/session/:sessionId/slides/pdf",userMiddleware,async(req:any
   }
 })
 
-sessionRouter.get("")
+sessionRouter.get("/session/:sessionId/slides/images",userMiddleware,async(req:any,res:any)=>{
+  try{
+    const sessionId = req.params.sessionId;
+  const images = await client.image.findMany({
+    where:{
+      sessionId
+    }
+  })
+    res.status(200).json({
+      images
+    })
+  }catch(error){
+    res.status(500).json({
+      message:"internal server error"
+    })
+  }
+})
 
 export default sessionRouter;
