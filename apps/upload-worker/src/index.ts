@@ -1,12 +1,12 @@
-
 import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import amqp from 'amqplib';
 import dotenv from "dotenv";
 import path from "path";
 import fs, { createWriteStream } from "fs-extra";
-import pdfParse from "pdf-parse";
-import pdfPoppler from "pdf-poppler";
+//@ts-ignore
+import { fromPath } from 'pdf2pic';
+import  pdfParse  from 'pdf-parse';
 
 
 dotenv.config();
@@ -19,8 +19,31 @@ const s3 = new S3Client({
     }
 })
 
-const convertPdfToImage = async(inputPath:string,outputPath:string)=>{
-    const poppler = new pdfPoppler()
+
+
+const convertPdfToImages = async(inputPath: string, outputDir: string, sessionId: string) => {
+    try {
+        const options = {
+            density: 100,
+            saveFilename: `${sessionId}_page`,
+            savePath: outputDir,
+            format: "png",
+            width: 2480,
+            height: 3508
+        };
+        
+        const convert = fromPath(inputPath, options);
+        
+        // Convert all pages
+        const result = await convert.bulk(-1);
+        console.log("PDF to images converted", result);
+        return result;
+    } catch(e) {
+        if(e instanceof Error) {
+            console.error("Error while converting PDF to images:", e);
+            throw e;
+        }
+    }
 }
 
 const RABBITMQ_URL = process.env.RABBITMQ_URL || "amqp://localhost:5672"
@@ -73,11 +96,11 @@ async function startConsumer() {
                     });
                 }
 
-                
-            
+                await convertPdfToImages(inputPath, outputDir, sessionId);
+                channel.ack(msg);
                 
             } catch (error) {
-                console.error('Error processing video:', error);
+                console.error('Error processing PDF:', error);
                 channel.nack(msg, false, true);
             }
         });
@@ -88,4 +111,5 @@ async function startConsumer() {
 }
 
 startConsumer();
+
 

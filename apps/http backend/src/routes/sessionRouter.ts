@@ -209,10 +209,10 @@ sessionRouter.put("/session/:sessionId/end",userMiddleware,async(req:any,res:any
 sessionRouter.post("/session/:sessionId/slides/pdf",userMiddleware,async(req:any,res:any)=>{
   try{
     const sessionId = req.params.sessionId;
-    const {url} = req.body;
-    if(!url){
+    const {pdfUrl} = req.body;
+    if(!pdfUrl || !sessionId){
       return res.status(400).json({
-        message:"url is required"
+        message:"pdfurl and sessionId  is required"
       })
     }
 
@@ -232,7 +232,7 @@ sessionRouter.post("/session/:sessionId/slides/pdf",userMiddleware,async(req:any
         message:"session not found"
       })
     }
-    channel?.sendToQueue(QUEUE_NAME,Buffer.from(JSON.stringify({url,sessionId})))
+    channel?.sendToQueue(QUEUE_NAME,Buffer.from(JSON.stringify({pdfUrl,sessionId})))
     res.status(200).json({
       message:"pdf uploaded successfully"
     })
