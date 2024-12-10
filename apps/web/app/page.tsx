@@ -124,6 +124,105 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Request Demo Section */}
+        <div className="py-24 relative z-10 bg-white/50 backdrop-blur-sm rounded-3xl my-12">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center"
+          >
+            <h2 className="text-4xl font-bold mb-8 bg-gradient-to-r from-teal-600 to-cyan-600 text-transparent bg-clip-text">
+              See TeachStream in Action
+            </h2>
+            <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
+              Schedule a personalized demo to discover how TeachStream can transform your teaching experience.
+            </p>
+            <Link 
+              href="/request-demo" 
+              className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-8 py-4 rounded-full hover:opacity-90 transition-all shadow-lg hover:shadow-teal-200 inline-block"
+            >
+              Request Demo
+            </Link>
+          </motion.div>
+        </div>
+
+        {/* Pricing Section */}
+        <div className="py-24 relative z-10">
+          <h2 className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-teal-600 to-cyan-600 text-transparent bg-clip-text">
+            Simple, Transparent Pricing
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Basic Plan */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="p-8 bg-white rounded-2xl shadow-xl border border-teal-100 hover:shadow-2xl transition-all"
+            >
+              <h3 className="text-2xl font-bold mb-4">Basic</h3>
+              <div className="text-4xl font-bold mb-6">$29<span className="text-lg text-gray-500">/mo</span></div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center"><span className="text-teal-500 mr-2">✓</span> Up to 30 students</li>
+                <li className="flex items-center"><span className="text-teal-500 mr-2">✓</span> Basic analytics</li>
+                <li className="flex items-center"><span className="text-teal-500 mr-2">✓</span> Live sessions</li>
+              </ul>
+              <Link 
+                href="/signup?plan=basic" 
+                className="block text-center bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-6 py-3 rounded-full hover:opacity-90 transition-all"
+              >
+                Get Started
+              </Link>
+            </motion.div>
+
+            {/* Pro Plan */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="p-8 bg-gradient-to-b from-teal-500 to-cyan-500 rounded-2xl shadow-xl border border-teal-400 hover:shadow-2xl transition-all transform scale-105"
+            >
+              <h3 className="text-2xl font-bold mb-4 text-white">Pro</h3>
+              <div className="text-4xl font-bold mb-6 text-white">$79<span className="text-lg opacity-75">/mo</span></div>
+              <ul className="space-y-4 mb-8 text-white">
+                <li className="flex items-center"><span className="mr-2">✓</span> Up to 100 students</li>
+                <li className="flex items-center"><span className="mr-2">✓</span> Advanced analytics</li>
+                <li className="flex items-center"><span className="mr-2">✓</span> Interactive tools</li>
+                <li className="flex items-center"><span className="mr-2">✓</span> Priority support</li>
+              </ul>
+              <Link 
+                href="/signup?plan=pro" 
+                className="block text-center bg-white text-teal-500 px-6 py-3 rounded-full hover:opacity-90 transition-all"
+              >
+                Get Started
+              </Link>
+            </motion.div>
+
+            {/* Enterprise Plan */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="p-8 bg-white rounded-2xl shadow-xl border border-teal-100 hover:shadow-2xl transition-all"
+            >
+              <h3 className="text-2xl font-bold mb-4">Enterprise</h3>
+              <div className="text-4xl font-bold mb-6">Custom</div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center"><span className="text-teal-500 mr-2">✓</span> Unlimited students</li>
+                <li className="flex items-center"><span className="text-teal-500 mr-2">✓</span> Custom analytics</li>
+                <li className="flex items-center"><span className="text-teal-500 mr-2">✓</span> API access</li>
+                <li className="flex items-center"><span className="text-teal-500 mr-2">✓</span> Dedicated support</li>
+              </ul>
+              <Link 
+                href="/contact-sales" 
+                className="block text-center bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-6 py-3 rounded-full hover:opacity-90 transition-all"
+              >
+                Contact Sales
+              </Link>
+            </motion.div>
+          </div>
+        </div>
+
         {/* Modern Footer */}
         <footer className="relative z-10 mt-24 border-t border-teal-100">
           <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
