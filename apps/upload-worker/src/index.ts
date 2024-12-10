@@ -120,7 +120,7 @@ async function startConsumer() {
                     // Generate presigned URL
                     const presignedUrl = await generatePresignedUrl(bucketName, `${sessionId}/${file}`);
                     console.log(`Presigned URL for ${file}: ${presignedUrl}`);
-                    await client.image.create({
+                    await client.slide.create({
                         data:{
                             sessionId,
                             url:presignedUrl

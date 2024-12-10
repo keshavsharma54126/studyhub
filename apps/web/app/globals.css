@@ -5,7 +5,7 @@
 
 @keyframes blob {
   0% {
-    transform: translate(0px, 0px) scale(5);
+    transform: translate(0px, 100px) scale(5);
   }
   25% {
     transform: translate(25px, -40px) scale(1.1);

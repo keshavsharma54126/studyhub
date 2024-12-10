@@ -2,7 +2,13 @@ import express from "express";
 import {Request,Response} from "express"
 import authRouter from "./routes/authRouter"
 import sessionRouter from "./routes/sessionRouter"
+import cors from "cors"
 const app = express();
+
+app.use(cors({
+  origin:"http://localhost:3000",
+  credentials:true
+}))
 
 app.use(express.json());
 

@@ -30,6 +30,15 @@ export default function Home() {
       text: "teaching",
     },
     {
+      text:"and"
+    }
+    
+  ];
+  const words2 = [
+    {
+      text:"learning",
+    },
+    {
       text: "experience.",
       className: "text-teal-500 dark:text-cyan-400",
     },
@@ -59,8 +68,8 @@ export default function Home() {
                 </Link>
                 <div className="relative group">
                   <div className="bg-teal-500 text-white px-6 py-2 rounded-full flex items-center space-x-2 group-hover:bg-teal-600 transition-colors">
-                    <Link href="/login" className="hover:text-blue-200 transition-colors">
-                      Login
+                    <Link href="/signin" className="hover:text-blue-200 transition-colors">
+                      Sign in
                     </Link>
                     <span className="text-gray-400">/</span>
                     <Link href="/signup" className="hover:text-blue-200 transition-colors">
@@ -128,11 +137,17 @@ export default function Home() {
                     </svg>
                   </div>
                 </motion.div>
-
-                <TypewriterEffect 
-                  words={words} 
-                  className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight px-4" 
-                />
+                  <div className="flex flex-col items-center justify-center px-10">
+                    
+                    <TypewriterEffect 
+                      words={words} 
+                      className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight" 
+                    />
+                    <TypewriterEffect 
+                      words={words2} 
+                      className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight" 
+                    />
+                  </div>
                 
                 <motion.p 
                   initial={{ opacity: 0, y: 10 }}
