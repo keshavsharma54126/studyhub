@@ -1,3 +1,4 @@
+'use client';
 import { Card } from "@repo/ui/card"
 import { 
   BarChart,
@@ -5,15 +6,20 @@ import {
   Users,
   DollarSign
 } from "lucide-react"
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
+    const router = useRouter();
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
-      
+      <button onClick={()=>{
+        localStorage.removeItem("auth_token");
+        router.push("/signin");
+      }}>Logout</button>
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card className="p-4">
+        <Card className="p-4" title={"haa haa"} href={"#"}>
           <div className="flex items-center space-x-4">
             <div className="p-2 bg-blue-100 rounded-lg">
               <Users className="h-6 w-6 text-blue-600" />
@@ -25,7 +31,7 @@ export default function DashboardPage() {
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-4" title={"haa haa"} href={"#"}>
           <div className="flex items-center space-x-4">
             <div className="p-2 bg-green-100 rounded-lg">
               <DollarSign className="h-6 w-6 text-green-600" />
@@ -37,7 +43,7 @@ export default function DashboardPage() {
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-4" title={"haa haa"} href={"#"}>
           <div className="flex items-center space-x-4">
             <div className="p-2 bg-purple-100 rounded-lg">
               <Activity className="h-6 w-6 text-purple-600" />
@@ -49,7 +55,7 @@ export default function DashboardPage() {
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-4" title={"haa haa"} href={"#"}>
           <div className="flex items-center space-x-4">
             <div className="p-2 bg-orange-100 rounded-lg">
               <BarChart className="h-6 w-6 text-orange-600" />
@@ -65,7 +71,7 @@ export default function DashboardPage() {
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Activity */}
-        <Card className="lg:col-span-2 p-6">
+        <Card className="lg:col-span-2 p-6" title={"haa haa"} href={"#"}>
           <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
           <div className="space-y-4">
             {[1, 2, 3].map((item) => (
@@ -81,7 +87,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Quick Actions */}
-        <Card className="p-6">
+        <Card className="p-6" title={"haa haa"} href={"#"}>
           <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
           <div className="space-y-2">
             <button className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
