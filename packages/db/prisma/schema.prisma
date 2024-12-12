@@ -19,6 +19,7 @@ model User {
   password String
   username String
   googleId String?
+  profilePicture String?
   sessions Session[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
