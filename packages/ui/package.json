@@ -8,7 +8,9 @@
     "./card": "./src/card.tsx",
     "./code": "./src/code.tsx",
     "./background-beams": "./src/background-beams.tsx",
-    "./typewriter-effect.tsx": "./src/typewriter-effect.tsx"
+    "./typewriter-effect.tsx": "./src/typewriter-effect.tsx",
+    "./theme-provider": "./src/themeprovider.tsx",
+    "./toaster": "./src/toaster/toaster.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
