@@ -10,7 +10,8 @@
     "./background-beams": "./src/background-beams.tsx",
     "./typewriter-effect.tsx": "./src/typewriter-effect.tsx",
     "./theme-provider": "./src/themeprovider.tsx",
-    "./toaster": "./src/toaster/toaster.tsx"
+    "./toaster": "./src/toaster/toaster.tsx",
+    "./themetoggle": "./src/themetoggle.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

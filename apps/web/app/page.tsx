@@ -5,7 +5,7 @@ import Link from "next/link";
 import { BackgroundBeams } from "@repo/ui/background-beams";
 import { TypewriterEffect } from "@repo/ui/typewriter-effect.tsx";
 import { useRef } from "react";
-
+import { ThemeToggle } from "@repo/ui/themetoggle";
 export default function Home() {
   const targetRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -45,7 +45,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-cyan-50">
+    <div className="min-h-screen bg-gradient-to-b from-white to-cyan-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Enhanced Navigation */}
         <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-cyan-100">
@@ -60,6 +60,7 @@ export default function Home() {
                 </svg>
               </button>
               <div className="hidden md:flex items-center space-x-4 lg:space-x-8">
+                <ThemeToggle />
                 <Link href="/features" className="text-gray-600 hover:text-teal-500 transition-colors">
                   Features
                 </Link>

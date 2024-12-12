@@ -26,15 +26,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Providers>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            {children}
+<html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <Providers>
+        <body className="antialiased min-h-screen flex flex-col">
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <header className="bg-gray-100 "></header>
+            <main className="flex-grow">{children}</main>
             <Toaster />
+            <footer className="bg-gray-100 mt-auto"></footer>
           </ThemeProvider>
-        </Providers>
-      </body>
+        </body>
+      </Providers>
     </html>
   );
 }
