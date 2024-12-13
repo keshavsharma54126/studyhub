@@ -15,7 +15,9 @@
     "./dialog": "./src/dialog.tsx",
     "./dialogSkeleton": "./src/dialogSkeleton.tsx",
     "./input": "./src/input.tsx",
-    "./label": "./src/label.tsx"
+    "./label": "./src/label.tsx",
+    "./dateTimePicker": "./src/dateTimePicker.tsx",
+    "./dropBox": "./src/dropBox.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

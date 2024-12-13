@@ -34,8 +34,7 @@ model Session{
   userId String
   user User @relation(fields: [userId], references: [id])
   title String
-  description String?
-  tags String[]
+  description String
   startTime DateTime
   endTime DateTime?
   secretCode String?

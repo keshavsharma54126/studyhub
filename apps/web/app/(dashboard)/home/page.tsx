@@ -1,7 +1,7 @@
 'use client';
 import { useState } from "react";
 import { FiPlay, FiUsers, FiPlus } from 'react-icons/fi';
-import { DialogDemo } from "@repo/ui/dialog";
+import { Dropbox } from "@repo/ui/dropBox";
 export default function HomePage() {
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [isStartModalOpen, setIsStartModalOpen] = useState(false);
@@ -109,19 +109,31 @@ export default function HomePage() {
           <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Join Session</h3>
           <input
             type="text"
-            placeholder="Enter session code"
+            placeholder="Title"
             className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
           />
+          <input
+            type="text"
+            placeholder="Description"
+            className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+          />
+          <div className="flex space-x-4">
+            <input aria-label="Date and time" type="datetime-local" className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white" />
+          </div>
+          <div className="flex space-x-4 justify-center items-center mb-4">
+            <Dropbox />
+          </div>
+          
           <div className="flex space-x-4">
             <button
               className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
               onClick={() => {/* Handle join session */}}
             >
-              Join
+              Start Session
             </button>
             <button
               className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300"
-              onClick={() => setIsJoinModalOpen(false)}
+              onClick={() => setIsStartModalOpen(false)}
             >
               Cancel
             </button>
