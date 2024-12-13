@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "../provider";
-import { Theme } from "next-auth";
 import { ThemeProvider } from "@repo/ui/theme-provider";
 import { Toaster } from "@repo/ui/toaster";
 
@@ -26,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-<html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+<html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <Providers>
         <body className="antialiased min-h-screen flex flex-col">
           <ThemeProvider
