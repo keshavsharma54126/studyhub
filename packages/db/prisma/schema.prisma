@@ -18,6 +18,10 @@ model User {
   email String @unique
   password String
   username String
+  firstName String?
+  lastName String?
+  isEmailVerified Boolean @default(false)
+  lastLogin DateTime?
   googleId String?
   profilePicture String?
   sessions Session[]
@@ -30,7 +34,11 @@ model Session{
   userId String
   user User @relation(fields: [userId], references: [id])
   title String
+  description String?
+  tags String[]
   startTime DateTime
+  endTime DateTime?
+  secretCode String?
   status SessionStatus @default(PENDING)
   slides Slide[]
   createdAt DateTime @default(now())

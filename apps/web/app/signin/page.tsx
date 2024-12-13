@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import {useGoogleLogin} from "@react-oauth/google";
 import axios from "axios";
 import { data } from 'framer-motion/client';
+import Link from 'next/link';
 export default function SignIn() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -40,6 +41,11 @@ export default function SignIn() {
 
   const handleGoogleSignIn = async() => {
     try{
+        const token = localStorage.getItem("auth_token");
+        if(token){
+            router.push("/home");
+            return;
+        }
         setLoading(true);
         const urlResponse = await axios.get("http://localhost:3001/api/v1/auth/google/url");
         if(urlResponse.status!==200){
@@ -108,6 +114,7 @@ export default function SignIn() {
           >
             Sign in to your account
           </motion.h2>
+          <p className="text-center text-md text-gray-500">new here? <Link href="/signup" className="text-teal-500 hover:text-teal-600 underline">Sign up</Link></p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
