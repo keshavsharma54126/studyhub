@@ -17,7 +17,9 @@
     "./input": "./src/input.tsx",
     "./label": "./src/label.tsx",
     "./dateTimePicker": "./src/dateTimePicker.tsx",
-    "./dropBox": "./src/dropBox.tsx"
+    "./dropBox": "./src/dropBox.tsx",
+    "./videoComponent": "./src/videoComponent.tsx",
+    "./chatComponent": "./src/chatComponent.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

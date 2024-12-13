@@ -31,7 +31,7 @@ export default function HomePage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         
       <button 
-          className="flex items-center justify-center space-x-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 shadow-sm hover:shadow-md"
+          className="flex items-center justify-center space-x-3 bg-blue-600 text-white px-6 py-4 rounded-xl hover:bg-blue-500 transition-all duration-300 shadow-sm hover:shadow-md"
           onClick={() => setIsStartModalOpen(true)}
         >
           <FiUsers className="w-5 h-5" />
@@ -39,7 +39,7 @@ export default function HomePage() {
         </button>
         
         <button 
-          className="flex items-center justify-center space-x-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 shadow-sm hover:shadow-md"
+          className="flex items-center justify-center space-x-3 bg-gradient-to-r bg-blue-600 hover:bg-blue-500 text-white px-6 py-4 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
           onClick={() => setIsJoinModalOpen(true)}
         >
           <FiUsers className="w-5 h-5" />
@@ -88,14 +88,14 @@ export default function HomePage() {
             />
             <div className="flex space-x-4">
               <button
-                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
+                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-300 hover:to-blue-800 transition-all duration-300"
                 onClick={() => {/* Handle join session */}}
               >
                 Start
               </button>
               <button
                 className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300"
-                onClick={() => setIsStartModalOpen(false)}
+                onClick={() => setIsJoinModalOpen(false)}
               >
                 Cancel
               </button>
