@@ -30,7 +30,7 @@ export default function SignIn() {
       if (result.data.status!==200) {
         setError('Invalid credentials');
       } else {
-        router.push('/dashboard');
+        router.push('/home');
       }
     } catch (error) {
       setError('An error occurred during sign in');
@@ -79,7 +79,7 @@ export default function SignIn() {
                 }
                 localStorage.setItem("auth_token",token);
                 setLoading(false);
-                router.push("/dashboard");
+                router.push("/home");
                 
                 return;
             }else{

@@ -1,9 +1,10 @@
 'use client';
 import { useState } from "react";
 import { FiPlay, FiUsers, FiPlus } from 'react-icons/fi';
-
+import { DialogDemo } from "@repo/ui/dialog";
 export default function HomePage() {
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+  const [isStartModalOpen, setIsStartModalOpen] = useState(false);
 
   return (
     <>
@@ -28,16 +29,17 @@ export default function HomePage() {
 
       {/* Action Buttons */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <button 
-          className="flex items-center justify-center space-x-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-sm hover:shadow-md"
-          onClick={() => {/* Handle start session */}}
+        
+      <button 
+          className="flex items-center justify-center space-x-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 shadow-sm hover:shadow-md"
+          onClick={() => setIsStartModalOpen(true)}
         >
-          <FiPlay className="w-5 h-5" />
-          <span className="font-medium">Start a New Session</span>
+          <FiUsers className="w-5 h-5" />
+          <span className="font-medium">Start a Session</span>
         </button>
         
         <button 
-          className="flex items-center justify-center space-x-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-4 rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 shadow-sm hover:shadow-md"
+          className="flex items-center justify-center space-x-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 shadow-sm hover:shadow-md"
           onClick={() => setIsJoinModalOpen(true)}
         >
           <FiUsers className="w-5 h-5" />
@@ -78,7 +80,7 @@ export default function HomePage() {
       {isJoinModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl w-full max-w-md shadow-xl">
-            <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Join Session</h3>
+            <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Start Session</h3>
             <input
               type="text"
               placeholder="Enter session code"
@@ -89,17 +91,43 @@ export default function HomePage() {
                 className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
                 onClick={() => {/* Handle join session */}}
               >
-                Join
+                Start
               </button>
               <button
                 className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300"
-                onClick={() => setIsJoinModalOpen(false)}
+                onClick={() => setIsStartModalOpen(false)}
               >
                 Cancel
               </button>
             </div>
           </div>
         </div>
+      )}
+      {isStartModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center">
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl w-full max-w-md shadow-xl">
+          <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Join Session</h3>
+          <input
+            type="text"
+            placeholder="Enter session code"
+            className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+          />
+          <div className="flex space-x-4">
+            <button
+              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
+              onClick={() => {/* Handle join session */}}
+            >
+              Join
+            </button>
+            <button
+              className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300"
+              onClick={() => setIsJoinModalOpen(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
       )}
     </>
   );

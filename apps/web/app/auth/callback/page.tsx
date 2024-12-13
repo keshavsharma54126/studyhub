@@ -13,7 +13,7 @@ export default function AuthCallback() {
 
     if (token) {
       localStorage.setItem('auth_token', token);
-      router.push('/dashboard');
+      router.push('/home');
     } else if (error) {
       router.push(`/signin?error=${error}`);
     } else {

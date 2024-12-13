@@ -11,7 +11,11 @@
     "./typewriter-effect.tsx": "./src/typewriter-effect.tsx",
     "./theme-provider": "./src/themeprovider.tsx",
     "./toaster": "./src/toaster/toaster.tsx",
-    "./themetoggle": "./src/themetoggle.tsx"
+    "./themetoggle": "./src/themetoggle.tsx",
+    "./dialog": "./src/dialog.tsx",
+    "./dialogSkeleton": "./src/dialogSkeleton.tsx",
+    "./input": "./src/input.tsx",
+    "./label": "./src/label.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
