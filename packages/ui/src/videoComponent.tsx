@@ -14,24 +14,36 @@ import {
   const serverUrl = 'wss://myacademy-lznxzk2x.livekit.cloud';
   const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzQxMTg1MTcsImlzcyI6IkFQSXhCeEYyYTJvSGJiOCIsIm5iZiI6MTczNDExMTMxNywic3ViIjoicXVpY2tzdGFydCB1c2VyIGFpc296ciIsInZpZGVvIjp7ImNhblB1Ymxpc2giOnRydWUsImNhblB1Ymxpc2hEYXRhIjp0cnVlLCJjYW5TdWJzY3JpYmUiOnRydWUsInJvb20iOiJxdWlja3N0YXJ0IHJvb20iLCJyb29tSm9pbiI6dHJ1ZX19.aMGFZGEFExV5hcI3pbtFSSBDCY3jWgcmU2ks9Zs_a1Q';
   
-  export default function VideoComponent() {
+  export function VideoComponent() {
     return (
       <LiveKitRoom
         video={true}
         audio={true}
         token={token}
         serverUrl={serverUrl}
-        // Use the default LiveKit theme for nice styles.
         data-lk-theme="default"
-        style={{ height: '100%',width: '100%' }}
+        style={{ 
+          height: '100%',
+          width: '100%',
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden'
+        }}
       >
-        {/* Your custom component with basic video conferencing functionality. */}
         <MyVideoConference />
-        {/* The RoomAudioRenderer takes care of room-wide audio for you. */}
         <RoomAudioRenderer />
-        {/* Controls for the user to start/stop audio, video, and screen
-        share tracks and to leave the room. */}
-        <ControlBar />
+        <div className='fixed bottom-0 left-0  p-4 bg-blackbackdrop-blur-sm '>
+          <ControlBar 
+            className='flex flex-row justify-center items-center gap-2 max-w-3xl mx-auto'
+            controls={{
+              microphone: true,
+              camera: true,
+              screenShare: true,
+              leave: true
+            }}
+          />
+        </div>
       </LiveKitRoom>
     );
   }
@@ -45,9 +57,14 @@ import {
       { onlySubscribed: false },
     );
     return (
-      <GridLayout tracks={tracks} style={{ height: 'calc(100vh - var(--lk-control-bar-height))' }}>
-        {/* The GridLayout accepts zero or one child. The child is used
-        as a template to render all passed in tracks. */}
+      <GridLayout 
+        tracks={tracks} 
+        style={{ 
+          height: 'calc(100vh - 80px)',
+          width: '100%',
+          padding: '1rem'
+        }}
+      >
         <ParticipantTile />
       </GridLayout>
     );
