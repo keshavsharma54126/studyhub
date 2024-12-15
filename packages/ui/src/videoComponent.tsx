@@ -1,3 +1,4 @@
+"use client"
 import {
     ControlBar,
     GridLayout,
@@ -12,9 +13,10 @@ import {
   import { Track } from 'livekit-client';
   
   const serverUrl = 'wss://myacademy-lznxzk2x.livekit.cloud';
-  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzQxMTg1MTcsImlzcyI6IkFQSXhCeEYyYTJvSGJiOCIsIm5iZiI6MTczNDExMTMxNywic3ViIjoicXVpY2tzdGFydCB1c2VyIGFpc296ciIsInZpZGVvIjp7ImNhblB1Ymxpc2giOnRydWUsImNhblB1Ymxpc2hEYXRhIjp0cnVlLCJjYW5TdWJzY3JpYmUiOnRydWUsInJvb20iOiJxdWlja3N0YXJ0IHJvb20iLCJyb29tSm9pbiI6dHJ1ZX19.aMGFZGEFExV5hcI3pbtFSSBDCY3jWgcmU2ks9Zs_a1Q';
   
-  export function VideoComponent() {
+  
+  export  function VideoComponent({token}:{token:string}) {
+
     return (
       <LiveKitRoom
         video={true}
@@ -33,7 +35,7 @@ import {
       >
         <MyVideoConference />
         <RoomAudioRenderer />
-        <div className='fixed bottom-0 left-0  p-4 bg-blackbackdrop-blur-sm '>
+        <div className='fixed top-0 left-0 right-0 p-4 bg-black/50'>
           <ControlBar 
             className='flex flex-row justify-center items-center gap-2 max-w-3xl mx-auto'
             controls={{

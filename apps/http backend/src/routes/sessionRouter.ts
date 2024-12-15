@@ -2,8 +2,8 @@ import {Router,Request,Response, application} from "express"
 import { sessionSchema } from "../types/types";
 import { userMiddleware } from "../middlewares/userMiddleware";
 import client from "@repo/db/client";
-import multer from "multer"
-import amqp from "amqplib"
+import amqp from "amqplib";
+import { AccessToken } from 'livekit-server-sdk';
 
 export const SessionStatus = {
   PENDING: 'PENDING',
@@ -322,5 +322,48 @@ sessionRouter.delete("/session/:sessionId/slides/:slideId",userMiddleware,async(
     })
   }
 })
+
+const createToken = async (roomname:string,participantname:string) => {
+  // If this room doesn't exist, it'll be automatically created when the first
+  // participant joins
+  const roomName = roomname;
+  // Identifier to be used for participant.
+  // It's available as LocalParticipant.identity with livekit-client SDK
+  const participantName = participantname;
+
+  const at = new AccessToken(process.env.LIVEKIT_API_KEY, process.env.LIVEKIT_API_SECRET, {
+    identity: participantName,
+    // Token to expire after 10 minutes
+    ttl: '10m',
+  });
+  at.addGrant({ roomJoin: true, room: roomName });
+
+  return await at.toJwt();
+};
+
+sessionRouter.post("/token",userMiddleware,async(req:any,res:any)=>{
+  try{
+    const userId = req.userId;
+    const {roomName,participantName} = req.body;
+    if(!userId){
+      return res.status(400).json({
+        message:"unauthorized"
+      })
+    }
+    if(!roomName || !participantName){
+      return res.status(400).json({
+        message:"room name and participant name is required"
+      })
+    }
+    const token = await createToken(roomName,participantName);
+    res.status(200).json({
+      token
+    })
+  }catch(error){
+    res.status(500).json({
+      message:"internal server error"
+    })
+  }
+})  
 
 export default sessionRouter;
