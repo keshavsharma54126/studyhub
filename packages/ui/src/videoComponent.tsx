@@ -11,6 +11,7 @@ import {
   import '@livekit/components-styles';
   
   import { Track } from 'livekit-client';
+import { Button } from './button.js';
   
   const serverUrl = 'wss://myacademy-lznxzk2x.livekit.cloud';
   
@@ -35,7 +36,7 @@ import {
       >
         <MyVideoConference />
         <RoomAudioRenderer />
-        <div className='fixed top-0 left-0 right-0 p-4 bg-black/50'>
+        <div className='flex flex-row fixed left-0 right-0 bottom-0  border-t border-gray-200 rounded-xl '>
           <ControlBar 
             className='flex flex-row justify-center items-center gap-2 max-w-3xl mx-auto'
             controls={{
@@ -45,6 +46,7 @@ import {
               leave: true
             }}
           />
+          
         </div>
       </LiveKitRoom>
     );

@@ -2,9 +2,20 @@
 import { useState } from "react";
 import { FiPlay, FiUsers, FiPlus } from 'react-icons/fi';
 import { Dropbox } from "@repo/ui/dropBox";
+import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { v4 as uuidv4 } from 'uuid';
 export default function HomePage() {
+  const Id = useParams();
+  const router = useRouter();
+  const sessionCode = uuidv4();
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [isStartModalOpen, setIsStartModalOpen] = useState(false);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [sessionDate, setSessionDate] = useState<string | null>(null);
+  const [pdfUrls, setPdfUrls] = useState<string[]>([]);
 
   return (
     <>
@@ -110,18 +121,22 @@ export default function HomePage() {
           <input
             type="text"
             placeholder="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
           />
           <input
             type="text"
             placeholder="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
           />
           <div className="flex space-x-4">
-            <input aria-label="Date and time" type="datetime-local" className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white" />
+            <input onChange={(e) => setSessionDate(e.target.value)} aria-label="Date and time" type="datetime-local" className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white" />
           </div>
           <div className="flex space-x-4 justify-center items-center mb-4">
-            <Dropbox />
+            <Dropbox setPdfUrls={setPdfUrls} accessKeyId={process.env.NEXT_PUBLIC_ACCESS_KEY_ID!} secretAccessKey={process.env.NEXT_PUBLIC_SECRET_ACCESS_KEY!} region={process.env.NEXT_PUBLIC_REGION!} bucketName={process.env.NEXT_PUBLIC_BUCKET_NAME!}/>
           </div>
           
           <div className="flex space-x-4">

@@ -1,14 +1,27 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
+import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { useDropzone } from "react-dropzone";
 import { Upload, FileIcon, X, Loader } from "lucide-react";
-import axios from "axios";
 import { useToast } from "./toaster/use-toast.js";
+import { v4 as uuidv4 } from 'uuid';
 
-export function Dropbox() {
+
+
+export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPdfUrls}: {accessKeyId: string, secretAccessKey: string, region: string, bucketName: string, setPdfUrls: (urls: string[]) => void}  ) {
+
+  const s3Client = new S3Client({
+    region: region,
+    credentials: {
+      accessKeyId: accessKeyId,
+      secretAccessKey: secretAccessKey
+    },
+  });
   const [files, setFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
 
   // console.log("this is the project id" ,projectId)
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -22,56 +35,37 @@ export function Dropbox() {
   };
 
   const handleUploading = async (currentFile: File) => {
-    // const uploadedFileId = uuidv4();
-    // const signedURLResult = await getSignedURL(uploadedFileId);
-    // if (signedURLResult.failure !== undefined) {
-    //   console.error(signedURLResult.failure);
-    //   return;
-    // }
+    try{
+      const uploadedFileId = uuidv4();
+      const putObjectCommand = new PutObjectCommand({
+        Bucket: bucketName ,
+        Key: "studyhub/" + uploadedFileId,
+        Body: currentFile,
+      });
+      await s3Client.send(putObjectCommand);
+      console.log("this is the uploaded file id" ,uploadedFileId)
 
-    // const { url } = signedURLResult.success;
+      const getObjectCommand = new GetObjectCommand({
+        Bucket: bucketName ,
+        Key: "studyhub/" + uploadedFileId,
+      });
+      const url = await getSignedUrl(s3Client, getObjectCommand, {
+        expiresIn: 100000,
+      });
+      //@ts-ignore
+      setPdfUrls((prev: string[]) => [...prev, url]);
 
-    // await fetch(url, {
-    //   method: "PUT",
-    //   headers: {
-    //     "Content-Type": currentFile.type,
-    //   },
-    //   body: currentFile,
-    // });
-
-    // if (currentFile.type === "text/csv") {
-    //   const data = await getParsedData(uploadedFileId, projectId);
-    //   console.log(data);
-    //   await createData(data);
-    //   await deleteFile(uploadedFileId);
-    // }
-
-    // if (currentFile.type === "application/pdf") {
-    //   // send request to python backend
-    //   const url = await getPublicUrl(uploadedFileId);
-    //   console.log(url);
-    //   const response = await axios.post(
-    //     "http://localhost:8000/client/fetch-data",
-    //     { fileUrl: url, fileKey: uploadedFileId },
-    //     {
-    //       headers: {
-    //         accept: "application/json",
-    //         "Content-Type": "application/json",
-    //       },
-    //     }
-    //   );
-    //   if (response.data) {
-    //     await deleteFile(uploadedFileId);
-    //   } else {
-    //     console.error("pdf data was not extracted");
-    //   }
-    // }
+    }catch(error){
+      console.log(error)
+    }
   };
 
   const handleSubmit = async () => {
     setIsLoading(true);
     files.map((file: File) => {
-      handleUploading(file);
+      if(file.type === "application/pdf"){
+        handleUploading(file);
+      }
     });
     setFiles([]);
     setIsLoading(false);
@@ -144,11 +138,5 @@ export function Dropbox() {
   );
 }
 
-// function uuidv4() {
-//   return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) =>
-//     (
-//       +c ^
-//       (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4)))
-//     ).toString(16)
-//   );
-// }
+
+
