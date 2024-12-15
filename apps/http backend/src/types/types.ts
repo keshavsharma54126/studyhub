@@ -1,3 +1,4 @@
+import { SessionStatus } from "@prisma/client"
 import {z} from "zod"
 
 export const signupSchema = z.object({
@@ -14,5 +15,7 @@ export const signinSchema = z.object({
 export const sessionSchema = z.object({
     title:z.string().min(4),
     description:z.string().min(4),
-    startTime:z.string().datetime(),
+    sessionDate:z.string().datetime(),
+    sessionCode:z.string().min(4),
+    status:z.nativeEnum(SessionStatus)
 })

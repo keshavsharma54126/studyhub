@@ -41,7 +41,7 @@ sessionRouter.post("/session", userMiddleware, async (req:any, res: any) => {
         message:"invalid input"
       })
     }
-    const {title,startTime} = parsedData.data;
+    const {title,description,sessionDate,sessionCode,status} = parsedData.data;
     const userId = req.userId;
     if(!userId){
       return res.status(400).json({
@@ -52,8 +52,10 @@ sessionRouter.post("/session", userMiddleware, async (req:any, res: any) => {
       data:{
         userId,
         title,
-        startTime,
-        status:SessionStatus.PENDING
+        description,
+        startTime:sessionDate,
+        secretCode:sessionCode,
+        status
       }
     })
     res.status(200).json({
@@ -209,8 +211,8 @@ sessionRouter.put("/session/:sessionId/end",userMiddleware,async(req:any,res:any
 sessionRouter.post("/session/:sessionId/slides/uplaod",userMiddleware,async(req:any,res:any)=>{
   try{
     const sessionId = req.params.sessionId;
-    const {pdfUrl} = req.body;
-    if(!pdfUrl || !sessionId){
+    const {pdfUrls} = req.body;
+    if(!pdfUrls || !sessionId){
       return res.status(400).json({
         message:"pdfurl and sessionId  is required"
       })
@@ -232,7 +234,7 @@ sessionRouter.post("/session/:sessionId/slides/uplaod",userMiddleware,async(req:
         message:"session not found"
       })
     }
-    channel?.sendToQueue(QUEUE_NAME,Buffer.from(JSON.stringify({pdfUrl,sessionId})))
+    channel?.sendToQueue(QUEUE_NAME,Buffer.from(JSON.stringify({pdfUrls,sessionId})))
     res.status(200).json({
       message:"pdf uploaded successfully"
     })

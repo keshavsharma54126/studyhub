@@ -4,7 +4,7 @@ import React, { useState, useCallback } from "react";
 import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { useDropzone } from "react-dropzone";
-import { Upload, FileIcon, X, Loader } from "lucide-react";
+import { Upload, FileIcon, X, Loader, Axis3DIcon } from "lucide-react";
 import { useToast } from "./toaster/use-toast.js";
 import { v4 as uuidv4 } from 'uuid';
 
