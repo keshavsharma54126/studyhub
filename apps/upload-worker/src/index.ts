@@ -9,12 +9,14 @@ import client from "@repo/db/client";
 
 
 dotenv.config();
-
+if(!process.env.REGION || !process.env.ACCESS_KEY_ID || !process.env.SECRET_ACCESS_KEY){
+    throw new Error("Missing environment variables")
+}
 const s3 = new S3Client({
-    region:process.env.AWS_REGION as string,
+    region:process.env.REGION as string,
     credentials:{
-        accessKeyId:process.env.AWS_ACCESS_KEY_ID as string,
-        secretAccessKey:process.env.AWS_SECRET_ACCESS_KEY as string
+        accessKeyId:process.env.ACCESS_KEY_ID as string,
+        secretAccessKey:process.env.SECRET_ACCESS_KEY as string
     }
 })
 
@@ -50,8 +52,19 @@ const QUEUE_NAME = "upload-pdf"
 
 const generatePresignedUrl = async (bucketName: string, key: string) => {
     const command = new GetObjectCommand({ Bucket: bucketName, Key: key });
-    const url = await getSignedUrl(s3, command, { expiresIn: 60 * 60 * 24 * 365 * 10 }); // 10 years
+    const url = await getSignedUrl(s3, command, { expiresIn: 60 * 60 * 100 }); // 10 years
     return url;
+};
+
+
+
+const cleanup = async (inputPath: string, outputDir: string) => {
+    try {
+        await fs.remove(inputPath);
+        await fs.emptyDir(outputDir);
+    } catch (error) {
+        console.error('Cleanup failed:', error);
+    }
 };
 
 async function startConsumer() {
@@ -67,68 +80,72 @@ async function startConsumer() {
         channel.consume(QUEUE_NAME, async (msg) => {
             if (!msg) return;
             
+            
             try {
-                const { pdfUrl,sessionId } = JSON.parse(msg.content.toString());
-                console.log(`Processing pdf ${pdfUrl} for session ${sessionId}`);
-                
-                const url = new URL(pdfUrl);
-                const bucketName = url.hostname.split(".")[0];
-                const key = url.pathname.slice(1);
-        
+                const { pdfUrls, sessionId } = JSON.parse(msg.content.toString());
+                console.log(`Processing pdf ${pdfUrls} for session ${sessionId}`);
                 const inputDir= path.join(__dirname,"../input")
                 const outputDir= path.join(__dirname,"../output")
                 await fs.ensureDir(inputDir)
                 await fs.ensureDir(outputDir)
-        
-                const inputPath= path.join(inputDir,sessionId)
-                const writeStream = createWriteStream(inputPath)
-                const getObjectCommand = new GetObjectCommand({
-                    Bucket:bucketName,
-                    Key:key
-                })
-        
-                const response = await s3.send(getObjectCommand);
-                const body = response.Body;
-                if(!body){
-                    throw new Error("no body found in response from s3")
-                }
-                if (body) {
-                    await new Promise((resolve, reject) => {
-                        const stream = body as unknown as any;
-                        stream.pipe(writeStream);
-                        writeStream.on('finish', resolve);
-                        writeStream.on('error', reject);
-                    });
-                }
-
-                await convertPdfToImages(inputPath, outputDir, sessionId);
-                channel.ack(msg);
-
-                const files =  await fs.readdir(outputDir)
-                for(const file of files){
-                    const filePath = path.join(outputDir,file);
-                    const fileStream = createReadStream(filePath);
-
-                    const putObjectCommand = new PutObjectCommand({
-                        Bucket:bucketName,
-                        Key:`${sessionId}/${file}`,
-                        Body:fileStream,
-                        ContentType:"image/png"
-                    })
-                    await s3.send(putObjectCommand)
-
-                    // Generate presigned URL
-                    const presignedUrl = await generatePresignedUrl(bucketName, `${sessionId}/${file}`);
-                    console.log(`Presigned URL for ${file}: ${presignedUrl}`);
-                    await client.slide.create({
-                        data:{
-                            sessionId,
-                            url:presignedUrl
-                        }
-                    })
-                }
-
                 
+            const inputPath = path.join(inputDir, sessionId);
+                
+                for(const pdfUrl of pdfUrls){
+                    const url = new URL(pdfUrl);
+                    const bucketName = url.hostname.split(".")[0];
+                    const key = url.pathname.slice(1);
+            
+                    const writeStream = createWriteStream(inputPath)
+                    const getObjectCommand = new GetObjectCommand({
+                        Bucket:bucketName,
+                        Key:key
+                    })
+            
+                    const response = await s3.send(getObjectCommand);
+                    const body = response.Body;
+                    if(!body){
+                        throw new Error("no body found in response from s3")
+                    }
+                    if (body) {
+                        await new Promise((resolve, reject) => {
+                            const stream = body as unknown as any;
+                            stream.pipe(writeStream);
+                            writeStream.on('finish', resolve);
+                            writeStream.on('error', reject);
+                        });
+                    }
+    
+                    await convertPdfToImages(inputPath, outputDir, sessionId);
+                    channel.ack(msg);
+    
+                    const files =  await fs.readdir(outputDir)
+                    for(const file of files){
+                        const filePath = path.join(outputDir,file);
+                        const fileStream = createReadStream(filePath);
+    
+                        const putObjectCommand = new PutObjectCommand({
+                            Bucket:bucketName,
+                            Key:`${sessionId}/${file}`,
+                            Body:fileStream,
+                            ContentType:"image/png"
+                        })
+                        await s3.send(putObjectCommand)
+    
+                        // Generate presigned URL
+                        const presignedUrl = await generatePresignedUrl(bucketName, `${sessionId}/${file}`);
+                        console.log(`Presigned URL for ${file}: ${presignedUrl}`);
+                        await client.slide.create({
+                            data:{
+                                sessionId,
+                                url:presignedUrl
+                            }
+                        })
+                    }
+    
+                }
+                
+                await cleanup(inputPath, outputDir);
             } catch (error) {
                 console.error('Error processing PDF:', error);
                 channel.nack(msg, false, true);
@@ -139,6 +156,7 @@ async function startConsumer() {
         setTimeout(() => startConsumer(), 5000);
     }
 }
+
 
 startConsumer();
 

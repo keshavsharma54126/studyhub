@@ -31,7 +31,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   
   // Use the hook directly
   const { user, isLoading, error, fetchUser } = useGetUser();
-console.log(user)
 
   useEffect(() => {
     setMounted(true);

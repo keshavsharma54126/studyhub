@@ -3,6 +3,7 @@ import { sessionSchema } from "../types/types";
 import { userMiddleware } from "../middlewares/userMiddleware";
 import client from "@repo/db/client";
 import amqp from "amqplib";
+//@ts-ignore
 import { AccessToken } from 'livekit-server-sdk';
 
 export const SessionStatus = {
@@ -35,27 +36,29 @@ const sessionRouter = Router();
 
 sessionRouter.post("/session", userMiddleware, async (req:any, res: any) => {
   try {
+    console.log(req.body)
     const parsedData = sessionSchema.safeParse(req.body);
+    console.log(parsedData)
     if(!parsedData.success){
       return res.status(400).json({
         message:"invalid input"
       })
     }
-    const {title,description,sessionDate,sessionCode,status} = parsedData.data;
+    const {title,description,sessionDate,sessionCode} = parsedData.data;
     const userId = req.userId;
     if(!userId){
       return res.status(400).json({
         message:"unauthorized"
       })
     }
+
     const session = await client.session.create({
       data:{
-        userId,
         title,
         description,
-        startTime:sessionDate,
+        startTime:new Date(sessionDate),
         secretCode:sessionCode,
-        status
+        userId
       }
     })
     res.status(200).json({
@@ -110,7 +113,7 @@ sessionRouter.get("/session/:sessionId",userMiddleware,async(req:any,res:any)=>{
 
 sessionRouter.get("/sessions/:userId",userMiddleware,async(req:any,res:any)=>{
   try{
-    const userId = req.params.userId;
+    const userId = req.userId;
     if(!userId){
       return res.status(400).json({
         message:"unauthorized"
@@ -119,6 +122,22 @@ sessionRouter.get("/sessions/:userId",userMiddleware,async(req:any,res:any)=>{
     const sessions = await client.session.findMany({
       where:{
         userId
+      },
+      select:{
+        id:true,
+        title:true,
+        description:true,
+        startTime:true,
+        secretCode:true,
+        status:true,
+        slides:{
+          select:{
+            id:true
+          }
+        }
+      },
+      orderBy:{
+        startTime:"desc"
       }
     })
     res.status(200).json({
@@ -208,7 +227,7 @@ sessionRouter.put("/session/:sessionId/end",userMiddleware,async(req:any,res:any
   }
 })
 
-sessionRouter.post("/session/:sessionId/slides/uplaod",userMiddleware,async(req:any,res:any)=>{
+sessionRouter.post("/session/:sessionId/slides/upload",userMiddleware,async(req:any,res:any)=>{
   try{
     const sessionId = req.params.sessionId;
     const {pdfUrls} = req.body;

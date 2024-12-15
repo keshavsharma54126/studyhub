@@ -6,7 +6,22 @@ import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { v4 as uuidv4 } from 'uuid';
+import { jwtDecode } from "jwt-decode";
+import { useGetUser } from "../../hooks";
+
+type Session={
+  id:string,
+  title:string,
+  description:string,
+  startTime:string,
+  secretCode:string,
+  status:string,
+  slides:string[]
+}
 export default function HomePage() {
+  const { user, isLoading, error, fetchUser } = useGetUser();
+  console.log(user?.id)
+  console.log(user)
   const Id = useParams();
   const router = useRouter();
   const sessionCode = uuidv4();
@@ -16,40 +31,58 @@ export default function HomePage() {
   const [description, setDescription] = useState('');
   const [sessionDate, setSessionDate] = useState<string | null>(null);
   const [pdfUrls, setPdfUrls] = useState<string[]>([]);
-  const [scheduledEvents, setScheduledEvents] = useState([
-    {
-      id: 1,
-      title: "Team Meeting",
-      date: "2024-02-20T10:00",
-      description: "Monthly team sync",
-      status: "upcoming",
-      sessionId: "123"
-    },
-    // Add more sample events as needed
-  ]);
+  const [scheduledEvents, setScheduledEvents] = useState<Session[]>([]);
+  
+
 
   const handleStartSession = async () =>{
     try{
-      const response = await axios.post(`http://localhost:3001/api/v1/session/create`,{
+      const response = await axios.post(`http://localhost:3001/api/v1/sessions/session`,{
         sessionCode: sessionCode,
         title: title,
         description: description,
         sessionDate: sessionDate,
+      },{
+        headers:{
+          Authorization: `Bearer ${localStorage.getItem("auth_token")}`
+        }
       })
 
       if(response.status === 200){
-        await axios.post(`http://localhost:3001/api/v1/session/${response.data.sessionId}/upload`,{
+        await axios.post(`http://localhost:3001/api/v1/sessions/session/${response.data.sessionId}/slides/upload`,{
           pdfUrls: pdfUrls
+        },{
+          headers:{
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`
+          }
         })
         setIsStartModalOpen(false);
         setIsJoinModalOpen(false);
-        router.push(`/session/${response.data.sessionId}`);
+        router.push(`/room/${response.data.sessionId}`);
 
       }
     }catch(error){
       console.error(error);
     }
   }
+  const preFetchSessions = async () =>{
+    try{
+      const response = await axios.get(`http://localhost:3001/api/v1/sessions/sessions/${user?.id}`,{
+        headers:{
+          Authorization: `Bearer ${localStorage.getItem("auth_token")}`
+        }
+      });
+      setScheduledEvents(response.data.sessions);
+    }catch(error){
+      console.error(error);
+    }
+  }
+  useEffect(() => {
+    preFetchSessions();
+    
+  }, [])
+
+  console.log(scheduledEvents.map((event) => event))
 
 
   return (
@@ -114,7 +147,7 @@ export default function HomePage() {
             scheduledEvents.map((event) => (
               <div 
                 key={event.id}
-                onClick={() => router.push(`/room/${event.sessionId}`)}
+                onClick={() => router.push(`/room/${event.id}`)}
                 className="flex items-center space-x-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors cursor-pointer"
               >
                 <div className="bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50 p-3 rounded-full">
@@ -124,11 +157,12 @@ export default function HomePage() {
                   <div className="flex justify-between items-center">
                     <p className="text-sm font-medium text-gray-800 dark:text-white">{event.title}</p>
                     <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full text-xs">
-                      {new Date(event.date).toLocaleDateString('en-US', {
+                      {new Date((event.startTime)).toLocaleString('en-US', {
                         month: 'short',
                         day: 'numeric',
                         hour: '2-digit',
-                        minute: '2-digit'
+                        minute: '2-digit',
+                        hour12: true
                       })}
                     </span>
                   </div>

@@ -46,7 +46,7 @@ model Session{
 
 model Slide{
   id String @id @default(cuid())
-  sessionId String  @unique
+  sessionId String 
   session Session @relation(fields: [sessionId], references: [id])
   url String
   createdAt DateTime @default(now())

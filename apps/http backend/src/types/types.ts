@@ -15,7 +15,6 @@ export const signinSchema = z.object({
 export const sessionSchema = z.object({
     title:z.string().min(4),
     description:z.string().min(4),
-    sessionDate:z.string().datetime(),
+    sessionDate:z.string(),
     sessionCode:z.string().min(4),
-    status:z.nativeEnum(SessionStatus)
 })
