@@ -20,7 +20,6 @@ type Session={
 }
 export default function HomePage() {
   const { user, isLoading, error, fetchUser } = useGetUser();
-  console.log(user?.id)
   console.log(user)
   const Id = useParams();
   const router = useRouter();

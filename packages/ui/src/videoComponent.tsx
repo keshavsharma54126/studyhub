@@ -55,14 +55,24 @@ import { Button } from './button.js';
   function MyVideoConference({isHost}:{isHost:boolean}) {
     const tracks = useTracks(
       [
-        { source: Track.Source.Camera, withPlaceholder: true,publication:(pub:any)=>{
-          return isHost || pub.participant.identity==="host"
-        }},
-        { source: Track.Source.ScreenShare, withPlaceholder: false,publication:(pub:any)=>{
-          return isHost || pub.participant.identity==="host"
-        }},
+        { 
+          source: Track.Source.Camera, 
+          withPlaceholder: false,
+          publication: (pub: any) => {
+            return (isHost && pub.participant.isLocal) || 
+                   (!isHost && pub.participant.identity === "host")
+          }
+        },
+        { 
+          source: Track.Source.ScreenShare, 
+          withPlaceholder: false,
+          publication: (pub: any) => {
+            return (isHost && pub.participant.isLocal) || 
+                   (!isHost && pub.participant.identity === "host")
+          }
+        },
       ],
-      { onlySubscribed: false },
+      { onlySubscribed: true },
     );
     return (
       <GridLayout 
@@ -73,7 +83,7 @@ import { Button } from './button.js';
           padding: '1rem'
         }}
       >
-        <ParticipantTile />
+        <ParticipantTile showOverlay={isHost} />
       </GridLayout>
     );
   }

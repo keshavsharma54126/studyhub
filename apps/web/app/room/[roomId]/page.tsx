@@ -6,7 +6,7 @@ import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@repo/ui/button";
 import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, PlayIcon } from "lucide-react";
-import { useGetUser } from "../../hooks/index";
+import { useGetUser } from "../../hooks";
 
 interface Slide {
     id: string;
@@ -17,7 +17,7 @@ interface Slide {
 
 
 export default function RoomPage() {
-    const { user, isLoading, error, fetchUser } = useGetUser();
+
     const router = useRouter();
     const [token, setToken] = useState<string>("");
     const [isHost,setIsHost] = useState(false);
@@ -28,8 +28,7 @@ export default function RoomPage() {
     const [isSessionEnded, setIsSessionEnded] = useState(false);
     const[hasSessionEnded,setHasSessionEnded] = useState(false);
     const [isSessionStarted, setIsSessionStarted] = useState(false);
-
-    console.log(user)
+    const { user, isLoading, error, fetchUser } = useGetUser();
 
     const getSlides = async () => {
        try{
@@ -127,6 +126,7 @@ export default function RoomPage() {
             router.push("/signin");
             return;
         }
+        
 
         axios.post(`http://localhost:3001/api/v1/sessions/token`,
             {
@@ -145,7 +145,7 @@ export default function RoomPage() {
             })
             .catch(err => console.error(err));
             getSlides();
-    }, [router]);
+    }, [router,user]);
 
     const handleStartSession = async()=>{
         try{
