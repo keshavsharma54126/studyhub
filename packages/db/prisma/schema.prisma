@@ -38,7 +38,7 @@ model Session{
   startTime DateTime
   actualStartTime DateTime?
   endTime DateTime?
-  secretCode String?
+  secretCode String @unique
   status SessionStatus @default(PENDING)
   slides Slide[]
   createdAt DateTime @default(now())
@@ -48,7 +48,7 @@ model Session{
 model Slide{
   id String @id @default(cuid())
   sessionId String 
-  session Session @relation(fields: [sessionId], references: [id])
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   url String
   createdAt DateTime @default(now())
 }

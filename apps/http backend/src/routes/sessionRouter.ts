@@ -350,6 +350,37 @@ sessionRouter.delete("/session/:sessionId/slides/:slideId",userMiddleware,async(
   }
 })
 
+sessionRouter.get("/session/tojoin/:sessionToJoin", userMiddleware, async(req:any, res:any) => {
+  try {
+    const sessionCode = req.params.sessionToJoin;
+    console.log("sessionCode", sessionCode);
+    
+    const session = await client.session.findUnique({
+      where: {
+        secretCode: sessionCode
+      },
+      select: {
+        id: true
+      }
+    });
+    
+    if (!session) {
+      return res.status(404).json({
+        message: "session not found"
+      });
+    }
+    
+    res.status(200).json({
+      sessionId: session.id
+    });
+  } catch(error) {
+    console.error(error);
+    res.status(500).json({
+      message: "internal server error"
+    });
+  }
+});
+
 const createToken = async (roomname:string,participantname:string) => {
   // If this room doesn't exist, it'll be automatically created when the first
   // participant joins
