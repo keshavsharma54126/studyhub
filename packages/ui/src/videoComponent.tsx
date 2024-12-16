@@ -11,7 +11,6 @@ import {
   import '@livekit/components-styles';
   
   import { Track } from 'livekit-client';
-import { Button } from './button.js';
   
   const serverUrl = 'wss://myacademy-lznxzk2x.livekit.cloud';
   
@@ -83,7 +82,10 @@ import { Button } from './button.js';
           padding: '1rem'
         }}
       >
-        <ParticipantTile showOverlay={isHost} />
+        <div>
+          {isHost && <ParticipantTile />}
+          {!isHost && <ParticipantTile />}
+        </div>
       </GridLayout>
     );
   }

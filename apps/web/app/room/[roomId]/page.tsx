@@ -181,7 +181,7 @@ export default function RoomPage() {
     return (
         <div className="flex flex-col lg:flex-row min-h-screen w-full bg-gray-50">
             <div className="relative flex-1 h-[60vh] lg:h-screen p-3 sm:p-4 lg:p-6">
-                <div className="absolute top-4 left-4 z-10 flex space-x-3">
+                {isHost ?(<div className="absolute top-4 left-4 z-10 flex space-x-3">
                     <Button onClick={handleStartSession} className="bg-green-500 hover:bg-green-600 text-white 
                                    px-4 py-2 rounded-lg transition-all duration-200 
                                    flex items-center gap-2 shadow-lg hover:shadow-xl">
@@ -197,7 +197,7 @@ export default function RoomPage() {
                         <ArrowLeftIcon size={18} />
                         <span className="hidden sm:inline">End Session</span>
                     </Button>
-                </div>
+                </div>):(<div></div>)}
 
                 <div className="relative w-full h-full bg-white rounded-xl shadow-xl 
                               border border-gray-200 overflow-hidden">
@@ -239,7 +239,7 @@ export default function RoomPage() {
 
             <div className="flex flex-col w-full lg:w-80 xl:w-96 2xl:w-[420px] 
                           bg-white border-t lg:border-l border-gray-200 shadow-xl">
-                <div className="h-[30vh] sm:h-[35vh] lg:h-[40vh] p-3 sm:p-4">
+                <div className="h-[30vh] sm:h-[35vh] lg:h-[26vh] p-3 sm:p-4">
                     <div className="w-full h-full rounded-xl overflow-hidden 
                                  shadow-lg bg-gray-50">
                         <VideoComponent token={token} isHost={isHost} />
