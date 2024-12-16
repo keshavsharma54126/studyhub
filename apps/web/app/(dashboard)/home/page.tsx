@@ -8,6 +8,7 @@ import axios from "axios";
 import { v4 as uuidv4 } from 'uuid';
 import { jwtDecode } from "jwt-decode";
 import { useGetUser } from "../../hooks";
+import { div } from "framer-motion/client";
 
 type Session={
   id:string,
@@ -33,7 +34,11 @@ export default function HomePage() {
   const [pdfUrls, setPdfUrls] = useState<string[]>([]);
   const [scheduledEvents, setScheduledEvents] = useState<Session[]>([]);
   
-
+enum SessionStatus {
+  PENDING = 'PENDING',
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE'
+}
 
   const handleStartSession = async () =>{
     try{
@@ -130,13 +135,26 @@ export default function HomePage() {
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Current Session</h2>
-          <span className="px-4 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-sm font-medium">
-            Inactive
-          </span>
+          {scheduledEvents.length > 0 && scheduledEvents[0]?.status === SessionStatus.ACTIVE ? (
+            <span className="px-4 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-sm font-medium">
+              Active
+            </span>
+          ) : (
+            <span className="px-4 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-sm font-medium">
+              Inactive
+            </span>
+          )}
         </div>
         <div className="space-y-4">
-          <p className="text-gray-600 dark:text-gray-400">No active session. Start or join a session to begin.</p>
-        </div>
+            {scheduledEvents.length > 0 && scheduledEvents[0]?.status === SessionStatus.ACTIVE ? (
+              <div>
+                <p>{scheduledEvents[0].title}</p>
+                <p>{scheduledEvents[0].description}</p>
+              </div>
+            ) : (
+              <p className="text-gray-600 dark:text-gray-400">No active session. Start or join a session to begin.</p>
+            )}
+          </div>
       </div>
 
       {/* Scheduled Events */}
@@ -177,8 +195,6 @@ export default function HomePage() {
           )}
         </div>
       </div>
-
-      {/* Join Session Modal */}
       {isJoinModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl w-full max-w-md shadow-xl">

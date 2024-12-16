@@ -36,7 +36,7 @@ import { Button } from './button.js';
       >
         <MyVideoConference />
         <RoomAudioRenderer />
-        <div className='flex flex-row fixed left-0 right-0 bottom-0  border-t border-gray-200 rounded-xl '>
+        <div className='flex flex-col fixed left-0 top-0 right-0   border-t border-gray-200 rounded-xl '>
           <ControlBar 
             className='flex flex-row justify-center items-center gap-2 max-w-3xl mx-auto'
             controls={{

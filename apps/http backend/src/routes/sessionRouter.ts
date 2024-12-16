@@ -121,7 +121,10 @@ sessionRouter.get("/sessions/:userId",userMiddleware,async(req:any,res:any)=>{
     }
     const sessions = await client.session.findMany({
       where:{
-        userId
+        userId,
+        status:{
+          in:[SessionStatus.PENDING,SessionStatus.ACTIVE]
+        }
       },
       select:{
         id:true,
@@ -186,7 +189,8 @@ sessionRouter.put("/session/:sessionId/start",userMiddleware,async(req:any,res:a
         id:sessionId
       },
       data:{
-        status:SessionStatus.ACTIVE
+        status:SessionStatus.ACTIVE,
+        actualStartTime:new Date()
       }
     })
     res.status(200).json({
@@ -208,12 +212,14 @@ sessionRouter.put("/session/:sessionId/end",userMiddleware,async(req:any,res:any
         message:"session id is required"
       })
     } 
+    const endTime = new Date();
     const session = await client.session.update({
       where:{
         id:sessionId
       },
       data:{
-        status:SessionStatus.INACTIVE
+        status:SessionStatus.INACTIVE,
+        endTime:endTime
       }
     })
     res.status(200).json({
@@ -361,6 +367,34 @@ const createToken = async (roomname:string,participantname:string) => {
 
   return await at.toJwt();
 };
+
+sessionRouter.get("/session/:sessionId/status",userMiddleware,async(req:any,res:any)=>{
+  try{
+    const sessionId = req.params.sessionId;
+    const session = await client.session.findUnique({
+      where:{
+        id:sessionId
+      }
+    })
+    if(!session){
+      return res.status(400).json({
+        message:"session not found"
+      })
+    }
+    if(session.status === SessionStatus.INACTIVE){
+      return res.status(200).json({
+        message:"session ended"
+      })
+    }
+    res.status(200).json({
+      message:"session is active"
+    })
+  }catch(error){
+    res.status(500).json({
+      message:"internal server error"
+    })
+  }
+})
 
 sessionRouter.post("/token",userMiddleware,async(req:any,res:any)=>{
   try{
