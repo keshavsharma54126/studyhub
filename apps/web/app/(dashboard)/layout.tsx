@@ -112,7 +112,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <FiSettings className="w-6 h-6 text-gray-600 dark:text-gray-400" />
           </button>
           <Image 
-            src={user?.profilePicture || '/default-avatar.png'}
+            src={user?.profilePicture || 'https://static.vecteezy.com/system/resources/previews/020/168/719/non_2x/pretty-boy-with-stylish-hairstyle-flat-avatar-icon-with-green-dot-editable-default-persona-for-ux-ui-design-profile-character-picture-with-online-status-color-messaging-app-user-badge-vector.jpg'}
             alt="profile"
             width={60}
             height={60}

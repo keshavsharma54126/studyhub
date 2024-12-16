@@ -16,7 +16,7 @@ import { Button } from './button.js';
   const serverUrl = 'wss://myacademy-lznxzk2x.livekit.cloud';
   
   
-  export  function VideoComponent({token}:{token:string}) {
+  export  function VideoComponent({token,isHost}:{token:string,isHost:boolean}) {
 
     return (
       <LiveKitRoom
@@ -34,16 +34,16 @@ import { Button } from './button.js';
           overflow: 'hidden'
         }}
       >
-        <MyVideoConference />
+        <MyVideoConference isHost={isHost} />
         <RoomAudioRenderer />
         <div className='flex flex-col fixed left-0 top-0 right-0   border-t border-gray-200 rounded-xl '>
           <ControlBar 
             className='flex flex-row justify-center items-center gap-2 max-w-3xl mx-auto'
             controls={{
-              microphone: true,
-              camera: true,
-              screenShare: true,
-              leave: true
+              microphone: isHost,
+              camera: isHost,
+              screenShare: isHost,
+              leave: isHost
             }}
           />
           
@@ -52,11 +52,15 @@ import { Button } from './button.js';
     );
   }
   
-  function MyVideoConference() {
+  function MyVideoConference({isHost}:{isHost:boolean}) {
     const tracks = useTracks(
       [
-        { source: Track.Source.Camera, withPlaceholder: true },
-        { source: Track.Source.ScreenShare, withPlaceholder: false },
+        { source: Track.Source.Camera, withPlaceholder: true,publication:(pub:any)=>{
+          return isHost || pub.participant.identity==="host"
+        }},
+        { source: Track.Source.ScreenShare, withPlaceholder: false,publication:(pub:any)=>{
+          return isHost || pub.participant.identity==="host"
+        }},
       ],
       { onlySubscribed: false },
     );

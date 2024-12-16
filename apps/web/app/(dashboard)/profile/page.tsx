@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {  useGetUser } from "../../hooks/index"
-
+import Image from "next/image";
 type User = {
   id: string;
   email: string;
@@ -32,7 +32,17 @@ export default function ProfilePage() {
       
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6">
         <div className="flex items-center space-x-4 mb-6">
-          <img src={user?.profilePicture} alt="profile" width={60} height={60} className="rounded-full" />
+        <Image 
+            src={user?.profilePicture || 'https://static.vecteezy.com/system/resources/previews/020/168/719/non_2x/pretty-boy-with-stylish-hairstyle-flat-avatar-icon-with-green-dot-editable-default-persona-for-ux-ui-design-profile-character-picture-with-online-status-color-messaging-app-user-badge-vector.jpg'}
+            alt="profile"
+            width={60}
+            height={60}
+            className="rounded-full object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/default-avatar.png';
+            }}
+          />
           <div>
             <h2 className="text-xl font-bold text-gray-800 dark:text-white">{user?.username}</h2>
             <p className="text-gray-600 dark:text-gray-400">{user?.email}</p>

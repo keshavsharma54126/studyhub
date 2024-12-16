@@ -5,13 +5,12 @@ import Link from "next/link";
 import { BackgroundBeams } from "@repo/ui/background-beams";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export default function SignupPage() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    username: ''
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -22,23 +21,12 @@ export default function SignupPage() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3001/api/v1/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Something went wrong');
-      }
-
-      router.push('/login');
+     const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup`,{email,password,username})
+      setLoading(false);
+      router.push('/signin');
     } catch (err: any) {
       setError(err.message);
+      setLoading(false);
     } finally {
       setLoading(false);
     }
@@ -72,16 +60,7 @@ export default function SignupPage() {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="bg-red-50 text-red-500 p-3 rounded-lg text-sm text-center"
-            >
-              {error}
-            </motion.div>
-          )}
+       
           
           <div className="space-y-4 rounded-md">
             <div>
@@ -95,8 +74,8 @@ export default function SignupPage() {
                 required
                 className="relative block w-full rounded-full border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-teal-500"
                 placeholder="Username"
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
             </div>
             <div>
@@ -111,8 +90,8 @@ export default function SignupPage() {
                 required
                 className="relative block w-full rounded-full border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-teal-500"
                 placeholder="Email address"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
@@ -127,27 +106,25 @@ export default function SignupPage() {
                 required
                 className="relative block w-full rounded-full border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-teal-500"
                 placeholder="Password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
           </div>
 
           <div>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <button
               type="submit"
               disabled={loading}
               className={`group relative flex w-full justify-center rounded-full bg-gradient-to-r from-teal-500 to-cyan-500 py-3 px-4 text-sm font-semibold text-white hover:shadow-lg hover:shadow-teal-500/25 transition-all duration-200 ${
                 loading ? 'opacity-70 cursor-not-allowed' : ''
               }`}
+              onClick={handleSubmit}
             >
               {loading ? 'Creating account...' : 'Sign up'}
-            </motion.button>
+          
+            </button>
           </div>
-        </form>
-
         <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -157,6 +134,7 @@ export default function SignupPage() {
           </div>
 
         </div>
+        {error && <p className="text-red-500 text-center">{error}</p>}
       </motion.div>
     </div>
   );

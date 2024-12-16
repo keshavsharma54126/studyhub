@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['localhost',"googleusercontent.com","lh3.googleusercontent.com"],
+    domains: ['localhost',"googleusercontent.com","lh3.googleusercontent.com","static.vecteezy.com"],
   },
 };
 

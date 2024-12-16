@@ -353,7 +353,6 @@ sessionRouter.delete("/session/:sessionId/slides/:slideId",userMiddleware,async(
 sessionRouter.get("/session/tojoin/:sessionToJoin", userMiddleware, async(req:any, res:any) => {
   try {
     const sessionCode = req.params.sessionToJoin;
-    console.log("sessionCode", sessionCode);
     
     const session = await client.session.findUnique({
       where: {
@@ -381,23 +380,7 @@ sessionRouter.get("/session/tojoin/:sessionToJoin", userMiddleware, async(req:an
   }
 });
 
-const createToken = async (roomname:string,participantname:string) => {
-  // If this room doesn't exist, it'll be automatically created when the first
-  // participant joins
-  const roomName = roomname;
-  // Identifier to be used for participant.
-  // It's available as LocalParticipant.identity with livekit-client SDK
-  const participantName = participantname;
 
-  const at = new AccessToken(process.env.LIVEKIT_API_KEY, process.env.LIVEKIT_API_SECRET, {
-    identity: participantName,
-    // Token to expire after 10 minutes
-    ttl: '10m',
-  });
-  at.addGrant({ roomJoin: true, room: roomName });
-
-  return await at.toJwt();
-};
 
 sessionRouter.get("/session/:sessionId/status",userMiddleware,async(req:any,res:any)=>{
   try{
@@ -427,23 +410,53 @@ sessionRouter.get("/session/:sessionId/status",userMiddleware,async(req:any,res:
   }
 })
 
+const createToken = async (roomname:string,participantname:string,isHost:boolean) => {
+  // If this room doesn't exist, it'll be automatically created when the first
+  // participant joins
+  const roomName = roomname;
+  // Identifier to be used for participant.
+  // It's available as LocalParticipant.identity with livekit-client SDK
+  const participantName = participantname;
+
+  const at = new AccessToken(process.env.LIVEKIT_API_KEY, process.env.LIVEKIT_API_SECRET, {
+    identity: isHost ? "host" : participantName,
+    // Token to expire after 10 minutes
+    ttl: '10h',
+  });
+  at.addGrant({ roomJoin: true, room: roomName,canPublish:true,canPublishData:true });
+
+  return await at.toJwt();
+};
+
 sessionRouter.post("/token",userMiddleware,async(req:any,res:any)=>{
   try{
     const userId = req.userId;
-    const {roomName,participantName} = req.body;
+    const {roomName,participantName,sessionId} = req.body;
     if(!userId){
       return res.status(400).json({
         message:"unauthorized"
       })
     }
-    if(!roomName || !participantName){
+    if(!roomName || !participantName || !sessionId){
       return res.status(400).json({
         message:"room name and participant name is required"
       })
     }
-    const token = await createToken(roomName,participantName);
+    const session = await client.session.findUnique({
+      where:{
+        id:sessionId
+      }
+    })
+    if(!session){
+      return res.status(400).json({
+        message:"session not found"
+      })
+    }
+    const isHost = session.userId === userId;
+    const token = await createToken(roomName,participantName,isHost);
     res.status(200).json({
-      token
+      token,
+      isHost
     })
   }catch(error){
     res.status(500).json({

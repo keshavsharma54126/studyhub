@@ -6,7 +6,7 @@ import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@repo/ui/button";
 import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, PlayIcon } from "lucide-react";
-import { div, span } from "framer-motion/client";
+import { useGetUser } from "../../hooks/index";
 
 interface Slide {
     id: string;
@@ -15,9 +15,12 @@ interface Slide {
     sessionId: string;
 }
 
+
 export default function RoomPage() {
+    const { user, isLoading, error, fetchUser } = useGetUser();
     const router = useRouter();
     const [token, setToken] = useState<string>("");
+    const [isHost,setIsHost] = useState(false);
     const sessionId = useParams().roomId;
     const [slides, setSlides] = useState<Slide[]>([]);
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
@@ -25,6 +28,8 @@ export default function RoomPage() {
     const [isSessionEnded, setIsSessionEnded] = useState(false);
     const[hasSessionEnded,setHasSessionEnded] = useState(false);
     const [isSessionStarted, setIsSessionStarted] = useState(false);
+
+    console.log(user)
 
     const getSlides = async () => {
        try{
@@ -125,15 +130,19 @@ export default function RoomPage() {
 
         axios.post(`http://localhost:3001/api/v1/sessions/token`,
             {
-                roomName: "room1",
-                participantName: "user1"
+                roomName:sessionId,
+                participantName: user?.username,
+                sessionId: sessionId
             },
             {
                 headers: {
                     "Authorization": `Bearer ${auth_token}`
                 }
             })
-            .then(res => setToken(res.data.token))
+            .then(res => {
+                setToken(res.data.token);
+                setIsHost(res.data.isHost);
+            })
             .catch(err => console.error(err));
             getSlides();
     }, [router]);
@@ -233,7 +242,7 @@ export default function RoomPage() {
                 <div className="h-[30vh] sm:h-[35vh] lg:h-[40vh] p-3 sm:p-4">
                     <div className="w-full h-full rounded-xl overflow-hidden 
                                  shadow-lg bg-gray-50">
-                        <VideoComponent token={token} />
+                        <VideoComponent token={token} isHost={isHost} />
                     </div>
                 </div>
 

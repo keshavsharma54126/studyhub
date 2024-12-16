@@ -2,12 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { BackgroundBeams } from "@repo/ui/background-beams";
 import { motion } from "framer-motion";
-import {useGoogleLogin} from "@react-oauth/google";
 import axios from "axios";
-import { data } from 'framer-motion/client';
 import Link from 'next/link';
 export default function SignIn() {
   const router = useRouter();
@@ -22,14 +19,15 @@ export default function SignIn() {
     setError('');
 
     try {
-      const result = await axios.post("http://localhost:3001/api/v1/auth/signin",{
+      const result = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/signin`,{
         email,
         password,
       });
-
-      if (result.data.status!==200) {
+      console.log(result.data)
+      if (result.data.message==="invalid password") {
         setError('Invalid credentials');
       } else {
+        localStorage.setItem("auth_token",result.data.token);
         router.push('/home');
       }
     } catch (error) {
