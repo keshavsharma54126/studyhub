@@ -54,6 +54,7 @@ export default function RoomPage() {
         console.error(error);
        }
     }
+    
 
     const displaySlide = (slideUrl: string) => {
         const canvas = slideCanvasRef.current;
@@ -161,6 +162,7 @@ export default function RoomPage() {
             })
             .catch(err => console.error(err));
             getSlides();
+           
     }, [router,user]);
 
     const handleStartSession = async()=>{

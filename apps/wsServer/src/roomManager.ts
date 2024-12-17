@@ -15,17 +15,30 @@ export class RoomManager{
         return RoomManager.instance;
     }
 
-    addUser(user:User){
-        this.rooms.set(user.id,user);
+    addUser(user:User,sessionId:string){
+        if(!this.rooms.has(sessionId)){
+            this.rooms.set(sessionId,[user])
+            return;
+        }
+        this.rooms.set(sessionId,[...(this.rooms.get(sessionId)?.filter((u)=>u.userId!==user.userId)??[]),user]);
     }
 
-    removeUser(user:User){
-        this.rooms.delete(user.id);
+    public removeUser(sessionId:string,user:User){
+        if(!this.rooms.has(sessionId)){
+            return
+        }
+        this.rooms.set(sessionId,[...(this.rooms.get(sessionId)?.filter((u)=>u.userId!== user.userId)??[])]);
     }
 
-    broadcast(roomId:string,data:any){
-        this.rooms.get(roomId)?.forEach((user:User)=>{
-            user.send(data);
+    broadcast(sessionId:string,user:User,message:any){
+        if(!this.rooms.has(sessionId)){
+            console.log("session not found");
+            return;
+        }
+        this.rooms.get(sessionId)?.forEach((u)=>{
+            if(u.userId!==user.userId){
+                u.send(message);
+            }
         })
     }
 
