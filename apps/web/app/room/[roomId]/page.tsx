@@ -29,6 +29,9 @@ export default function RoomPage() {
     const[hasSessionEnded,setHasSessionEnded] = useState(false);
     const [isSessionStarted, setIsSessionStarted] = useState(false);
     const { user, isLoading, error, fetchUser } = useGetUser();
+    const [isDrawing,setIsDrawing] = useState(false);
+    const[lastX,setLastX] = useState(0);
+    const[lastY,setLastY] = useState(0);
 
     const getSlides = async () => {
        try{
@@ -178,6 +181,42 @@ export default function RoomPage() {
         }
     }
 
+    const startDrawing = (e:React.MouseEvent<HTMLCanvasElement>)=>{
+        const canvas = canvasRef.current;
+        if(!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        setIsDrawing(true);
+        setLastX(e.clientX - rect.left);
+        setLastY(e.clientY - rect.top);
+    }
+
+    const draw = (e:React.MouseEvent<HTMLCanvasElement>)=>{
+        const canvas = canvasRef.current;
+        if(!canvas) return;
+        if(!isDrawing) return;
+        const ctx = canvas.getContext('2d');
+        if(!ctx) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left; 
+        const y = e.clientY - rect.top;
+
+        ctx.beginPath();
+        ctx.moveTo(lastX,lastY);
+        ctx.lineTo(x,y);
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        ctx.stroke();
+
+        setLastX(x);
+        setLastY(y);
+    }
+
+    const stopDrawing = ()=>{
+        setIsDrawing(false);
+    }
+
     return (
         <div className="flex flex-col lg:flex-row min-h-screen w-full bg-gray-50">
             <div className="relative flex-1 h-[60vh] lg:h-screen p-3 sm:p-4 lg:p-6">
@@ -205,6 +244,10 @@ export default function RoomPage() {
                         ref={canvasRef}
                         id="canvas" 
                         className="w-full h-full"
+                        onMouseDown={startDrawing}
+                        onMouseMove={draw}
+                        onMouseUp={stopDrawing}
+                        onMouseOut={stopDrawing}
                     ></canvas>
 
                     <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 
