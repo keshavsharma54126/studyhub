@@ -5,8 +5,10 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@repo/ui/button";
-import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, PlayIcon } from "lucide-react";
+import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, PlayIcon, XIcon, Eraser as ClearIcon, PaintBucketIcon, Pen, Minus } from "lucide-react";
 import { useGetUser } from "../../hooks";
+import { HexColorPicker } from "react-colorful";
+
 
 interface Slide {
     id: string;
@@ -24,7 +26,8 @@ export default function RoomPage() {
     const sessionId = useParams().roomId;
     const [slides, setSlides] = useState<Slide[]>([]);
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const slideCanvasRef = useRef<HTMLCanvasElement>(null);
+    const drawingCanvasRef = useRef<HTMLCanvasElement>(null);
     const [isSessionEnded, setIsSessionEnded] = useState(false);
     const[hasSessionEnded,setHasSessionEnded] = useState(false);
     const [isSessionStarted, setIsSessionStarted] = useState(false);
@@ -32,6 +35,10 @@ export default function RoomPage() {
     const [isDrawing,setIsDrawing] = useState(false);
     const[lastX,setLastX] = useState(0);
     const[lastY,setLastY] = useState(0);
+    const[strokeColor,setStrokeColor] = useState("#000000");
+    const [showColorPicker, setShowColorPicker] = useState(false);
+    const [isEraser,setIsEraser] = useState(false);
+    const [strokeSize,setStrokeSize] = useState(2);
 
     const getSlides = async () => {
        try{
@@ -49,7 +56,7 @@ export default function RoomPage() {
     }
 
     const displaySlide = (slideUrl: string) => {
-        const canvas = canvasRef.current;
+        const canvas = slideCanvasRef.current;
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d');
@@ -60,6 +67,12 @@ export default function RoomPage() {
             // Set canvas dimensions to match the image aspect ratio
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
+            
+            // Also set drawing canvas dimensions to match
+            if (drawingCanvasRef.current) {
+                drawingCanvasRef.current.width = canvas.width;
+                drawingCanvasRef.current.height = canvas.height;
+            }
 
             // Calculate dimensions to maintain aspect ratio
             const ratio = Math.min(
@@ -181,31 +194,37 @@ export default function RoomPage() {
         }
     }
 
-    const startDrawing = (e:React.MouseEvent<HTMLCanvasElement>)=>{
-        const canvas = canvasRef.current;
-        if(!canvas) return;
+    const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        const canvas = drawingCanvasRef.current;
+        if (!canvas) return;
         const rect = canvas.getBoundingClientRect();
         setIsDrawing(true);
         setLastX(e.clientX - rect.left);
         setLastY(e.clientY - rect.top);
     }
 
-    const draw = (e:React.MouseEvent<HTMLCanvasElement>)=>{
-        const canvas = canvasRef.current;
-        if(!canvas) return;
-        if(!isDrawing) return;
+    const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        const canvas = drawingCanvasRef.current;
+        if (!canvas) return;
+        if (!isDrawing) return;
         const ctx = canvas.getContext('2d');
-        if(!ctx) return;
+        if (!ctx) return;
 
         const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left; 
+        const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
 
         ctx.beginPath();
-        ctx.moveTo(lastX,lastY);
-        ctx.lineTo(x,y);
-        ctx.strokeStyle = "red";
-        ctx.lineWidth = 2;
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        if (isEraser) {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.lineWidth = strokeSize * 10;
+        } else {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = strokeSize;
+        }
         ctx.lineCap = "round";
         ctx.stroke();
 
@@ -217,42 +236,115 @@ export default function RoomPage() {
         setIsDrawing(false);
     }
 
+
+
+    const DrawingToolbar = () => (
+        <div className="absolute top-20 right-6 flex flex-col gap-2 bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-lg">
+            <Button 
+                onClick={() => {
+                    setIsEraser(false);
+                }}
+                className={`hover:bg-gray-100 text-gray-700 p-2 rounded-lg transition-all ${
+                    !isEraser ? 'bg-gray-200' : ''
+                }`}
+                title="Pen Tool"
+            >
+                <Pen size={20} />
+            </Button>
+            <Button 
+                onClick={() => {
+                    setIsEraser(true);
+                }}
+                className={`hover:bg-gray-100 text-gray-700 p-2 rounded-lg transition-all ${
+                    isEraser ? 'bg-gray-200' : ''
+                }`}
+                title="Eraser Tool"
+            >
+                <ClearIcon size={20} />
+            </Button>
+            <div className="flex flex-col gap-1 p-2">
+            <Minus size={strokeSize} className="mx-auto" />
+            <input
+                type="range"
+                min="1"
+                max="20"
+                value={strokeSize}
+                onChange={(e) => setStrokeSize(Number(e.target.value))}
+                className="w-full"
+                title="Stroke Size"
+            />
+        </div>
+            <div className="relative">
+                <Button 
+                    onClick={() => setShowColorPicker(!showColorPicker)}
+                    className="hover:bg-gray-100 p-2 rounded-lg transition-all"
+                    style={{ color: strokeColor }}
+                    title="Color Picker"
+                >
+                    <PaintBucketIcon size={20} />
+                </Button>
+                {showColorPicker && (
+                    <div className="absolute right-full mr-2 top-0">
+                        <HexColorPicker
+                            color={strokeColor}
+                            onChange={setStrokeColor}
+                            className="shadow-xl rounded-lg"
+                        />
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+
     return (
-        <div className="flex flex-col lg:flex-row min-h-screen w-full bg-gray-50">
-            <div className="relative flex-1 h-[60vh] lg:h-screen p-3 sm:p-4 lg:p-6">
-                {isHost ?(<div className="absolute top-4 left-4 z-10 flex space-x-3">
-                    <Button onClick={handleStartSession} className="bg-green-500 hover:bg-green-600 text-white 
-                                   px-4 py-2 rounded-lg transition-all duration-200 
-                                   flex items-center gap-2 shadow-lg hover:shadow-xl">
-                        <PlayIcon size={18} />
-                        {isSessionStarted?(<span className="hidden sm:inline">Session Started</span>):(<span className="hidden sm:inline">Start Session</span>)}
-                    </Button>
-                    <Button 
-                        onClick={() => setIsSessionEnded(true)}
-                        className="bg-red-500 hover:bg-red-600 text-white 
-                                 px-4 py-2 rounded-lg transition-all duration-200 
-                                 flex items-center gap-2 shadow-lg hover:shadow-xl"
-                    >
-                        <ArrowLeftIcon size={18} />
-                        <span className="hidden sm:inline">End Session</span>
-                    </Button>
-                </div>):(<div></div>)}
+        <div className="flex flex-col lg:flex-row min-h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
+            <div className="relative flex-1 h-[50vh] md:h-[60vh] lg:h-screen p-2 sm:p-3 md:p-4 lg:p-6">
+                {isHost && (
+                    <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-10 flex flex-col sm:flex-row gap-2 sm:space-x-3">
+                        <Button 
+                            onClick={handleStartSession} 
+                            className="bg-green-500 hover:bg-green-600 text-white 
+                                     px-2 sm:px-4 py-1 sm:py-2 rounded-lg transition-all duration-200 
+                                     flex items-center gap-2 shadow-lg hover:shadow-xl text-sm sm:text-base"
+                        >
+                            <PlayIcon size={16} className="sm:size-18" />
+                            <span className="inline">{isSessionStarted ? "Session Started" : "Start Session"}</span>
+                        </Button>
+                        <Button 
+                            onClick={() => setIsSessionEnded(true)}
+                            className="bg-red-500 hover:bg-red-600 text-white 
+                                     px-2 sm:px-4 py-1 sm:py-2 rounded-lg transition-all duration-200 
+                                     flex items-center gap-2 shadow-lg hover:shadow-xl text-sm sm:text-base"
+                        >
+                            <ArrowLeftIcon size={16} className="sm:size-18" />
+                            <span className="inline">End Session</span>
+                        </Button>
+                    </div>
+                )}
 
                 <div className="relative w-full h-full bg-white rounded-xl shadow-xl 
-                              border border-gray-200 overflow-hidden">
+                              border border-gray-200 overflow-hidden
+                              backdrop-blur-sm bg-white/95">
                     <canvas 
-                        ref={canvasRef}
-                        id="canvas" 
-                        className="w-full h-full"
+                        ref={slideCanvasRef}
+                        className="w-full h-full absolute top-0 left-0"
+                    ></canvas>
+                    <canvas 
+                        ref={drawingCanvasRef}
+                        className="w-full h-full absolute top-0 left-0 cursor-crosshair"
                         onMouseDown={startDrawing}
                         onMouseMove={draw}
                         onMouseUp={stopDrawing}
                         onMouseOut={stopDrawing}
                     ></canvas>
 
-                    <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 
-                                 flex items-center gap-4 bg-white/90 backdrop-blur-sm 
-                                 px-6 py-3 rounded-full shadow-lg">
+                    
+
+                    <DrawingToolbar />
+
+                    <div className="absolute bottom-2 sm:bottom-6 left-1/2 transform -translate-x-1/2 
+                                 flex items-center gap-2 sm:gap-4 bg-white/90 backdrop-blur-sm 
+                                 px-3 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg">
                         <Button
                             onClick={previousSlide}
                             disabled={currentSlideIndex === 0}
@@ -276,20 +368,21 @@ export default function RoomPage() {
                         >
                             <ChevronRightIcon size={24} />
                         </Button>
+                       
                     </div>
                 </div>
             </div>
 
-            <div className="flex flex-col w-full lg:w-80 xl:w-96 2xl:w-[420px] 
-                          bg-white border-t lg:border-l border-gray-200 shadow-xl">
-                <div className="h-[30vh] sm:h-[35vh] lg:h-[26vh] p-3 sm:p-4">
+            <div className="flex flex-col w-full lg:w-72 xl:w-96 2xl:w-[420px] 
+                          bg-white/95 backdrop-blur-sm border-t lg:border-l border-gray-200 shadow-xl">
+                <div className="h-[25vh] sm:h-[30vh] lg:h-[26vh] p-2 sm:p-3 md:p-4">
                     <div className="w-full h-full rounded-xl overflow-hidden 
-                                 shadow-lg bg-gray-50">
+                                 shadow-lg bg-gray-900 relative">
                         <VideoComponent token={token} isHost={isHost} />
                     </div>
                 </div>
 
-                <div className="flex-1 min-h-[40vh] lg:min-h-[60vh] p-3 sm:p-4">
+                <div className="flex-1 min-h-[35vh] lg:min-h-[60vh] p-2 sm:p-3 md:p-4">
                     <ChatComponent 
                         currentUser="user" 
                         onSendMessage={() => {}} 
@@ -299,10 +392,10 @@ export default function RoomPage() {
                 </div>
             </div>
 
-            {isSessionEnded && (
+            {(isSessionEnded || hasSessionEnded) && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm 
-                             flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl 
+                               flex items-center justify-center z-50 p-4">
+                    <div className="bg-white dark:bg-gray-800 p-4 sm:p-8 rounded-2xl 
                                  w-full max-w-md shadow-2xl transform transition-all">
                         <div className="flex flex-col items-center justify-center">
                             <h3 className="text-2xl font-bold text-gray-800 

@@ -67,6 +67,21 @@ const cleanup = async (inputPath: string, outputDir: string) => {
     }
 };
 
+const purgeQueue = async()=>{
+    try{
+        const connection = await amqp.connect(RABBITMQ_URL)
+        const channel = await connection.createChannel()
+        await channel.assertQueue(QUEUE_NAME, {
+            durable: true
+        })
+        await channel.purgeQueue(QUEUE_NAME)
+        await channel.close()
+        await connection.close()
+    }catch(e){
+        console.error("failed to purge queue: ",e)
+    }
+}
+
 async function startConsumer() {
     try {
         const connection = await amqp.connect(RABBITMQ_URL)
@@ -74,9 +89,10 @@ async function startConsumer() {
         await channel.assertQueue(QUEUE_NAME, {
             durable: true
         })
+
         channel.prefetch(1)
         console.log("Connected to RabbitMQ, waiting for messages...")
-        
+
         channel.consume(QUEUE_NAME, async (msg) => {
             if (!msg) return;
             
@@ -153,7 +169,11 @@ async function startConsumer() {
         });
     } catch (error) {
         console.error("Failed to connect to RabbitMQ", error);
-        setTimeout(() => startConsumer(), 5000);
+        purgeQueue()
+        setTimeout(() => {
+           
+            startConsumer()
+        }, 5000);
     }
 }
 

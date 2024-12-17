@@ -10,6 +10,7 @@ interface Message {
   content: string;
   timestamp: Date;
   isCurrentUser: boolean;
+  status?: 'sending' | 'sent' | 'delivered' | 'read';
 }
 
 interface ChatComponentProps {
@@ -17,18 +18,33 @@ interface ChatComponentProps {
   onSendMessage: (message: string) => void;
   messages: Message[];
   className?: string;
+  isLoading?: boolean;
+  isTyping?: boolean;
 }
 
-export function ChatComponent({ currentUser, onSendMessage, messages, className }: ChatComponentProps) {
+export function ChatComponent({ currentUser, onSendMessage, messages, className, isLoading, isTyping }: ChatComponentProps) {
   const [newMessage, setNewMessage] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    // Scroll to bottom when new messages arrive
+  const scrollToBottom = (smooth = true) => {
     if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+      scrollAreaRef.current.scrollTo({
+        top: scrollAreaRef.current.scrollHeight,
+        behavior: smooth ? 'smooth' : 'auto'
+      });
     }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
   }, [messages]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage(e);
+    }
+  };
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,30 +64,57 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className 
       {/* Messages Area */}
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4" ref={scrollAreaRef}>
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.isCurrentUser ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[80%] rounded-lg p-3 ${
-                  message.isCurrentUser
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white'
-                }`}
-              >
-                {!message.isCurrentUser && (
-                  <p className="text-xs font-medium mb-1 text-gray-600 dark:text-gray-400">
-                    {message.sender}
-                  </p>
-                )}
-                <p className="text-sm">{message.content}</p>
-                <p className="text-xs mt-1 opacity-70">
-                  {new Date(message.timestamp).toLocaleTimeString()}
-                </p>
-              </div>
+          {isLoading ? (
+            <div className="flex justify-center">
+              <div className="animate-pulse">Loading messages...</div>
             </div>
-          ))}
+          ) : (
+            <>
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.isCurrentUser ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[80%] rounded-lg p-3 ${
+                      message.isCurrentUser
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white'
+                    }`}
+                  >
+                    {!message.isCurrentUser && (
+                      <p className="text-xs font-medium mb-1 text-gray-600 dark:text-gray-400">
+                        {message.sender}
+                      </p>
+                    )}
+                    <p className="text-sm">{message.content}</p>
+                    <div className="flex items-center justify-between text-xs mt-1 opacity-70">
+                      <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
+                      {message.isCurrentUser && message.status && (
+                        <span className="ml-2">
+                          {message.status === 'sending' && '⋯'}
+                          {message.status === 'sent' && '✓'}
+                          {message.status === 'delivered' && '✓✓'}
+                          {message.status === 'read' && '✓✓'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
+                      <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-100" />
+                      <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-200" />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </ScrollArea>
 
@@ -83,10 +126,15 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className 
             placeholder="Type a message..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
             className="flex-1"
           />
-          <Button type="submit" disabled={!newMessage.trim()}>
-            <FiSend className="w-4 h-4" />
+          <Button 
+            type="submit" 
+            className='bg-blue-500 hover:bg-blue-600 text-white transition-colors' 
+            disabled={!newMessage.trim()}
+          >
+            <FiSend className="w-4 h-4 text-white" />
           </Button>
         </div>
       </form>

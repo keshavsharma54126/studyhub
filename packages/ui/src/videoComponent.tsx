@@ -11,6 +11,7 @@ import {
   import '@livekit/components-styles';
   
   import { Track } from 'livekit-client';
+
   
   const serverUrl = 'wss://myacademy-lznxzk2x.livekit.cloud';
   
@@ -30,22 +31,23 @@ import {
           position: 'relative',
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          borderRadius: '0.75rem',
         }}
       >
         <MyVideoConference isHost={isHost} />
         <RoomAudioRenderer />
-        <div className='flex flex-col fixed left-0 top-0 right-0   border-t border-gray-200 rounded-xl '>
+        <div className=' bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4'>
           <ControlBar 
-            className='flex flex-row justify-center items-center gap-2 max-w-3xl mx-auto'
+            className='flex flex-row justify-center items-center gap-4 max-w-3xl mx-auto'
             controls={{
               microphone: isHost,
               camera: isHost,
               screenShare: isHost,
               leave: isHost
             }}
+            variation="minimal"
           />
-          
         </div>
       </LiveKitRoom>
     );
@@ -77,15 +79,20 @@ import {
       <GridLayout 
         tracks={tracks} 
         style={{ 
-          height: 'calc(100vh - 80px)',
+          height: 'calc(100% - 80px)',
           width: '100%',
-          padding: '1rem'
+          padding: '1rem',
+          gap: '1rem',
         }}
       >
-        <div>
-          {isHost && <ParticipantTile />}
-          {!isHost && <ParticipantTile />}
-        </div>
+        <ParticipantTile
+          style={{
+            borderRadius: '0.75rem',
+            overflow: 'hidden',
+            background: 'rgba(0, 0, 0, 0.2)',
+            aspectRatio: '16/9',
+          }} 
+        />
       </GridLayout>
     );
   }
