@@ -599,8 +599,9 @@ export default function RoomPage() {
                         currentUser={user || {id: "", username: "", profilePicture: ""}}
                         onSendMessage={() => {}} 
                         messages={chatMessages}
+                        setChatMessages={setChatMessages}
                         className="h-full rounded-xl shadow-lg"
-                        webSocket={roomWebSocketRef.current}
+                        webSocket={roomWebSocketRef.current || undefined}
                         sessionId={sessionId as string}
                     />
                 </div>

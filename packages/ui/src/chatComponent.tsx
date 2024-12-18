@@ -3,12 +3,14 @@ import { ScrollArea } from './scrollArea.js';
 import { Input } from './input.js';
 import { Button } from './button.js';
 import { FiSend } from 'react-icons/fi';
+import { RoomWebSocket } from '../../../apps/web/app/webSocket.js';
 
 interface Message {
   userId: string;
   username: string;
   profilePicture: string;
   message: string;  
+  timestamp: Date;
 }
 
 interface User {
@@ -24,14 +26,16 @@ interface ChatComponentProps {
   className?: string;
   isLoading?: boolean;
   isTyping?: boolean;
-  webSocket?: WebSocket;
+  webSocket?: RoomWebSocket;
   sessionId?: string;
+  setChatMessages: (messages: Message[]) => void;
 }
 
-export function ChatComponent({ currentUser, onSendMessage, messages, className, isLoading, isTyping, webSocket, sessionId }: ChatComponentProps) {
+export function ChatComponent({ currentUser, onSendMessage, messages, className, isLoading, isTyping, webSocket, sessionId, setChatMessages }: ChatComponentProps) {
   const [newMessage, setNewMessage] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const roomWebSocketRef = useRef<RoomWebSocket>(null);
 
   const scrollToBottom = (smooth = true) => {
     if (scrollAreaRef.current) {
@@ -44,29 +48,7 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className,
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
-
-  useEffect(() => {
-    if (webSocket) {
-      webSocket.onopen = () => {
-        console.log('WebSocket Connected');
-        setIsConnected(true);
-      };
-
-      webSocket.onclose = () => {
-        console.log('WebSocket Disconnected');
-        setIsConnected(false);
-      };
-
-      webSocket.onerror = (error) => {
-        console.error('WebSocket Error:', error);
-      };
-
-      webSocket.onmessage = (event) => {
-        console.log('Received message:', event.data);
-      };
-    }
-  }, [webSocket]);
+  }, [messages,webSocket]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -78,12 +60,20 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className,
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim()) {
-      if (webSocket && isConnected) {
+      if (webSocket) {
         try {
+          const newMessageObj:Message = {
+            message: newMessage,
+            userId: currentUser.id,
+            username: currentUser.username,
+            profilePicture: currentUser.profilePicture,
+            timestamp: new Date()
+          };
+          setChatMessages((prevMessages:Message[]) => [...prevMessages, newMessageObj]);
           webSocket.send(JSON.stringify({
             type: "CHAT_MESSAGE",
+            sessionId: sessionId,
             payload: {
-              sessionId,
               message: newMessage,
               userId: currentUser.id,
               username: currentUser.username,
@@ -91,6 +81,7 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className,
               timestamp: new Date()
             }
           }));
+        
           console.log('Message sent successfully');
         } catch (error) {
           console.error('Error sending message:', error);
@@ -102,6 +93,14 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className,
       setNewMessage('');
     }
   };
+
+  useEffect(() => {
+    roomWebSocketRef?.current?.setHandlers({
+      onChatMessageReceived: (message) => {
+        setChatMessages((prevMessages:Message[]) => [...prevMessages, message.payload]);
+      },
+    });
+  }, []);
 
   return (
     <div className={`flex flex-col h-full bg-white dark:bg-gray-800 rounded-xl shadow-sm ${className}`}>
@@ -138,7 +137,7 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className,
                     )}
                     <p className="text-sm">{message.message}</p>
                     <div className="flex items-center justify-between text-xs mt-1 opacity-70">
-                      {/* <span>{new Date(message.timestamp).toLocaleTimeString()}</span> */}
+                      <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
                     </div>
                   </div>
                 </div>

@@ -118,7 +118,7 @@ export class User{
 
                 case "CHAT_MESSAGE":
                     console.log("chat message sent")
-                    const chatSessionId = message.payload.sessionId;
+                    const chatSessionId = message.sessionId;
                     RoomManager.getInstance().broadcast(chatSessionId,this,{
                         sessionId:chatSessionId,
                         type:"CHAT_MESSAGE_RECEIVED",
