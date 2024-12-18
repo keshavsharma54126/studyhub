@@ -107,34 +107,36 @@ export default function RoomPage() {
         img.src = slideUrl;
     };
 
-    const nextSlide = () => {
+    const nextSlide = (wsBool: boolean = false) => {
         if (currentSlideIndex < slides.length - 1) {
             const newIndex = currentSlideIndex + 1;
             setCurrentSlideIndex(newIndex);
             
-            if (roomWebSocketRef.current) {
+            if (roomWebSocketRef.current && !wsBool && isHost) {
                 roomWebSocketRef.current.send(JSON.stringify({
                     type: "SLIDE_CHANGE",
                     payload: {
                         sessionId,
-                        slideIndex: newIndex
+                        slideIndex: newIndex,
+                        move: "next"
                     }
                 }));
             }
         }
     };
 
-    const previousSlide = () => {
+    const previousSlide = (wsBool: boolean = false) => {
         if (currentSlideIndex > 0) {
             const newIndex = currentSlideIndex - 1;
             setCurrentSlideIndex(newIndex);
             
-            if (roomWebSocketRef.current) {
+            if (roomWebSocketRef.current && !wsBool && isHost) {
                 roomWebSocketRef.current.send(JSON.stringify({
                     type: "SLIDE_CHANGE",
                     payload: {
                         sessionId,
-                        slideIndex: newIndex
+                        slideIndex: newIndex,
+                        move: "previous"
                     }
                 }));
             }
@@ -292,8 +294,14 @@ export default function RoomPage() {
                     setChatMessages((prevMessages) => [...prevMessages, parsedMessage.payload]);
                 },
                 onSlideChangeReceived: (parsedMessage: any) => {
-                    const { slideIndex } = parsedMessage.payload;
-                    setCurrentSlideIndex(slideIndex);
+                    console.log("Received slide change:", parsedMessage);
+                    if (!isHost) {  // Only non-host users should react to slide changes
+                        if (parsedMessage.payload.move === "next") {
+                            nextSlide(true);
+                        } else if (parsedMessage.payload.move === "previous") {
+                            previousSlide(true);
+                        }
+                    }
                 }
             });
 
@@ -314,6 +322,12 @@ export default function RoomPage() {
             roomWebSocketRef.current?.close();
         };
     }, [sessionId, user]);
+
+    useEffect(() => {
+        if (slides.length > 0) {
+            displaySlide(slides[currentSlideIndex]?.url || "");
+        }
+    }, [currentSlideIndex,slides]);
 
     const handleStartSession = async()=>{
         try{
@@ -389,6 +403,8 @@ export default function RoomPage() {
                 type: "STROKE",
                 payload: {
                     sessionId,
+                    lastX,
+                    lastY,
                     x,
                     y,
                     color: strokeColor,
@@ -542,7 +558,7 @@ export default function RoomPage() {
                                  flex items-center gap-2 sm:gap-4 bg-white/90 backdrop-blur-sm 
                                  px-3 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg">
                         <Button
-                            onClick={previousSlide}
+                            onClick={() => previousSlide(false)}
                             disabled={currentSlideIndex === 0}
                             className="bg-white hover:bg-gray-100 text-gray-800 
                                    shadow-md rounded-full p-2 disabled:opacity-50
@@ -556,7 +572,7 @@ export default function RoomPage() {
                         </span>
 
                         <Button
-                            onClick={nextSlide}
+                            onClick={() => nextSlide(false)}
                             disabled={currentSlideIndex === slides.length - 1}
                             className="bg-white hover:bg-gray-100 text-gray-800 
                                    shadow-md rounded-full p-2 disabled:opacity-50

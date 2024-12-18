@@ -95,20 +95,20 @@ export class RoomWebSocket{
                 console.log("user subscribed",parsedMessage);
                 this.handlers.onUserJoined?.(parsedMessage);
                 break;
-            case "STROKE_SENT":
-                console.log("stroke sent",parsedMessage);
+            case "STROKE_RECEIVED":
+                console.log("stroke received",parsedMessage);
                 this.handlers.onStrokeReceived?.(parsedMessage);
                 break;
-            case "CLEAR_SENT":
+            case "CLEAR_RECEIVED":
                 console.log("clear sent",parsedMessage);
                 this.handlers.onClearReceived?.(parsedMessage);
                 break;
-            case "CHAT_MESSAGE_SENT":
-                console.log("chat message sent",parsedMessage);
+            case "CHAT_MESSAGE_RECEIVED":
+                console.log("chat message received",parsedMessage);
                 this.handlers.onChatMessageReceived?.(parsedMessage);
                 break;
-            case "SLIDE_CHANGE_SENT":
-                console.log("slide change sent",parsedMessage);
+            case "SLIDE_CHANGE_RECEIVED":
+                console.log("slide change received",parsedMessage);
                 this.handlers.onSlideChangeReceived?.(parsedMessage);
                 break;
             default:

@@ -108,13 +108,12 @@ export class User{
                 case "SLIDE_CHANGE":
                     console.log("slide change received",message);
                     const slideChangeSessionId = message.payload.sessionId;
-                    if(this.isHost){
+                    
                         RoomManager.getInstance().broadcast(slideChangeSessionId,this,{
                             sessionId:slideChangeSessionId,
                             type:"SLIDE_CHANGE_RECEIVED",
                             payload:message.payload
-                        });
-                    }
+                    });
                     break;
 
                 case "CHAT_MESSAGE":
