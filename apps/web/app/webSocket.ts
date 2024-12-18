@@ -75,6 +75,13 @@ export class RoomWebSocket{
         })
     }
 
+    public close(){
+        if(this.ws){
+            this.ws.close();
+            this.ws = null
+        }
+    }
+
     private handleMessage(message:MessageEvent){
        try{
         const parsedMessage = JSON.parse(message.data);

@@ -5,24 +5,30 @@ import { Button } from './button.js';
 import { FiSend } from 'react-icons/fi';
 
 interface Message {
+  userId: string;
+  username: string;
+  profilePicture: string;
+  message: string;  
+}
+
+interface User {
   id: string;
-  sender: string;
-  content: string;
-  timestamp: Date;
-  isCurrentUser: boolean;
-  status?: 'sending' | 'sent' | 'delivered' | 'read';
+  username: string;
+  profilePicture: string;
 }
 
 interface ChatComponentProps {
-  currentUser: string;
+  currentUser: User;
   onSendMessage: (message: string) => void;
   messages: Message[];
   className?: string;
   isLoading?: boolean;
   isTyping?: boolean;
+  webSocket?: any;
+  sessionId?: string;
 }
 
-export function ChatComponent({ currentUser, onSendMessage, messages, className, isLoading, isTyping }: ChatComponentProps) {
+export function ChatComponent({ currentUser, onSendMessage, messages, className, isLoading, isTyping, webSocket, sessionId }: ChatComponentProps) {
   const [newMessage, setNewMessage] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -49,6 +55,19 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className,
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim()) {
+      if (webSocket) {
+        webSocket.send(JSON.stringify({
+          type: "CHAT_MESSAGE",
+          payload: {
+            sessionId,
+            message: newMessage,
+            userId: currentUser.id,
+            username: currentUser.username,
+            profilePicture: currentUser.profilePicture,
+            timestamp: new Date()
+          }
+        }));
+      }
       onSendMessage(newMessage);
       setNewMessage('');
     }
@@ -72,32 +91,24 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className,
             <>
               {messages.map((message) => (
                 <div
-                  key={message.id}
-                  className={`flex ${message.isCurrentUser ? 'justify-end' : 'justify-start'}`}
+                  key={message.userId}
+                  className={`flex ${message.userId === currentUser.id ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
                     className={`max-w-[80%] rounded-lg p-3 ${
-                      message.isCurrentUser
+                      message.userId === currentUser.id
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white'
                     }`}
                   >
-                    {!message.isCurrentUser && (
+                    {message.userId !== currentUser.id && (
                       <p className="text-xs font-medium mb-1 text-gray-600 dark:text-gray-400">
-                        {message.sender}
+                        {message.username}
                       </p>
                     )}
-                    <p className="text-sm">{message.content}</p>
+                    <p className="text-sm">{message.message}</p>
                     <div className="flex items-center justify-between text-xs mt-1 opacity-70">
-                      <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
-                      {message.isCurrentUser && message.status && (
-                        <span className="ml-2">
-                          {message.status === 'sending' && '⋯'}
-                          {message.status === 'sent' && '✓'}
-                          {message.status === 'delivered' && '✓✓'}
-                          {message.status === 'read' && '✓✓'}
-                        </span>
-                      )}
+                      {/* <span>{new Date(message.timestamp).toLocaleTimeString()}</span> */}
                     </div>
                   </div>
                 </div>

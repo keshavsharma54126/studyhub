@@ -8,13 +8,20 @@ import { Button } from "@repo/ui/button";
 import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, PlayIcon, XIcon, Eraser as ClearIcon, PaintBucketIcon, Pen, Minus } from "lucide-react";
 import { useGetUser } from "../../hooks";
 import { HexColorPicker } from "react-colorful";
-
+import { RoomWebSocket } from "../../webSocket";
 
 interface Slide {
     id: string;
     url: string;
     createdAt: string;
     sessionId: string;
+}
+
+interface ChatMessage {
+    userId: string;
+    username: string;
+    profilePicture: string;
+    message: string;
 }
 
 
@@ -39,7 +46,10 @@ export default function RoomPage() {
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [isEraser,setIsEraser] = useState(false);
     const [strokeSize,setStrokeSize] = useState(2);
-
+    const roomWebSocketRef = useRef<RoomWebSocket | null>(null);
+    const [isConnected,setIsConnected] = useState(false);
+    const [isAdmin,setIsAdmin] = useState(false);
+    const [chatMessages,setChatMessages] = useState<ChatMessage[]>([]);
     const getSlides = async () => {
        try{
         const auth_token = localStorage.getItem("auth_token");
@@ -50,11 +60,12 @@ export default function RoomPage() {
         });
         console.log(response.data);
         setSlides(response.data.images);
+
        }catch(error){
         console.error(error);
        }
     }
-    
+
 
     const displaySlide = (slideUrl: string) => {
         const canvas = slideCanvasRef.current;
@@ -98,13 +109,35 @@ export default function RoomPage() {
 
     const nextSlide = () => {
         if (currentSlideIndex < slides.length - 1) {
-            setCurrentSlideIndex(prev => prev + 1);
+            const newIndex = currentSlideIndex + 1;
+            setCurrentSlideIndex(newIndex);
+            
+            if (roomWebSocketRef.current) {
+                roomWebSocketRef.current.send(JSON.stringify({
+                    type: "SLIDE_CHANGE",
+                    payload: {
+                        sessionId,
+                        slideIndex: newIndex
+                    }
+                }));
+            }
         }
     };
 
     const previousSlide = () => {
         if (currentSlideIndex > 0) {
-            setCurrentSlideIndex(prev => prev - 1);
+            const newIndex = currentSlideIndex - 1;
+            setCurrentSlideIndex(newIndex);
+            
+            if (roomWebSocketRef.current) {
+                roomWebSocketRef.current.send(JSON.stringify({
+                    type: "SLIDE_CHANGE",
+                    payload: {
+                        sessionId,
+                        slideIndex: newIndex
+                    }
+                }));
+            }
         }
     };
 
@@ -128,9 +161,25 @@ export default function RoomPage() {
             console.error(error);
         }
     }
+    const checkAdmin = async()=>{
+        try{
+            const auth_token = localStorage.getItem("auth_token");
+            const response = await axios.get(`http://localhost:3001/api/v1/sessions/session/${sessionId}`,{
+                headers:{
+                    "Authorization": `Bearer ${auth_token}`
+                }
+            });
+            if(response.data.session.userId === user?.id){
+                setIsAdmin(true);
+            }
+        }catch(error){
+            console.error(error);
+        }
+    }
 
     useEffect(() => {
         checkSessionEnded();
+        checkAdmin();
         if (slides.length > 0) {
             displaySlide(slides[currentSlideIndex]?.url || "");
         }
@@ -143,7 +192,7 @@ export default function RoomPage() {
             router.push("/signin");
             return;
         }
-        
+        checkAdmin();
 
         axios.post(`http://localhost:3001/api/v1/sessions/token`,
             {
@@ -164,6 +213,82 @@ export default function RoomPage() {
             getSlides();
            
     }, [router,user]);
+
+    useEffect(() => {
+        const token = localStorage.getItem("auth_token");
+        roomWebSocketRef.current = new RoomWebSocket(`ws://localhost:8081/?token=${token}`);
+        roomWebSocketRef.current.setHandlers({
+            onConnect: () => {
+                console.log("connected to websocket");
+                setIsConnected(true);
+            },
+            onDisconnect: () => {
+                console.log("disconnected from websocket");
+                setIsConnected(false);
+            },
+            onError: (error: any) => {
+                console.error(error);
+                setIsConnected(false);
+            },
+            onAdminJoined: (parsedMessage: any) => {
+                console.log("admin joined", parsedMessage);
+                setIsAdmin(true);
+            },
+            onUserJoined: (parsedMessage: any) => {
+                console.log("user joined", parsedMessage);
+            },
+            onStrokeReceived: (parsedMessage: any) => {
+                const canvas = drawingCanvasRef.current;
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return;
+
+                const { x, y, lastX, lastY, color, width, isEraser } = parsedMessage.payload;
+                
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                
+                if (isEraser) {
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.lineWidth = width * 10;
+                } else {
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = width;
+                }
+                
+                ctx.lineCap = "round";
+                ctx.stroke();
+            },
+            onClearReceived: () => {
+                const canvas = drawingCanvasRef.current;
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            },
+            onChatMessageReceived: (parsedMessage: any) => {
+                // This will be handled in the ChatComponent
+                setChatMessages((prevMessages) => [...prevMessages, parsedMessage.payload]);
+            },
+            onSlideChangeReceived: (parsedMessage: any) => {
+                const { slideIndex } = parsedMessage.payload;
+                setCurrentSlideIndex(slideIndex);
+            }
+        });
+        
+        if(roomWebSocketRef.current && token){
+            roomWebSocketRef.current.connect(sessionId as string)
+            .catch((error)=>{
+                console.error(error);
+                setIsConnected(false);
+            });
+        }
+        return () => {
+            roomWebSocketRef.current?.close();
+        };
+    }, [sessionId]);
 
     const handleStartSession = async()=>{
         try{
@@ -197,6 +322,7 @@ export default function RoomPage() {
     }
 
     const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        if (!isAdmin) return;
         const canvas = drawingCanvasRef.current;
         if (!canvas) return;
         const rect = canvas.getBoundingClientRect();
@@ -206,6 +332,7 @@ export default function RoomPage() {
     }
 
     const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        if (!isAdmin) return;
         const canvas = drawingCanvasRef.current;
         if (!canvas) return;
         if (!isDrawing) return;
@@ -216,6 +343,7 @@ export default function RoomPage() {
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
 
+        // Draw locally
         ctx.beginPath();
         ctx.moveTo(lastX, lastY);
         ctx.lineTo(x, y);
@@ -230,72 +358,115 @@ export default function RoomPage() {
         ctx.lineCap = "round";
         ctx.stroke();
 
+        // Emit stroke event
+        if (roomWebSocketRef.current) {
+            roomWebSocketRef.current.send(JSON.stringify({
+                type: "STROKE",
+                payload: {
+                    sessionId,
+                    x,
+                    y,
+                    lastX,
+                    lastY,
+                    color: strokeColor,
+                    width: strokeSize,
+                    isEraser
+                }
+            }));
+        }
+
         setLastX(x);
         setLastY(y);
-    }
+    };
 
     const stopDrawing = ()=>{
         setIsDrawing(false);
     }
 
+    const clearCanvas = () => {
+        const canvas = drawingCanvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // Emit clear event
+        if (roomWebSocketRef.current) {
+            roomWebSocketRef.current.send(JSON.stringify({
+                type: "CLEAR",
+                payload: {
+                    sessionId
+                }
+            }));
+        }
+    };
 
     const DrawingToolbar = () => (
-        <div className="absolute top-20 right-6 flex flex-col gap-2 bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-lg">
-            <Button 
-                onClick={() => {
-                    setIsEraser(false);
-                }}
-                className={`hover:bg-gray-100 text-gray-700 p-2 rounded-lg transition-all ${
-                    !isEraser ? 'bg-gray-200' : ''
-                }`}
-                title="Pen Tool"
-            >
-                <Pen size={20} />
-            </Button>
-            <Button 
-                onClick={() => {
-                    setIsEraser(true);
-                }}
-                className={`hover:bg-gray-100 text-gray-700 p-2 rounded-lg transition-all ${
-                    isEraser ? 'bg-gray-200' : ''
-                }`}
-                title="Eraser Tool"
-            >
-                <ClearIcon size={20} />
-            </Button>
-            <div className="flex flex-col gap-1 p-2">
-            <Minus size={strokeSize} className="mx-auto" />
-            <input
-                type="range"
-                min="1"
-                max="20"
-                value={strokeSize}
-                onChange={(e) => setStrokeSize(Number(e.target.value))}
-                className="w-full"
-                title="Stroke Size"
-            />
-        </div>
-            <div className="relative">
+        isAdmin ? (
+            <div className="absolute top-20 right-6 flex flex-col gap-2 bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-lg">
                 <Button 
-                    onClick={() => setShowColorPicker(!showColorPicker)}
-                    className="hover:bg-gray-100 p-2 rounded-lg transition-all"
-                    style={{ color: strokeColor }}
-                    title="Color Picker"
+                    onClick={() => {
+                        setIsEraser(false);
+                    }}
+                    className={`hover:bg-gray-100 text-gray-700 p-2 rounded-lg transition-all ${
+                        !isEraser ? 'bg-gray-200' : ''
+                    }`}
+                    title="Pen Tool"
                 >
-                    <PaintBucketIcon size={20} />
+                    <Pen size={20} />
                 </Button>
-                {showColorPicker && (
-                    <div className="absolute right-full mr-2 top-0">
-                        <HexColorPicker
-                            color={strokeColor}
-                            onChange={setStrokeColor}
-                            className="shadow-xl rounded-lg"
-                        />
-                    </div>
-                )}
+                <Button 
+                    onClick={() => {
+                        setIsEraser(true);
+                    }}
+                    className={`hover:bg-gray-100 text-gray-700 p-2 rounded-lg transition-all ${
+                        isEraser ? 'bg-gray-200' : ''
+                    }`}
+                    title="Eraser Tool"
+                >
+                    <ClearIcon size={20} />
+                </Button>
+                <div className="flex flex-col gap-1 p-2">
+                <Minus size={strokeSize} className="mx-auto" />
+                <input
+                    type="range"
+                    min="1"
+                    max="20"
+                    value={strokeSize}
+                    onChange={(e) => setStrokeSize(Number(e.target.value))}
+                    className="w-full"
+                    title="Stroke Size"
+                />
             </div>
-        </div>
+                <div className="relative">
+                    <Button 
+                        onClick={() => setShowColorPicker(!showColorPicker)}
+                        className="hover:bg-gray-100 p-2 rounded-lg transition-all"
+                        style={{ color: strokeColor }}
+                        title="Color Picker"
+                    >
+                        <PaintBucketIcon size={20} />
+                    </Button>
+                    {showColorPicker && (
+                        <div className="absolute right-full mr-2 top-0">
+                            <HexColorPicker
+                                color={strokeColor}
+                                onChange={setStrokeColor}
+                                className="shadow-xl rounded-lg"
+                            />
+                        </div>
+                    )}
+                </div>
+                <Button 
+                    onClick={clearCanvas}
+                    className="hover:bg-gray-100 text-gray-700 p-2 rounded-lg transition-all"
+                    title="Clear Canvas"
+                >
+                    <XIcon size={20} />
+                </Button>
+            </div>
+        ) : null
     );
 
     return (
@@ -333,7 +504,7 @@ export default function RoomPage() {
                     ></canvas>
                     <canvas 
                         ref={drawingCanvasRef}
-                        className="w-full h-full absolute top-0 left-0 cursor-crosshair"
+                        className={`w-full h-full absolute top-0 left-0 ${isAdmin ? 'cursor-crosshair' : 'cursor-default'}`}
                         onMouseDown={startDrawing}
                         onMouseMove={draw}
                         onMouseUp={stopDrawing}
@@ -386,10 +557,12 @@ export default function RoomPage() {
 
                 <div className="flex-1 min-h-[35vh] lg:min-h-[60vh] p-2 sm:p-3 md:p-4">
                     <ChatComponent 
-                        currentUser="user" 
+                        currentUser={user || {id: "", username: "", profilePicture: ""}}
                         onSendMessage={() => {}} 
-                        messages={[]}
+                        messages={chatMessages}
                         className="h-full rounded-xl shadow-lg"
+                        webSocket={roomWebSocketRef.current}
+                        sessionId={sessionId as string}
                     />
                 </div>
             </div>
