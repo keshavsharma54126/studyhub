@@ -38,7 +38,7 @@ export class RoomWebSocket{
                         sessionId
                     }
                     this.log("Sending JOIN_SESSION message to WebSocketServer");
-                    this.send(joinMessage);
+                    this.send(JSON.stringify(joinMessage));
                     resolve()
                 }
                 this.ws.onclose = ()=>{
@@ -87,22 +87,28 @@ export class RoomWebSocket{
         const parsedMessage = JSON.parse(message.data);
         this.log("parsed message",message)
         switch(parsedMessage.type){
-            case "ADMIN_JOINED":
+            case "ADMIN_SUBSCRIBED":
+                console.log("admin subscribed",parsedMessage);
                 this.handlers.onAdminJoined?.(parsedMessage);
                 break;
-            case "USER_JOINED":
+            case "USER_SUBSCRIBED":
+                console.log("user subscribed",parsedMessage);
                 this.handlers.onUserJoined?.(parsedMessage);
                 break;
-            case "STROKE_RECEIVED":
+            case "STROKE_SENT":
+                console.log("stroke sent",parsedMessage);
                 this.handlers.onStrokeReceived?.(parsedMessage);
                 break;
-            case "CLEAR_RECEIVED":
+            case "CLEAR_SENT":
+                console.log("clear sent",parsedMessage);
                 this.handlers.onClearReceived?.(parsedMessage);
                 break;
-            case "CHAT_MESSAGE_RECEIVED":
+            case "CHAT_MESSAGE_SENT":
+                console.log("chat message sent",parsedMessage);
                 this.handlers.onChatMessageReceived?.(parsedMessage);
                 break;
-            case "SLIDE_CHANGE_RECEIVED":
+            case "SLIDE_CHANGE_SENT":
+                console.log("slide change sent",parsedMessage);
                 this.handlers.onSlideChangeReceived?.(parsedMessage);
                 break;
             default:
@@ -126,10 +132,10 @@ export class RoomWebSocket{
         }
     }
 
-    public send(message: any) {
+    public send(message: string) {
         if (this.ws?.readyState === WebSocket.OPEN) {
             this.log("Sending message:", message);
-            this.ws.send(JSON.stringify(message));
+            this.ws.send(message);
         } else {
             this.log("Cannot send message - WebSocket not open, state:", this.ws?.readyState);
         }

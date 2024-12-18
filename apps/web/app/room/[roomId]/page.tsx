@@ -161,19 +161,20 @@ export default function RoomPage() {
             console.error(error);
         }
     }
-    const checkAdmin = async()=>{
-        try{
+    const checkAdmin = async () => {
+        try {
             const auth_token = localStorage.getItem("auth_token");
-            const response = await axios.get(`http://localhost:3001/api/v1/sessions/session/${sessionId}`,{
-                headers:{
+            const response = await axios.get(`http://localhost:3001/api/v1/sessions/session/${sessionId}`, {
+                headers: {
                     "Authorization": `Bearer ${auth_token}`
                 }
             });
-            if(response.data.session.userId === user?.id){
-                setIsAdmin(true);
-            }
-        }catch(error){
+            const isUserAdmin = response.data.session.userId === user?.id;
+            setIsAdmin(isUserAdmin);
+            return isUserAdmin;  // Return the value directly
+        } catch (error) {
             console.error(error);
+            return false;
         }
     }
 
@@ -215,80 +216,104 @@ export default function RoomPage() {
     }, [router,user]);
 
     useEffect(() => {
-        const token = localStorage.getItem("auth_token");
-        roomWebSocketRef.current = new RoomWebSocket(`ws://localhost:8081/?token=${token}`);
-        roomWebSocketRef.current.setHandlers({
-            onConnect: () => {
-                console.log("connected to websocket");
-                setIsConnected(true);
-            },
-            onDisconnect: () => {
-                console.log("disconnected from websocket");
-                setIsConnected(false);
-            },
-            onError: (error: any) => {
-                console.error(error);
-                setIsConnected(false);
-            },
-            onAdminJoined: (parsedMessage: any) => {
-                console.log("admin joined", parsedMessage);
-                setIsAdmin(true);
-            },
-            onUserJoined: (parsedMessage: any) => {
-                console.log("user joined", parsedMessage);
-            },
-            onStrokeReceived: (parsedMessage: any) => {
-                const canvas = drawingCanvasRef.current;
-                if (!canvas) return;
-                const ctx = canvas.getContext('2d');
-                if (!ctx) return;
+        const wsFunc = async () => {
+            const token = localStorage.getItem("auth_token");
+            roomWebSocketRef.current = new RoomWebSocket(`ws://localhost:8081/?token=${token}`);
+            
+            // Get the admin status directly
+            const isUserAdmin = await checkAdmin();
+            
+            roomWebSocketRef.current.setHandlers({
+                onConnect: () => {
+                    console.log("connected to websocket");
+                    setIsConnected(true);
+                    if (roomWebSocketRef.current && user) {
+                        const subscribeMessage = {
+                            type: isUserAdmin ? "SUBSCRIBE_ADMIN" : "SUBSCRIBE_USER",
+                            payload: {
+                                sessionId,
+                                userId: user.id,
+                                username: user.username,
+                                profilePicture: user.profilePicture
+                            }
+                        };
+                        console.log("Sending subscription message:", subscribeMessage); // Add debug log
+                        roomWebSocketRef.current.send(JSON.stringify(subscribeMessage));
+                    }
+                },
+                onDisconnect: () => {
+                    console.log("disconnected from websocket");
+                    setIsConnected(false);
+                },
+                onError: (error: any) => {
+                    console.error(error);
+                    setIsConnected(false);
+                },
+                onAdminJoined: (parsedMessage: any) => {
+                    console.log("admin joined", parsedMessage);
+                    
+                },
+                onUserJoined: (parsedMessage: any) => {
+                    console.log("user joined", parsedMessage);
+                },
+                onStrokeReceived: (parsedMessage: any) => {
+                    const canvas = drawingCanvasRef.current;
+                    if (!canvas) return;
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) return;
 
-                const { x, y, lastX, lastY, color, width, isEraser } = parsedMessage.payload;
-                
-                ctx.beginPath();
-                ctx.moveTo(lastX, lastY);
-                ctx.lineTo(x, y);
-                
-                if (isEraser) {
-                    ctx.globalCompositeOperation = 'destination-out';
-                    ctx.lineWidth = width * 10;
-                } else {
-                    ctx.globalCompositeOperation = 'source-over';
-                    ctx.strokeStyle = color;
-                    ctx.lineWidth = width;
+                    const { x, y, lastX, lastY, color, width, isEraser } = parsedMessage.payload;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(lastX, lastY);
+                    ctx.lineTo(x, y);
+                    
+                    if (isEraser) {
+                        ctx.globalCompositeOperation = 'destination-out';
+                        ctx.lineWidth = width * 10;
+                    } else {
+                        ctx.globalCompositeOperation = 'source-over';
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = width;
+                    }
+                    
+                    ctx.lineCap = "round";
+                    ctx.stroke();
+                },
+                onClearReceived: () => {
+                    const canvas = drawingCanvasRef.current;
+                    if (!canvas) return;
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) return;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                },
+                onChatMessageReceived: (parsedMessage: any) => {
+                    // This will be handled in the ChatComponent
+                    setChatMessages((prevMessages) => [...prevMessages, parsedMessage.payload]);
+                },
+                onSlideChangeReceived: (parsedMessage: any) => {
+                    const { slideIndex } = parsedMessage.payload;
+                    setCurrentSlideIndex(slideIndex);
                 }
-                
-                ctx.lineCap = "round";
-                ctx.stroke();
-            },
-            onClearReceived: () => {
-                const canvas = drawingCanvasRef.current;
-                if (!canvas) return;
-                const ctx = canvas.getContext('2d');
-                if (!ctx) return;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-            },
-            onChatMessageReceived: (parsedMessage: any) => {
-                // This will be handled in the ChatComponent
-                setChatMessages((prevMessages) => [...prevMessages, parsedMessage.payload]);
-            },
-            onSlideChangeReceived: (parsedMessage: any) => {
-                const { slideIndex } = parsedMessage.payload;
-                setCurrentSlideIndex(slideIndex);
-            }
-        });
-        
-        if(roomWebSocketRef.current && token){
-            roomWebSocketRef.current.connect(sessionId as string)
-            .catch((error)=>{
-                console.error(error);
-                setIsConnected(false);
             });
+
+            if (roomWebSocketRef.current && token) {
+                roomWebSocketRef.current.connect(sessionId as string)
+                .catch((error) => {
+                    console.error(error);
+                    setIsConnected(false);
+                });
+            }
+        };
+        
+        if (user) {
+            wsFunc();
         }
+
         return () => {
             roomWebSocketRef.current?.close();
         };
-    }, [sessionId]);
+    }, [sessionId, user]);
 
     const handleStartSession = async()=>{
         try{

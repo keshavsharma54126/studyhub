@@ -24,13 +24,14 @@ interface ChatComponentProps {
   className?: string;
   isLoading?: boolean;
   isTyping?: boolean;
-  webSocket?: any;
+  webSocket?: WebSocket;
   sessionId?: string;
 }
 
 export function ChatComponent({ currentUser, onSendMessage, messages, className, isLoading, isTyping, webSocket, sessionId }: ChatComponentProps) {
   const [newMessage, setNewMessage] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const [isConnected, setIsConnected] = useState(false);
 
   const scrollToBottom = (smooth = true) => {
     if (scrollAreaRef.current) {
@@ -45,6 +46,28 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className,
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    if (webSocket) {
+      webSocket.onopen = () => {
+        console.log('WebSocket Connected');
+        setIsConnected(true);
+      };
+
+      webSocket.onclose = () => {
+        console.log('WebSocket Disconnected');
+        setIsConnected(false);
+      };
+
+      webSocket.onerror = (error) => {
+        console.error('WebSocket Error:', error);
+      };
+
+      webSocket.onmessage = (event) => {
+        console.log('Received message:', event.data);
+      };
+    }
+  }, [webSocket]);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -55,18 +78,25 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className,
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim()) {
-      if (webSocket) {
-        webSocket.send(JSON.stringify({
-          type: "CHAT_MESSAGE",
-          payload: {
-            sessionId,
-            message: newMessage,
-            userId: currentUser.id,
-            username: currentUser.username,
-            profilePicture: currentUser.profilePicture,
-            timestamp: new Date()
-          }
-        }));
+      if (webSocket && isConnected) {
+        try {
+          webSocket.send(JSON.stringify({
+            type: "CHAT_MESSAGE",
+            payload: {
+              sessionId,
+              message: newMessage,
+              userId: currentUser.id,
+              username: currentUser.username,
+              profilePicture: currentUser.profilePicture,
+              timestamp: new Date()
+            }
+          }));
+          console.log('Message sent successfully');
+        } catch (error) {
+          console.error('Error sending message:', error);
+        }
+      } else {
+        console.error('WebSocket is not connected');
       }
       onSendMessage(newMessage);
       setNewMessage('');

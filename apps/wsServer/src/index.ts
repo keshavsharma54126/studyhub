@@ -23,6 +23,9 @@ ws.on("connection", (ws: WebSocket,request) => {
   const {userId,username} = decoded as any;
   
   let user = new User(ws,userId,username)
+  if(user){
+    console.log("user websocket created")
+  }
   ws.on("error", console.error);
   ws.on("close", () => {
    console.log("user disconnected");
