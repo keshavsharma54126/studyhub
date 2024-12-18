@@ -366,8 +366,6 @@ export default function RoomPage() {
                     sessionId,
                     x,
                     y,
-                    lastX,
-                    lastY,
                     color: strokeColor,
                     width: strokeSize,
                     isEraser
