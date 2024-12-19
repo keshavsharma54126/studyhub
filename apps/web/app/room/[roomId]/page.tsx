@@ -52,6 +52,10 @@ export default function RoomPage() {
     const [chatMessages,setChatMessages] = useState<ChatMessage[]>([]);
     const [isChatOpen,setIsChatOpen] = useState(false);
     const [isDrawingControlsOpen,setIsDrawingControlsOpen] = useState(false);
+    const [currentSlide,setCurrentSlide] = useState<Slide | null>(null);
+    const currentSlideIndexRef = useRef<number>(
+        parseInt(localStorage.getItem(`slideIndex-${sessionId}`) || "0")
+    );
     const getSlides = async () => {
        try{
         const auth_token = localStorage.getItem("auth_token");
@@ -78,40 +82,26 @@ export default function RoomPage() {
 
         const img = new Image();
         img.onload = () => {
-            // Set canvas dimensions to match the image aspect ratio
+            // Set canvas dimensions to match the container size
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
             
-            // Also set drawing canvas dimensions to match
+            // Set drawing canvas to match
             if (drawingCanvasRef.current) {
                 drawingCanvasRef.current.width = canvas.width;
                 drawingCanvasRef.current.height = canvas.height;
             }
 
-            // Calculate dimensions to maintain aspect ratio
-            const ratio = Math.min(
-                canvas.width / img.width,
-                canvas.height / img.height
-            );
-            const centerX = (canvas.width - img.width * ratio) / 2;
-            const centerY = (canvas.height - img.height * ratio) / 2;
-
-            // Clear canvas and draw image
+            // Draw image to fill entire canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(
-                img,
-                centerX,
-                centerY,
-                img.width * ratio,
-                img.height * ratio
-            );
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         };
         img.src = slideUrl;
     };
 
     const nextSlide = (wsBool: boolean = false) => {
-        if (currentSlideIndex < slides.length - 1) {
-            const newIndex = currentSlideIndex + 1;
+        if (currentSlideIndexRef.current < slides.length - 1) {
+            const newIndex = currentSlideIndexRef.current + 1;
             
             // Only emit websocket event if it's the host and not a received event
             if (roomWebSocketRef.current && !wsBool && isHost) {
@@ -127,17 +117,17 @@ export default function RoomPage() {
             }
             
             // Always update the slide index
-            setCurrentSlideIndex(newIndex);
+            currentSlideIndexRef.current = newIndex;
             // Force display the new slide
-            console.log("new index",newIndex);
+            localStorage.setItem(`slideIndex-${sessionId}`,newIndex.toString());
             console.log("slides",slides[newIndex]?.url);
             displaySlide(slides[newIndex]?.url || "");
         }
     };
 
     const previousSlide = (wsBool: boolean) => {
-        if (currentSlideIndex > 0) {
-            const newIndex = currentSlideIndex - 1;
+        if (currentSlideIndexRef.current > 0) {
+            const newIndex = currentSlideIndexRef.current - 1;
             
             // Only emit websocket event if it's the host and not a received event
             if (roomWebSocketRef.current && !wsBool && isHost) {
@@ -146,14 +136,16 @@ export default function RoomPage() {
                     payload: {
                         sessionId,
                         slideIndex: newIndex,
-                        move: "previous"
+                        move: "previous",
+                        url: slides[newIndex]?.url
                     }
                 }));
             }
             
             // Always update the slide index
-            setCurrentSlideIndex(newIndex);
+            currentSlideIndexRef.current = newIndex;
             // Force display the new slide
+            localStorage.setItem(`slideIndex-${sessionId}`,newIndex.toString());
             displaySlide(slides[newIndex]?.url || "");
         }
     };
@@ -281,9 +273,15 @@ export default function RoomPage() {
 
                     const { x, y, lastX, lastY, color, width, isEraser } = parsedMessage.payload;
                     
+                    // Convert normalized coordinates back to actual canvas coordinates
+                    const actualX = x * canvas.width;
+                    const actualY = y * canvas.height;
+                    const actualLastX = lastX * canvas.width;
+                    const actualLastY = lastY * canvas.height;
+                    
                     ctx.beginPath();
-                    ctx.moveTo(lastX, lastY);
-                    ctx.lineTo(x, y);
+                    ctx.moveTo(actualLastX, actualLastY);
+                    ctx.lineTo(actualX, actualY);
                     
                     if (isEraser) {
                         ctx.globalCompositeOperation = 'destination-out';
@@ -310,14 +308,10 @@ export default function RoomPage() {
                 },
                 onSlideChangeReceived: (parsedMessage: any) => {
                     console.log("Received slide change:", parsedMessage);
-                    if (parsedMessage.payload.move === "next") {
-                        nextSlide(true);
-                        displaySlide(parsedMessage.payload.url);
-                    } else if (parsedMessage.payload.move === "previous") {
-                        previousSlide(true);
-                        displaySlide(parsedMessage.payload.url);
-                    }
-                    
+                    const newIndex = parsedMessage.payload.slideIndex;
+                    currentSlideIndexRef.current = newIndex;
+                    localStorage.setItem(`slideIndex-${sessionId}`,newIndex.toString());
+                    displaySlide(parsedMessage.payload.url);
                 }
             });
 
@@ -341,9 +335,10 @@ export default function RoomPage() {
 
     useEffect(() => {
         if (slides.length > 0) {
-            displaySlide(slides[currentSlideIndex]?.url || "");
+            setCurrentSlideIndex(currentSlideIndexRef.current);
+            displaySlide(slides[currentSlideIndexRef.current]?.url || "");
         }
-    }, [currentSlideIndex,slides]);
+    }, [slides]);
 
     const handleStartSession = async()=>{
         try{
@@ -381,9 +376,14 @@ export default function RoomPage() {
         const canvas = drawingCanvasRef.current;
         if (!canvas) return;
         const rect = canvas.getBoundingClientRect();
+        
+        // Convert to normalized coordinates (0-1)
+        const normalizedX = (e.clientX - rect.left) / rect.width;
+        const normalizedY = (e.clientY - rect.top) / rect.height;
+        
         setIsDrawing(true);
-        setLastX(e.clientX - rect.left);
-        setLastY(e.clientY - rect.top);
+        setLastX(normalizedX);
+        setLastY(normalizedY);
     }
 
     const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -395,13 +395,16 @@ export default function RoomPage() {
         if (!ctx) return;
 
         const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        
+        // Convert to normalized coordinates (0-1)
+        const normalizedX = (e.clientX - rect.left) / rect.width;
+        const normalizedY = (e.clientY - rect.top) / rect.height;
 
-        // Draw locally
+        // Draw locally using actual canvas coordinates
         ctx.beginPath();
-        ctx.moveTo(lastX, lastY);
-        ctx.lineTo(x, y);
+        ctx.moveTo(lastX * canvas.width, lastY * canvas.height);
+        ctx.lineTo(normalizedX * canvas.width, normalizedY * canvas.height);
+        
         if (isEraser) {
             ctx.globalCompositeOperation = 'destination-out';
             ctx.lineWidth = strokeSize * 10;
@@ -413,7 +416,7 @@ export default function RoomPage() {
         ctx.lineCap = "round";
         ctx.stroke();
 
-        // Emit stroke event
+        // Emit normalized coordinates
         if (roomWebSocketRef.current) {
             roomWebSocketRef.current.send(JSON.stringify({
                 type: "STROKE",
@@ -421,8 +424,8 @@ export default function RoomPage() {
                     sessionId,
                     lastX,
                     lastY,
-                    x,
-                    y,
+                    x: normalizedX,
+                    y: normalizedY,
                     color: strokeColor,
                     width: strokeSize,
                     isEraser
@@ -430,8 +433,8 @@ export default function RoomPage() {
             }));
         }
 
-        setLastX(x);
-        setLastY(y);
+        setLastX(normalizedX);
+        setLastY(normalizedY);
     };
 
     const stopDrawing = ()=>{
@@ -617,17 +620,17 @@ export default function RoomPage() {
                                           px-4 py-2 rounded-full shadow-lg">
                                 <Button
                                     onClick={() => previousSlide(false)}
-                                    disabled={currentSlideIndex === 0}
+                                    disabled={currentSlideIndexRef.current === 0}
                                     className="p-1.5 rounded-full disabled:opacity-50"
                                 >
                                     <ChevronLeftIcon size={20} />
                                 </Button>
                                 <span className="text-sm font-medium mx-2">
-                                    {currentSlideIndex + 1} / {slides.length}
+                                    {currentSlideIndexRef.current + 1} / {slides.length}
                                 </span>
                                 <Button
                                     onClick={() => nextSlide(false)}
-                                    disabled={currentSlideIndex === slides.length - 1}
+                                    disabled={currentSlideIndexRef.current === slides.length - 1}
                                     className="p-1.5 rounded-full disabled:opacity-50"
                                 >
                                     <ChevronRightIcon size={20} />
