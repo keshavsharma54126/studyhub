@@ -19,12 +19,8 @@ type Session = {
   endTime: string;
 }
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+
   const router = useRouter();
-  const token = localStorage.getItem("auth_token");
-  if (!token) {
-    router.push("/signin");
-  }
- 
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
 
@@ -34,6 +30,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     setMounted(true);
+    
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      router.push("/signin");
+    }
     // Call fetchUser instead of getUser
     fetchUser();
   }, []);
