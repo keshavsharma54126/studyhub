@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@repo/ui/button";
-import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, PlayIcon, XIcon, Eraser as ClearIcon, PaintBucketIcon, Pen, Minus } from "lucide-react";
+import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, PlayIcon, XIcon, Eraser as ClearIcon, PaintBucketIcon, Pen, Minus, MessageCircle, X as CloseIcon } from "lucide-react";
 import { useGetUser } from "../../hooks";
 import { HexColorPicker } from "react-colorful";
 import { RoomWebSocket } from "../../webSocket";
@@ -50,6 +50,7 @@ export default function RoomPage() {
     const [isConnected,setIsConnected] = useState(false);
     const [isAdmin,setIsAdmin] = useState(false);
     const [chatMessages,setChatMessages] = useState<ChatMessage[]>([]);
+    const [isChatOpen,setIsChatOpen] = useState(false);
     const getSlides = async () => {
        try{
         const auth_token = localStorage.getItem("auth_token");
@@ -509,104 +510,149 @@ export default function RoomPage() {
     );
 
     return (
-        <div className="flex flex-col lg:flex-row min-h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
-            <div className="relative flex-1 h-[50vh] md:h-[60vh] lg:h-screen p-2 sm:p-3 md:p-4 lg:p-6">
-                {isHost && (
-                    <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-10 flex flex-col sm:flex-row gap-2 sm:space-x-3">
-                        <Button 
-                            onClick={handleStartSession} 
-                            className="bg-green-500 hover:bg-green-600 text-white 
-                                     px-2 sm:px-4 py-1 sm:py-2 rounded-lg transition-all duration-200 
-                                     flex items-center gap-2 shadow-lg hover:shadow-xl text-sm sm:text-base"
-                        >
-                            <PlayIcon size={16} className="sm:size-18" />
-                            <span className="inline">{isSessionStarted ? "Session Started" : "Start Session"}</span>
-                        </Button>
-                        <Button 
-                            onClick={() => setIsSessionEnded(true)}
-                            className="bg-red-500 hover:bg-red-600 text-white 
-                                     px-2 sm:px-4 py-1 sm:py-2 rounded-lg transition-all duration-200 
-                                     flex items-center gap-2 shadow-lg hover:shadow-xl text-sm sm:text-base"
-                        >
-                            <ArrowLeftIcon size={16} className="sm:size-18" />
-                            <span className="inline">End Session</span>
-                        </Button>
+        <div className="flex flex-col h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
+            {/* Main Content Area */}
+            <div className="flex flex-col h-full">
+                {/* Top Bar - Only visible on mobile */}
+                <div className="lg:hidden flex items-center justify-between p-3 bg-white/95 border-b">
+                    <h1 className="text-lg font-semibold">Session #{sessionId}</h1>
+                    {isHost && (
+                        <div className="flex gap-2">
+                            <Button 
+                                onClick={handleStartSession}
+                                className="bg-green-500 hover:bg-green-600 text-white text-sm px-3 py-1.5 rounded-lg"
+                            >
+                                {isSessionStarted ? "Started" : "Start"}
+                            </Button>
+                            <Button 
+                                onClick={() => setIsSessionEnded(true)}
+                                className="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1.5 rounded-lg"
+                            >
+                                End
+                            </Button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Main Content Grid */}
+                <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr,380px] h-[calc(100vh-56px)] lg:h-screen relative">
+                    {/* Left Side - Slides and Drawing */}
+                    <div className="relative h-[calc(100vh-220px)] sm:h-[calc(100vh-180px)] lg:h-full">
+                        {/* Host Controls - Only visible on desktop */}
+                        {isHost && (
+                            <div className="hidden lg:flex absolute top-4 left-4 z-10 gap-3">
+                                <Button 
+                                    onClick={handleStartSession}
+                                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg"
+                                >
+                                    <PlayIcon size={16} className="mr-2" />
+                                    {isSessionStarted ? "Session Started" : "Start Session"}
+                                </Button>
+                                <Button 
+                                    onClick={() => setIsSessionEnded(true)}
+                                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
+                                >
+                                    <ArrowLeftIcon size={16} className="mr-2" />
+                                    End Session
+                                </Button>
+                            </div>
+                        )}
+
+                        {/* Slide Canvas Container */}
+                        <div className="relative w-full sm: h-full bg-white rounded-lg shadow-lg overflow-hidden">
+                            <canvas 
+                                ref={slideCanvasRef}
+                                className="absolute inset-0 w-full h-full"
+                            />
+                            <canvas 
+                                ref={drawingCanvasRef}
+                                className={`absolute inset-0 w-full h-full ${isAdmin ? 'cursor-crosshair' : 'cursor-default'}`}
+                                onMouseDown={startDrawing}
+                                onMouseMove={draw}
+                                onMouseUp={stopDrawing}
+                                onMouseOut={stopDrawing}
+                            />
+
+                            <DrawingToolbar />
+
+                            {/* Slide Controls */}
+                            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 
+                                          flex items-center gap-2 bg-white/90 backdrop-blur-sm 
+                                          px-4 py-2 rounded-full shadow-lg">
+                                <Button
+                                    onClick={() => previousSlide(false)}
+                                    disabled={currentSlideIndex === 0}
+                                    className="p-1.5 rounded-full disabled:opacity-50"
+                                >
+                                    <ChevronLeftIcon size={20} />
+                                </Button>
+                                <span className="text-sm font-medium mx-2">
+                                    {currentSlideIndex + 1} / {slides.length}
+                                </span>
+                                <Button
+                                    onClick={() => nextSlide(false)}
+                                    disabled={currentSlideIndex === slides.length - 1}
+                                    className="p-1.5 rounded-full disabled:opacity-50"
+                                >
+                                    <ChevronRightIcon size={20} />
+                                </Button>
+                            </div>
+                        </div>
                     </div>
-                )}
 
-                <div className="relative w-full h-full bg-white rounded-xl shadow-xl 
-                              border border-gray-200 overflow-hidden
-                              backdrop-blur-sm bg-white/95">
-                    <canvas 
-                        ref={slideCanvasRef}
-                        className="w-full h-full absolute top-0 left-0"
-                    ></canvas>
-                    <canvas 
-                        ref={drawingCanvasRef}
-                        className={`w-full h-full absolute top-0 left-0 ${isAdmin ? 'cursor-crosshair' : 'cursor-default'}`}
-                        onMouseDown={startDrawing}
-                        onMouseMove={draw}
-                        onMouseUp={stopDrawing}
-                        onMouseOut={stopDrawing}
-                    ></canvas>
-
-                    
-
-                    <DrawingToolbar />
-
-                    <div className="absolute bottom-2 sm:bottom-6 left-1/2 transform -translate-x-1/2 
-                                 flex items-center gap-2 sm:gap-4 bg-white/90 backdrop-blur-sm 
-                                 px-3 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg">
-                        <Button
-                            onClick={() => previousSlide(false)}
-                            disabled={currentSlideIndex === 0}
-                            className="bg-white hover:bg-gray-100 text-gray-800 
-                                   shadow-md rounded-full p-2 disabled:opacity-50
-                                   transition-all duration-200 hover:shadow-lg"
+                    {/* Right Side - Modified for mobile */}
+                    <div className={`
+                        lg:static lg:flex lg:flex-col lg:h-screen lg:overflow-hidden lg:bg-white/95 lg:border-l lg:border-gray-200
+                        fixed inset-0 bg-white/95 z-50 transition-transform duration-300 ease-in-out
+                        ${isChatOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+                    `}>
+                        {/* Close button for mobile */}
+                        <button 
+                            onClick={() => setIsChatOpen(false)}
+                            className="lg:hidden absolute top-4 right-4 p-2 rounded-full bg-gray-100 hover:bg-gray-200"
                         >
-                            <ChevronLeftIcon size={24} />
-                        </Button>
+                            <CloseIcon size={24} />
+                        </button>
 
-                        <span className="font-medium text-gray-700">
-                            {currentSlideIndex + 1} / {slides.length}
-                        </span>
+                        {/* Existing Video and Chat components */}
+                        <div className="h-[100px] sm:h-[120px] md:h-[180px] lg:h-1/4 p-2">
+                            <div className="w-full h-full rounded-lg overflow-hidden bg-gray-900">
+                                <VideoComponent token={token} isHost={isHost} />
+                            </div>
+                        </div>
 
-                        <Button
-                            onClick={() => nextSlide(false)}
-                            disabled={currentSlideIndex === slides.length - 1}
-                            className="bg-white hover:bg-gray-100 text-gray-800 
-                                   shadow-md rounded-full p-2 disabled:opacity-50
-                                   transition-all duration-200 hover:shadow-lg"
-                        >
-                            <ChevronRightIcon size={24} />
-                        </Button>
-                       
+                        <div className="flex-1 overflow-hidden p-2">
+                            <ChatComponent 
+                                currentUser={user || {id: "", username: "", profilePicture: ""}}
+                                onSendMessage={() => {}}
+                                //@ts-ignore 
+                                messages={chatMessages}
+                                setChatMessages={setChatMessages}
+                                className="h-full"
+                                webSocket={roomWebSocketRef.current || undefined}
+                                sessionId={sessionId as string}
+                            />
+                        </div>
                     </div>
+
+                    {/* Fixed Video Component for Mobile */}
+                    <div className="lg:hidden fixed bottom-0 left-0 right-0 h-[80px] sm:h-[100px] bg-white/95 border-t border-gray-200 p-2">
+                        <div className="w-full h-full rounded-lg overflow-hidden bg-gray-900">
+                            <VideoComponent token={token} isHost={isHost} />
+                        </div>
+                    </div>
+
+                    {/* Chat Toggle Button for Mobile */}
+                    <button 
+                        onClick={() => setIsChatOpen(!isChatOpen)}
+                        className="lg:hidden fixed right-4 bottom-24 sm:bottom-28 z-50 bg-blue-500 text-white p-3 rounded-full shadow-lg"
+                    >
+                        <MessageCircle size={24} />
+                    </button>
                 </div>
             </div>
 
-            <div className="flex flex-col w-full lg:w-72 xl:w-96 2xl:w-[420px] 
-                          bg-white/95 backdrop-blur-sm border-t lg:border-l border-gray-200 shadow-xl">
-                <div className="h-[25vh] sm:h-[30vh] lg:h-[26vh] p-2 sm:p-3 md:p-4">
-                    <div className="w-full h-full rounded-xl overflow-hidden 
-                                 shadow-lg bg-gray-900 relative">
-                        <VideoComponent token={token} isHost={isHost} />
-                    </div>
-                </div>
-
-                <div className="flex-1 min-h-[35vh] lg:min-h-[60vh] p-2 sm:p-3 md:p-4">
-                    <ChatComponent 
-                        currentUser={user || {id: "", username: "", profilePicture: ""}}
-                        onSendMessage={() => {}} 
-                        messages={chatMessages}
-                        setChatMessages={setChatMessages}
-                        className="h-full rounded-xl shadow-lg"
-                        webSocket={roomWebSocketRef.current || undefined}
-                        sessionId={sessionId as string}
-                    />
-                </div>
-            </div>
-
+            {/* Session End Modals */}
             {(isSessionEnded || hasSessionEnded) && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm 
                                flex items-center justify-center z-50 p-4">
@@ -664,6 +710,5 @@ export default function RoomPage() {
                 </div>
             )}
         </div>
-       
     );
 }

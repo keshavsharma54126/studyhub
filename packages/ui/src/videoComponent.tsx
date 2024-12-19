@@ -16,7 +16,7 @@ import {
   const serverUrl = 'wss://myacademy-lznxzk2x.livekit.cloud';
   
   
-  export  function VideoComponent({token,isHost}:{token:string,isHost:boolean}) {
+  export  function VideoComponent({token, isHost}: {token: string, isHost: boolean}) {
 
     return (
       <LiveKitRoom
@@ -25,21 +25,13 @@ import {
         token={token}
         serverUrl={serverUrl}
         data-lk-theme="default"
-        style={{ 
-          height: '100%',
-          width: '100%',
-          position: 'relative',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          borderRadius: '0.75rem',
-        }}
+        style={{ height: '100%', width: '100%' }}
       >
         <MyVideoConference isHost={isHost} />
         <RoomAudioRenderer />
-        <div className=' bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4'>
+        <div className='absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent'>
           <ControlBar 
-            className='flex flex-row justify-center items-center gap-4 max-w-3xl mx-auto'
+            className='flex justify-center items-center gap-2 p-2'
             controls={{
               microphone: isHost,
               camera: isHost,
@@ -53,7 +45,7 @@ import {
     );
   }
   
-  function MyVideoConference({isHost}:{isHost:boolean}) {
+  function MyVideoConference({isHost}: {isHost: boolean}) {
     const tracks = useTracks(
       [
         { 
@@ -79,15 +71,15 @@ import {
       <GridLayout 
         tracks={tracks} 
         style={{ 
-          height: 'calc(100% - 80px)',
+          height: 'calc(100% - 48px)',
           width: '100%',
-          padding: '1rem',
-          gap: '1rem',
+          padding: '0.5rem',
+          gap: '0.5rem',
         }}
       >
         <ParticipantTile
           style={{
-            borderRadius: '0.75rem',
+            borderRadius: '0.5rem',
             overflow: 'hidden',
             background: 'rgba(0, 0, 0, 0.2)',
             aspectRatio: '16/9',
