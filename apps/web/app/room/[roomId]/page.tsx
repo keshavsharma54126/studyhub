@@ -51,6 +51,7 @@ export default function RoomPage() {
     const [isAdmin,setIsAdmin] = useState(false);
     const [chatMessages,setChatMessages] = useState<ChatMessage[]>([]);
     const [isChatOpen,setIsChatOpen] = useState(false);
+    const [isDrawingControlsOpen,setIsDrawingControlsOpen] = useState(false);
     const getSlides = async () => {
        try{
         const auth_token = localStorage.getItem("auth_token");
@@ -559,7 +560,7 @@ export default function RoomPage() {
                         )}
 
                         {/* Slide Canvas Container */}
-                        <div className="relative w-full sm: h-full bg-white rounded-lg shadow-lg overflow-hidden">
+                        <div className="relative w-full h-full bg-white rounded-lg shadow-lg overflow-hidden">
                             <canvas 
                                 ref={slideCanvasRef}
                                 className="absolute inset-0 w-full h-full"
@@ -572,8 +573,28 @@ export default function RoomPage() {
                                 onMouseUp={stopDrawing}
                                 onMouseOut={stopDrawing}
                             />
+                            <Button 
+                                onClick={() => setIsDrawingControlsOpen(!isDrawingControlsOpen)}
+                                className={`
+                                    flex items-center gap-3
+                                    absolute top-4 right-4 z-10
+                                    bg-gradient-to-r from-indigo-500 to-purple-500
+                                    hover:from-indigo-600 hover:to-purple-600
+                                    text-white
+                                    px-4 py-2.5
+                                    rounded-full
+                                    shadow-lg hover:shadow-xl
+                                    transform transition-all duration-200
+                                    hover:scale-105
+                                    backdrop-blur-sm
+                                    border border-white/20
+                                `}
+                            >
+                                <PaintBucketIcon size={24} className="animate-bounce" />
+                                <span className="font-medium">Drawing Tools</span>
+                            </Button>
 
-                            <DrawingToolbar />
+                            {isDrawingControlsOpen && <DrawingToolbar />}
 
                             {/* Slide Controls */}
                             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 
@@ -615,13 +636,13 @@ export default function RoomPage() {
                         </button>
 
                         {/* Existing Video and Chat components */}
-                        <div className="h-[100px] sm:h-[120px] md:h-[180px] lg:h-1/4 p-2">
+                        <div className="h-[300px] sm:h-[440px] md:h-[380px] lg:h-1/4 p-2">
                             <div className="w-full h-full rounded-lg overflow-hidden bg-gray-900">
                                 <VideoComponent token={token} isHost={isHost} />
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-hidden p-2">
+                        <div className="flex-1 overflow-hidden p-2 h-[calc(100vh-340px)] sm:h-[calc(100vh-380px)] md:h-[calc(100vh-420px)] lg:h-1/4">
                             <ChatComponent 
                                 currentUser={user || {id: "", username: "", profilePicture: ""}}
                                 onSendMessage={() => {}}
@@ -636,7 +657,7 @@ export default function RoomPage() {
                     </div>
 
                     {/* Fixed Video Component for Mobile */}
-                    <div className="lg:hidden fixed bottom-0 left-0 right-0 h-[80px] sm:h-[100px] bg-white/95 border-t border-gray-200 p-2">
+                    <div className="lg:hidden fixed bottom-0 left-0 right-0 h-[220px] sm:h-[260px] bg-white/95 border-t border-gray-200 p-2">
                         <div className="w-full h-full rounded-lg overflow-hidden bg-gray-900">
                             <VideoComponent token={token} isHost={isHost} />
                         </div>
@@ -645,7 +666,7 @@ export default function RoomPage() {
                     {/* Chat Toggle Button for Mobile */}
                     <button 
                         onClick={() => setIsChatOpen(!isChatOpen)}
-                        className="lg:hidden fixed right-4 bottom-24 sm:bottom-28 z-50 bg-blue-500 text-white p-3 rounded-full shadow-lg"
+                        className="lg:hidden fixed right-4 bottom-56 sm:bottom-72 z-50 bg-blue-500 text-white p-3 rounded-full shadow-lg"
                     >
                         <MessageCircle size={24} />
                     </button>
