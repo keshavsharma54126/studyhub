@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@repo/ui/button";
-import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, PlayIcon, XIcon, Eraser as ClearIcon, PaintBucketIcon, Pen, Minus, MessageCircle, X as CloseIcon } from "lucide-react";
+import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, PlayIcon, XIcon, Eraser as ClearIcon, PaintBucketIcon, Pen, Minus, MessageCircle, X as CloseIcon, PlusIcon } from "lucide-react";
 import { useGetUser } from "../../hooks";
 import { HexColorPicker } from "react-colorful";
 import { RoomWebSocket } from "../../webSocket";
@@ -52,7 +52,6 @@ export default function RoomPage() {
     const [chatMessages,setChatMessages] = useState<ChatMessage[]>([]);
     const [isChatOpen,setIsChatOpen] = useState(false);
     const [isDrawingControlsOpen,setIsDrawingControlsOpen] = useState(false);
-    const [currentSlide,setCurrentSlide] = useState<Slide | null>(null);
     const currentSlideIndexRef = useRef<number>(
         parseInt(localStorage.getItem(`slideIndex-${sessionId}`) || "0")
     );
@@ -460,73 +459,6 @@ export default function RoomPage() {
         }
     };
 
-    const DrawingToolbar = () => (
-        isAdmin ? (
-            <div className="absolute top-20 right-6 flex flex-col gap-2 bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-lg">
-                <Button 
-                    onClick={() => {
-                        setIsEraser(false);
-                    }}
-                    className={`hover:bg-gray-100 text-gray-700 p-2 rounded-lg transition-all ${
-                        !isEraser ? 'bg-gray-200' : ''
-                    }`}
-                    title="Pen Tool"
-                >
-                    <Pen size={20} />
-                </Button>
-                <Button 
-                    onClick={() => {
-                        setIsEraser(true);
-                    }}
-                    className={`hover:bg-gray-100 text-gray-700 p-2 rounded-lg transition-all ${
-                        isEraser ? 'bg-gray-200' : ''
-                    }`}
-                    title="Eraser Tool"
-                >
-                    <ClearIcon size={20} />
-                </Button>
-                <div className="flex flex-col gap-1 p-2">
-                <Minus size={strokeSize} className="mx-auto" />
-                <input
-                    type="range"
-                    min="1"
-                    max="20"
-                    value={strokeSize}
-                    onChange={(e) => setStrokeSize(Number(e.target.value))}
-                    className="w-full"
-                    title="Stroke Size"
-                />
-            </div>
-                <div className="relative">
-                    <Button 
-                        onClick={() => setShowColorPicker(!showColorPicker)}
-                        className="hover:bg-gray-100 p-2 rounded-lg transition-all"
-                        style={{ color: strokeColor }}
-                        title="Color Picker"
-                    >
-                        <PaintBucketIcon size={20} />
-                    </Button>
-                    {showColorPicker && (
-                        <div className="absolute right-full mr-2 top-0">
-                            <HexColorPicker
-                                color={strokeColor}
-                                onChange={setStrokeColor}
-                                className="shadow-xl rounded-lg"
-                            />
-                        </div>
-                    )}
-                </div>
-                <Button 
-                    onClick={clearCanvas}
-                    className="hover:bg-gray-100 text-gray-700 p-2 rounded-lg transition-all"
-                    title="Clear Canvas"
-                >
-                    <XIcon size={20} />
-                </Button>
-            </div>
-        ) : null
-    );
-
     return (
         <div className="flex flex-col h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
             {/* Main Content Area */}
@@ -590,29 +522,132 @@ export default function RoomPage() {
                                 onMouseUp={stopDrawing}
                                 onMouseOut={stopDrawing}
                             />
-                            {isHost && (                           <Button 
-                                onClick={() => setIsDrawingControlsOpen(!isDrawingControlsOpen)}
-                                className={`
-                                    flex items-center gap-3
-                                    absolute top-4 right-4 z-10
-                                    bg-gradient-to-r from-indigo-500 to-purple-500
-                                    hover:from-indigo-600 hover:to-purple-600
-                                    text-white
-                                    px-4 py-2.5
-                                    rounded-full
-                                    shadow-lg hover:shadow-xl
-                                    transform transition-all duration-200
-                                    hover:scale-105
-                                    backdrop-blur-sm
-                                    border border-white/20
-                                `}
-                            >
-                                <PaintBucketIcon size={24} className="animate-bounce" />
-                                <span className="font-medium">Drawing Tools</span>
-                            </Button>
+                            {isHost && (
+                                <Button 
+                                    onClick={() => setIsDrawingControlsOpen(!isDrawingControlsOpen)}
+                                    className={`
+                                        fixed right-0 lg:absolute lg:top-1 lg:right-6 z-10
+                                        flex items-center gap-2
+                                        bg-black/90 hover:bg-white/95
+                                        text-white hover:text-black
+                                        px-4 py-2.5
+                                        rounded-lg
+                                        shadow-lg hover:shadow-xl
+                                        transform transition-all duration-200
+                                        backdrop-blur-sm
+                                        border border-gray-200
+                                    `}
+                                >
+                                    <PaintBucketIcon size={20} />
+
+                                    <span className="text-sm font-medium hidden lg:block">Drawing Tools</span>
+                                </Button>
                             )}
 
-                            {isDrawingControlsOpen && <DrawingToolbar />}
+                            {isHost && (
+                                <Button
+                                    onClick={() => {}}
+                                    className={`
+                                        fixed lg:absolute  lg:top-1 lg:right-48 z-10
+                                        flex items-center gap-2
+                                        bg-black/90 hover:bg-white/95
+                                        text-white hover:text-black
+                                        px-4 py-2.5
+                                        rounded-lg
+                                        shadow-lg hover:shadow-xl
+                                        transform transition-all duration-200
+                                        backdrop-blur-sm
+                                        border border-gray-200
+                                    `}
+                                >
+                                    <PlusIcon size={20} />
+                                    <span className="text-sm font-medium hidden lg:block">Add Slide</span>
+                                </Button>
+                            )}
+
+                            {isDrawingControlsOpen && (
+                                <div className="fixed lg:absolute top-20 right-4 lg:right-6 z-20 
+                                      flex flex-col gap-2 bg-white/95 backdrop-blur-sm p-3 
+                                      rounded-lg shadow-lg border border-gray-200">
+                                    <div className="flex flex-col gap-3">
+                                        <div className="flex gap-2">
+                                            <Button 
+                                                onClick={() => setIsEraser(false)}
+                                                className={`flex-1 p-2 rounded-lg transition-all ${
+                                                    !isEraser ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
+                                                }`}
+                                                title="Pen Tool"
+                                            >
+                                                <Pen size={20} />
+                                            </Button>
+                                            <Button 
+                                                onClick={() => setIsEraser(true)}
+                                                className={`flex-1 p-2 rounded-lg transition-all ${
+                                                    isEraser ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
+                                                }`}
+                                                title="Eraser Tool"
+                                            >
+                                                <ClearIcon size={20} />
+                                            </Button>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between text-sm text-gray-600">
+                                                <span>Size</span>
+                                                <span>{strokeSize}px</span>
+                                            </div>
+                                            <input
+                                                type="range"
+                                                min="1"
+                                                max="20"
+                                                value={strokeSize}
+                                                onChange={(e) => setStrokeSize(Number(e.target.value))}
+                                                className="w-full accent-blue-500"
+                                                title="Stroke Size"
+                                            />
+                                        </div>
+
+                                        <div className="relative">
+                                            <Button 
+                                                onClick={() => setShowColorPicker(!showColorPicker)}
+                                                className="w-full flex items-center justify-between p-2 
+                                                         hover:bg-gray-100 rounded-lg transition-all"
+                                                title="Color Picker"
+                                            >
+                                                <span className="text-sm text-gray-600">Color</span>
+                                                <div className="flex items-center gap-2">
+                                                    <div 
+                                                        className="w-6 h-6 rounded-full border border-gray-200"
+                                                        style={{ backgroundColor: strokeColor }}
+                                                    />
+                                                    <PaintBucketIcon size={16} className="text-gray-600" />
+                                                </div>
+                                            </Button>
+                                            {showColorPicker && (
+                                                <div className="absolute right-0 mt-2">
+                                                    <HexColorPicker
+                                                        color={strokeColor}
+                                                        onChange={setStrokeColor}
+                                                        className="shadow-xl rounded-lg border border-gray-200"
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <Button 
+                                            onClick={clearCanvas}
+                                            className="w-full flex items-center justify-center gap-2 
+                                                             bg-red-50 hover:bg-red-100 text-red-600 
+                                                             p-2 rounded-lg transition-all"
+                                            title="Clear Canvas"
+                                        >
+                                            <XIcon size={16} />
+                                            <span className="text-sm">Clear Canvas</span>
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                            
 
                             
                            {isHost &&  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 
