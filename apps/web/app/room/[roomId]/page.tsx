@@ -112,26 +112,34 @@ export default function RoomPage() {
     const nextSlide = (wsBool: boolean = false) => {
         if (currentSlideIndex < slides.length - 1) {
             const newIndex = currentSlideIndex + 1;
-            setCurrentSlideIndex(newIndex);
             
+            // Only emit websocket event if it's the host and not a received event
             if (roomWebSocketRef.current && !wsBool && isHost) {
                 roomWebSocketRef.current.send(JSON.stringify({
                     type: "SLIDE_CHANGE",
                     payload: {
                         sessionId,
                         slideIndex: newIndex,
-                        move: "next"
+                        move: "next",
+                        url: slides[newIndex]?.url
                     }
                 }));
             }
+            
+            // Always update the slide index
+            setCurrentSlideIndex(newIndex);
+            // Force display the new slide
+            console.log("new index",newIndex);
+            console.log("slides",slides[newIndex]?.url);
+            displaySlide(slides[newIndex]?.url || "");
         }
     };
 
-    const previousSlide = (wsBool: boolean = false) => {
+    const previousSlide = (wsBool: boolean) => {
         if (currentSlideIndex > 0) {
             const newIndex = currentSlideIndex - 1;
-            setCurrentSlideIndex(newIndex);
             
+            // Only emit websocket event if it's the host and not a received event
             if (roomWebSocketRef.current && !wsBool && isHost) {
                 roomWebSocketRef.current.send(JSON.stringify({
                     type: "SLIDE_CHANGE",
@@ -142,6 +150,11 @@ export default function RoomPage() {
                     }
                 }));
             }
+            
+            // Always update the slide index
+            setCurrentSlideIndex(newIndex);
+            // Force display the new slide
+            displaySlide(slides[newIndex]?.url || "");
         }
     };
 
@@ -297,13 +310,14 @@ export default function RoomPage() {
                 },
                 onSlideChangeReceived: (parsedMessage: any) => {
                     console.log("Received slide change:", parsedMessage);
-                    if (!isHost) {  // Only non-host users should react to slide changes
-                        if (parsedMessage.payload.move === "next") {
-                            nextSlide(true);
-                        } else if (parsedMessage.payload.move === "previous") {
-                            previousSlide(true);
-                        }
+                    if (parsedMessage.payload.move === "next") {
+                        nextSlide(true);
+                        displaySlide(parsedMessage.payload.url);
+                    } else if (parsedMessage.payload.move === "previous") {
+                        previousSlide(true);
+                        displaySlide(parsedMessage.payload.url);
                     }
+                    
                 }
             });
 
@@ -573,7 +587,7 @@ export default function RoomPage() {
                                 onMouseUp={stopDrawing}
                                 onMouseOut={stopDrawing}
                             />
-                            <Button 
+                            {isHost && (                           <Button 
                                 onClick={() => setIsDrawingControlsOpen(!isDrawingControlsOpen)}
                                 className={`
                                     flex items-center gap-3
@@ -593,11 +607,12 @@ export default function RoomPage() {
                                 <PaintBucketIcon size={24} className="animate-bounce" />
                                 <span className="font-medium">Drawing Tools</span>
                             </Button>
+                            )}
 
                             {isDrawingControlsOpen && <DrawingToolbar />}
 
-                            {/* Slide Controls */}
-                            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 
+                            
+                           {isHost &&  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 
                                           flex items-center gap-2 bg-white/90 backdrop-blur-sm 
                                           px-4 py-2 rounded-full shadow-lg">
                                 <Button
@@ -617,7 +632,7 @@ export default function RoomPage() {
                                 >
                                     <ChevronRightIcon size={20} />
                                 </Button>
-                            </div>
+                            </div>}
                         </div>
                     </div>
 
