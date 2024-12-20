@@ -461,55 +461,33 @@ export default function RoomPage() {
 
     return (
         <div className="flex flex-col h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
-            {/* Main Content Area */}
             <div className="flex flex-col h-full">
-                {/* Top Bar - Only visible on mobile */}
-                <div className="lg:hidden flex items-center justify-between p-3 bg-white/95 border-b">
-                    <h1 className="text-lg font-semibold">Session #{sessionId}</h1>
-                    {isHost && (
-                        <div className="flex gap-2">
-                            <Button 
-                                onClick={handleStartSession}
-                                className="bg-green-500 hover:bg-green-600 text-white text-sm px-3 py-1.5 rounded-lg"
-                            >
-                                {isSessionStarted ? "Started" : "Start"}
-                            </Button>
-                            <Button 
-                                onClick={() => setIsSessionEnded(true)}
-                                className="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1.5 rounded-lg"
-                            >
-                                End
-                            </Button>
-                        </div>
-                    )}
-                </div>
-
-                {/* Main Content Grid */}
-                <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr,380px] h-[calc(100vh-56px)] lg:h-screen relative">
+                {/* Main Content Grid - Modified for responsiveness */}
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr,380px] h-screen relative">
                     {/* Left Side - Slides and Drawing */}
-                    <div className="relative h-[calc(100vh-220px)] sm:h-[calc(100vh-180px)] lg:h-full">
-                        {/* Host Controls - Only visible on desktop */}
+                    <div className="relative h-full">
+                        {/* Host Controls - Adjusted positioning */}
                         {isHost && (
-                            <div className="hidden lg:flex absolute top-4 left-4 z-10 gap-3">
+                            <div className="flex absolute top-4 left-4 z-10 gap-2 flex-wrap">
                                 <Button 
                                     onClick={handleStartSession}
-                                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg"
+                                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm"
                                 >
-                                    <PlayIcon size={16} className="mr-2" />
-                                    {isSessionStarted ? "Session Started" : "Start Session"}
+                                    <PlayIcon size={14} className="mr-1" />
+                                    {isSessionStarted ? "Started" : "Start"}
                                 </Button>
                                 <Button 
                                     onClick={() => setIsSessionEnded(true)}
-                                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
+                                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm"
                                 >
-                                    <ArrowLeftIcon size={16} className="mr-2" />
-                                    End Session
+                                    <ArrowLeftIcon size={14} className="mr-1" />
+                                    End
                                 </Button>
                             </div>
                         )}
 
-                        {/* Slide Canvas Container */}
-                        <div className="relative w-full h-full bg-white rounded-lg shadow-lg overflow-hidden">
+                        {/* Slide Canvas Container - Adjusted for responsiveness */}
+                        <div className="relative w-full h-[calc(100vh-280px)] lg:h-full bg-white rounded-lg shadow-lg overflow-hidden">
                             <canvas 
                                 ref={slideCanvasRef}
                                 className="absolute inset-0 w-full h-full"
@@ -522,207 +500,152 @@ export default function RoomPage() {
                                 onMouseUp={stopDrawing}
                                 onMouseOut={stopDrawing}
                             />
-                            {isHost && (
-                                <Button 
-                                    onClick={() => setIsDrawingControlsOpen(!isDrawingControlsOpen)}
-                                    className={`
-                                        fixed right-0 lg:absolute lg:top-1 lg:right-6 z-10
-                                        flex items-center gap-2
-                                        bg-black/90 hover:bg-white/95
-                                        text-white hover:text-black
-                                        px-4 py-2.5
-                                        rounded-lg
-                                        shadow-lg hover:shadow-xl
-                                        transform transition-all duration-200
-                                        backdrop-blur-sm
-                                        border border-gray-200
-                                    `}
-                                >
-                                    <PaintBucketIcon size={20} />
 
-                                    <span className="text-sm font-medium hidden lg:block">Drawing Tools</span>
-                                </Button>
+                            {/* Drawing Controls - Adjusted positioning */}
+                            {isHost && (
+                                <div className="absolute top-1 right-2 lg:right-6 z-10 flex gap-2 flex-wrap justify-end">
+                                    <Button 
+                                        onClick={() => setIsDrawingControlsOpen(!isDrawingControlsOpen)}
+                                        className="bg-black/90 hover:bg-white/95 text-white hover:text-black px-3 py-2 rounded-lg shadow-lg text-sm"
+                                    >
+                                        <PaintBucketIcon size={18} />
+                                        <span className="hidden sm:inline ml-2">Drawing Tools</span>
+                                    </Button>
+                                    <Button
+                                        onClick={() => {}}
+                                        className="bg-black/90 hover:bg-white/95 text-white hover:text-black px-3 py-2 rounded-lg shadow-lg text-sm"
+                                    >
+                                        <PlusIcon size={18} />
+                                        <span className="hidden sm:inline ml-2">Add Slide</span>
+                                    </Button>
+                                </div>
                             )}
 
+                            {/* Slide Navigation - Adjusted positioning */}
                             {isHost && (
-                                <Button
-                                    onClick={() => {}}
-                                    className={`
-                                        fixed lg:absolute  lg:top-1 lg:right-48 z-10
-                                        flex items-center gap-2
-                                        bg-black/90 hover:bg-white/95
-                                        text-white hover:text-black
-                                        px-4 py-2.5
-                                        rounded-lg
-                                        shadow-lg hover:shadow-xl
-                                        transform transition-all duration-200
-                                        backdrop-blur-sm
-                                        border border-gray-200
-                                    `}
-                                >
-                                    <PlusIcon size={20} />
-                                    <span className="text-sm font-medium hidden lg:block">Add Slide</span>
-                                </Button>
+                                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
+                                    <Button
+                                        onClick={() => previousSlide(false)}
+                                        disabled={currentSlideIndexRef.current === 0}
+                                        className="p-1 rounded-full disabled:opacity-50"
+                                    >
+                                        <ChevronLeftIcon size={18} />
+                                    </Button>
+                                    <span className="text-xs font-medium mx-2">
+                                        {currentSlideIndexRef.current + 1} / {slides.length}
+                                    </span>
+                                    <Button
+                                        onClick={() => nextSlide(false)}
+                                        disabled={currentSlideIndexRef.current === slides.length - 1}
+                                        className="p-1 rounded-full disabled:opacity-50"
+                                    >
+                                        <ChevronRightIcon size={18} />
+                                    </Button>
+                                </div>
                             )}
 
-                            {isDrawingControlsOpen && (
-                                <div className="fixed lg:absolute top-20 right-4 lg:right-6 z-20 
-                                      flex flex-col gap-2 bg-white/95 backdrop-blur-sm p-3 
-                                      rounded-lg shadow-lg border border-gray-200">
-                                    <div className="flex flex-col gap-3">
-                                        <div className="flex gap-2">
-                                            <Button 
-                                                onClick={() => setIsEraser(false)}
-                                                className={`flex-1 p-2 rounded-lg transition-all ${
-                                                    !isEraser ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
-                                                }`}
-                                                title="Pen Tool"
-                                            >
-                                                <Pen size={20} />
-                                            </Button>
-                                            <Button 
-                                                onClick={() => setIsEraser(true)}
-                                                className={`flex-1 p-2 rounded-lg transition-all ${
-                                                    isEraser ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
-                                                }`}
-                                                title="Eraser Tool"
-                                            >
-                                                <ClearIcon size={20} />
-                                            </Button>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <div className="flex items-center justify-between text-sm text-gray-600">
-                                                <span>Size</span>
-                                                <span>{strokeSize}px</span>
-                                            </div>
-                                            <input
-                                                type="range"
-                                                min="1"
-                                                max="20"
-                                                value={strokeSize}
-                                                onChange={(e) => setStrokeSize(Number(e.target.value))}
-                                                className="w-full accent-blue-500"
-                                                title="Stroke Size"
-                                            />
-                                        </div>
-
+                            {/* Drawing Controls - Add this right after the Drawing Tools button */}
+                            {isHost && isDrawingControlsOpen && (
+                                <div className="absolute top-14 right-2 lg:right-6 z-20 bg-white/95 backdrop-blur-sm p-4 rounded-lg shadow-lg">
+                                    <div className="flex flex-col gap-4">
+                                        {/* Color Picker */}
                                         <div className="relative">
                                             <Button 
                                                 onClick={() => setShowColorPicker(!showColorPicker)}
-                                                className="w-full flex items-center justify-between p-2 
-                                                         hover:bg-gray-100 rounded-lg transition-all"
-                                                title="Color Picker"
+                                                className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border"
+                                                style={{ backgroundColor: strokeColor }}
                                             >
-                                                <span className="text-sm text-gray-600">Color</span>
-                                                <div className="flex items-center gap-2">
-                                                    <div 
-                                                        className="w-6 h-6 rounded-full border border-gray-200"
-                                                        style={{ backgroundColor: strokeColor }}
-                                                    />
-                                                    <PaintBucketIcon size={16} className="text-gray-600" />
-                                                </div>
+                                                <span className="text-white text-sm">Color</span>
                                             </Button>
                                             {showColorPicker && (
-                                                <div className="absolute right-0 mt-2">
-                                                    <HexColorPicker
-                                                        color={strokeColor}
-                                                        onChange={setStrokeColor}
-                                                        className="shadow-xl rounded-lg border border-gray-200"
-                                                    />
+                                                <div className="absolute mt-2 z-30">
+                                                    <HexColorPicker color={strokeColor} onChange={setStrokeColor} />
                                                 </div>
                                             )}
                                         </div>
 
+                                        {/* Tool Buttons */}
+                                        <div className="flex gap-2">
+                                            <Button 
+                                                onClick={() => setIsEraser(false)}
+                                                className={`flex-1 px-3 py-2 rounded-lg ${!isEraser ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                                            >
+                                                <Pen size={18} />
+                                            </Button>
+                                            <Button 
+                                                onClick={() => setIsEraser(true)}
+                                                className={`flex-1 px-3 py-2 rounded-lg ${isEraser ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                                            >
+                                                <ClearIcon size={18} />
+                                            </Button>
+                                        </div>
+
+                                        {/* Stroke Size */}
+                                        <div className="flex items-center gap-2">
+                                            <Minus size={14} />
+                                            <input 
+                                                type="range" 
+                                                min="1" 
+                                                max="10" 
+                                                value={strokeSize}
+                                                onChange={(e) => setStrokeSize(parseInt(e.target.value))}
+                                                className="flex-1"
+                                            />
+                                            <Minus size={20} />
+                                        </div>
+
+                                        {/* Clear Canvas Button */}
                                         <Button 
                                             onClick={clearCanvas}
-                                            className="w-full flex items-center justify-center gap-2 
-                                                             bg-red-50 hover:bg-red-100 text-red-600 
-                                                             p-2 rounded-lg transition-all"
-                                            title="Clear Canvas"
+                                            className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg"
                                         >
-                                            <XIcon size={16} />
-                                            <span className="text-sm">Clear Canvas</span>
+                                            Clear Canvas
                                         </Button>
                                     </div>
                                 </div>
                             )}
-                            
-
-                            
-                           {isHost &&  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 
-                                          flex items-center gap-2 bg-white/90 backdrop-blur-sm 
-                                          px-4 py-2 rounded-full shadow-lg">
-                                <Button
-                                    onClick={() => previousSlide(false)}
-                                    disabled={currentSlideIndexRef.current === 0}
-                                    className="p-1.5 rounded-full disabled:opacity-50"
-                                >
-                                    <ChevronLeftIcon size={20} className="text-black" />
-                                </Button>
-                                <span className="text-sm font-medium mx-2 text-black">
-                                    {currentSlideIndexRef.current + 1} / {slides.length}
-                                </span>
-                                <Button
-                                    onClick={() => nextSlide(false)}
-                                    disabled={currentSlideIndexRef.current === slides.length - 1}
-                                    className="p-1.5 rounded-full disabled:opacity-50"
-                                >
-                                    <ChevronRightIcon size={20} className="text-black" />
-                                </Button>
-                            </div>}
                         </div>
                     </div>
 
-                    {/* Right Side - Modified for mobile */}
-                    <div className={`
-                        lg:static lg:flex lg:flex-col lg:h-screen lg:overflow-hidden lg:bg-white/95 lg:border-l lg:border-gray-200
-                        fixed inset-0 bg-white/95 z-50 transition-transform duration-300 ease-in-out
-                        ${isChatOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
-                    `}>
-                        {/* Close button for mobile */}
-                        <button 
-                            onClick={() => setIsChatOpen(false)}
-                            className="lg:hidden absolute top-4 right-4 p-2 rounded-full bg-gray-100 hover:bg-gray-200"
-                        >
-                            <CloseIcon size={24} />
-                        </button>
-
-                        {/* Existing Video and Chat components */}
-                        <div className="h-[300px] sm:h-[440px] md:h-[380px] lg:h-1/4 p-2">
+                    {/* Right Side - Video and Chat */}
+                    <div className="fixed lg:relative bottom-0 left-0 right-0 lg:bottom-auto lg:left-auto lg:right-auto h-[280px] lg:h-screen bg-white/95 border-t lg:border-l border-gray-200">
+                        {/* Video Component */}
+                        <div className="h-[280px] lg:h-1/4 p-2">
                             <div className="w-full h-full rounded-lg overflow-hidden bg-gray-900">
                                 <VideoComponent token={token} isHost={isHost} />
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-hidden p-2 h-[calc(100vh-340px)] sm:h-[calc(100vh-380px)] md:h-[calc(100vh-420px)] lg:h-1/4">
-                            <ChatComponent 
-                                currentUser={user || {id: "", username: "", profilePicture: ""}}
-                                onSendMessage={() => {}}
-                                //@ts-ignore 
-                                messages={chatMessages}
-                                setChatMessages={setChatMessages}
-                                className="h-full"
-                                webSocket={roomWebSocketRef.current || undefined}
-                                sessionId={sessionId as string}
-                            />
+                        {/* Chat Component with Drawer for Mobile */}
+                        <div className="fixed lg:relative bottom-0 left-0 right-0 lg:bottom-auto lg:left-auto lg:right-auto">
+                            {/* Chat Toggle Button - Only visible on mobile */}
+                            <Button
+                                onClick={() => setIsChatOpen(!isChatOpen)}
+                                className="lg:hidden fixed bottom-3/4 right-1 z-50 rounded-full w-12 h-12 flex items-center justify-center bg-blue-500 text-white shadow-lg"
+                            >
+                                {isChatOpen ? <CloseIcon size={24} /> : <MessageCircle size={24} />}
+                            </Button>
+
+                            {/* Chat Drawer */}
+                            <div className={`
+                                fixed lg:relative bottom-0 left-0 right-0 
+                                h-[60vh] lg:max-h-[calc(100vh-280px)]
+                                bg-white shadow-lg lg:shadow-none
+                                transform transition-transform duration-300 ease-in-out
+                                ${isChatOpen ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'}
+                            `}>
+                                <ChatComponent 
+                                    currentUser={user || {id: "", username: "", profilePicture: ""}}
+                                    onSendMessage={() => {}}
+                                    //@ts-ignore
+                                    messages={chatMessages}
+                                    setChatMessages={setChatMessages}
+                                    webSocket={roomWebSocketRef.current || undefined}
+                                    sessionId={sessionId as string}
+                                />
+                            </div>
                         </div>
                     </div>
-
-                    {/* Fixed Video Component for Mobile */}
-                    <div className="lg:hidden fixed bottom-0 left-0 right-0 h-[220px] sm:h-[260px] bg-white/95 border-t border-gray-200 p-2">
-                        <div className="w-full h-full rounded-lg overflow-hidden bg-gray-900">
-                            <VideoComponent token={token} isHost={isHost} />
-                        </div>
-                    </div>
-
-                    {/* Chat Toggle Button for Mobile */}
-                    <button 
-                        onClick={() => setIsChatOpen(!isChatOpen)}
-                        className="lg:hidden fixed right-4 bottom-56 sm:bottom-72 z-50 bg-blue-500 text-white p-3 rounded-full shadow-lg"
-                    >
-                        <MessageCircle size={24} />
-                    </button>
                 </div>
             </div>
 
