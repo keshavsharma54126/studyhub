@@ -11,20 +11,19 @@ import {
   import '@livekit/components-styles';
   
   import { Track, TrackPublication } from 'livekit-client';
-import { useRef, useEffect } from 'react';
-
+import { useEffect } from 'react';
   
   const serverUrl = 'wss://myacademy-lznxzk2x.livekit.cloud';
   
   
   export  function VideoComponent({token, isHost}: {token: string, isHost: boolean}) {
 
-
+    
 
     return (
       <LiveKitRoom
-        video={true}
-        audio={true}
+        video={isHost}
+        audio={isHost}
         token={token}
         serverUrl={serverUrl}
         data-lk-theme="default"
@@ -49,22 +48,8 @@ import { useRef, useEffect } from 'react';
   }
   
   function MyVideoConference({isHost}: {isHost: boolean}) {
-    const tracsRef = useRef<any[]>([]);
-
-    useEffect(()=>{
-       return ()=>{
-        if(tracsRef.current && tracsRef.current.length > 0){
-          tracsRef.current.forEach((track)=>{
-            if(track && track.track){
-              track.stop();
-            }
-          })
-          tracsRef.current = [];
-        }
-       }
-
-    },[])
-      tracsRef.current = useTracks(
+    
+      const tracks = useTracks(
       [
         { 
           source: Track.Source.Camera, 
@@ -83,11 +68,11 @@ import { useRef, useEffect } from 'react';
           }
         },
       ],
-      { onlySubscribed: true },
+      { onlySubscribed: true},
     );
     return (
       <GridLayout 
-        tracks={tracsRef.current} 
+        tracks={tracks} 
         style={{ 
           height: 'calc(100% - 48px)',
           width: '100%',

@@ -26,7 +26,6 @@ export default function RootLayout({
 }>) {
   return (
 <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
-      <Providers>
         <body className="antialiased min-h-screen flex flex-col">
           <ThemeProvider
             attribute="class"
@@ -40,7 +39,6 @@ export default function RootLayout({
             <footer className="bg-gray-100 mt-auto"></footer>
           </ThemeProvider>
         </body>
-      </Providers>
     </html>
   );
 }

@@ -202,7 +202,7 @@ export default function RoomPage() {
             return;
         }
         checkAdmin();
-
+        if(user){
         axios.post(`http://localhost:3001/api/v1/sessions/token`,
             {
                 roomName:sessionId,
@@ -219,7 +219,8 @@ export default function RoomPage() {
                 setIsHost(res.data.isHost);
             })
             .catch(err => console.error(err));
-            getSlides();
+        }
+        getSlides();
            
     }, [router,user]);
 
@@ -227,8 +228,7 @@ export default function RoomPage() {
         const wsFunc = async () => {
             const token = localStorage.getItem("auth_token");
             roomWebSocketRef.current = new RoomWebSocket(`ws://localhost:8081/?token=${token}`);
-            
-            // Get the admin status directly
+
             const isUserAdmin = await checkAdmin();
             
             roomWebSocketRef.current.setHandlers({
