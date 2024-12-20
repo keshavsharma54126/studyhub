@@ -658,9 +658,9 @@ export default function RoomPage() {
                                     disabled={currentSlideIndexRef.current === 0}
                                     className="p-1.5 rounded-full disabled:opacity-50"
                                 >
-                                    <ChevronLeftIcon size={20} />
+                                    <ChevronLeftIcon size={20} className="text-black" />
                                 </Button>
-                                <span className="text-sm font-medium mx-2">
+                                <span className="text-sm font-medium mx-2 text-black">
                                     {currentSlideIndexRef.current + 1} / {slides.length}
                                 </span>
                                 <Button
@@ -668,7 +668,7 @@ export default function RoomPage() {
                                     disabled={currentSlideIndexRef.current === slides.length - 1}
                                     className="p-1.5 rounded-full disabled:opacity-50"
                                 >
-                                    <ChevronRightIcon size={20} />
+                                    <ChevronRightIcon size={20} className="text-black" />
                                 </Button>
                             </div>}
                         </div>
