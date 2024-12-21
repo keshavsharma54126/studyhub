@@ -24,8 +24,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
 
-  
-  // Use the hook directly
   const { user, isLoading, error, fetchUser } = useGetUser();
 
   useEffect(() => {
@@ -35,14 +33,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (!token) {
       router.push("/signin");
     }
-    // Call fetchUser instead of getUser
+
     fetchUser();
   }, []);
 
 
   if (!mounted) return null;
 
-  if(isLoading) return <div>Loading...</div>;
+  if(isLoading) return (
+    <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
+      <div className="m-auto">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-700 dark:text-gray-300 text-lg font-medium">
+            Loading your dashboard...
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
   if(error) return <div>Error: {error.message}</div>;
 
   return (

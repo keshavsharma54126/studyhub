@@ -153,6 +153,38 @@ sessionRouter.get("/sessions/:userId",userMiddleware,async(req:any,res:any)=>{
   }
 })
 
+sessionRouter.get("/ended/:userId",userMiddleware,async(req:any,res:any)=>{
+  try{
+    const userId = req.params.userId;
+    const sessions = await client.session.findMany({
+      where:{
+        userId,
+        status:SessionStatus.INACTIVE
+      },
+      select:{
+        id:true,
+        title:true,
+        description:true,
+        slides:{
+          select:{
+            id:true,
+            url:true
+          }
+        },
+        startTime:true,
+        endTime:true
+      }
+    })
+    res.status(200).json({
+      sessions
+    })
+  }catch(error){
+    res.status(500).json({
+      message:"internal server error"
+    })
+  }
+})
+
 sessionRouter.delete("/session/:sessionId",userMiddleware,async(req:any,res:any)=>{
   try{
     const sessionId = req.params.sessionId;
