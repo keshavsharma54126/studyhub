@@ -1,6 +1,7 @@
 import { WebSocket } from "ws";
 import client from "@repo/db/client";
 import { RoomManager } from "./roomManager";
+import { Producer } from "kafkajs";
 
 export class User{
     public userId?:string;
@@ -9,14 +10,35 @@ export class User{
     public x:number;
     public y:number;
     public isHost?:boolean;
+    private producer:Producer;
 
-    constructor(ws:WebSocket,userId:string,username:string){
+    constructor(ws:WebSocket,userId:string,username:string,producer:Producer){
         this.ws = ws;
         this.x = 0;
         this.y = 0;
         this.userId = userId;
         this.username = username;
+        this.producer = producer
         this.initHandler();
+    }
+
+    private async produceEvents(event:any){
+        try{
+            await this.producer.send({
+                topic:"session-recorder",
+                messages:[{
+                    key:event.sessionId,
+                    value:JSON.stringify({
+                        ...event,
+                        userId:this.userId,
+                        username:this.username,
+                        timestamp:new Date().toISOString()
+                    })
+                }]
+            })
+        }catch(error){
+            console.error("Error producing event",error);
+        }
     }
 
     initHandler(){
@@ -51,6 +73,13 @@ export class User{
                             userId:this.userId
                         }
                     });
+                    await this.produceEvents({
+                        type:"ADMIN_SUBSCRIBED",
+                        sessionId:adminsessionId,
+                        payload:{
+                            message:"Admin subscribed to session",
+                        }
+                    })
                     break;
 
                 case "SUBSCRIBE_USER":
@@ -76,6 +105,13 @@ export class User{
                             userId:this.userId
                         }
                     });
+                    await this.produceEvents({
+                        type:"USER_SUBSCRIBED",
+                        sessionId:userSessionId,
+                        payload:{
+                            message:"User subscribed to session",
+                        }
+                    })
                     break;
 
                 case "STROKE":
@@ -88,6 +124,11 @@ export class User{
                             payload:message.payload
                         });
                     }
+                    await this.produceEvents({
+                        type:"STROKE_RECEIVED",
+                        sessionId:strokeSessionId,
+                        payload:message.payload
+                    })
                     break;
 
                 case "CLEAR":
@@ -103,6 +144,13 @@ export class User{
                         }
                     });
                     }
+                    await this.produceEvents({
+                        type:"CLEAR_RECEIVED",
+                        sessionId:clearSessionId,
+                        payload:{
+                            message:"Admin cleared the canvas",
+                        }
+                    })
                     break;
 
                 case "SLIDE_CHANGE":
@@ -114,6 +162,11 @@ export class User{
                             type:"SLIDE_CHANGE_RECEIVED",
                             payload:message.payload
                     });
+                    await this.produceEvents({
+                        type:"SLIDE_CHANGE_RECEIVED",
+                        sessionId:slideChangeSessionId,
+                        payload:message.payload
+                    })
                     break;
 
                 case "CHAT_MESSAGE":
@@ -124,6 +177,11 @@ export class User{
                         type:"CHAT_MESSAGE_RECEIVED",
                         payload:message.payload
                     });
+                    await this.produceEvents({
+                        type:"CHAT_MESSAGE_RECEIVED",
+                        sessionId:chatSessionId,
+                        payload:message.payload
+                    })
                     break;
 
             }

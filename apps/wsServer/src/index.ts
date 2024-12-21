@@ -77,7 +77,7 @@ ws.on("connection", (ws: WebSocket,request) => {
 
   const {userId,username} = decoded as any;
   
-  let user = new User(ws,userId,username)
+  let user = new User(ws,userId,username,producer)
   if(user){
     console.log("user websocket created")
   }
