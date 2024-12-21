@@ -465,4 +465,30 @@ sessionRouter.post("/token",userMiddleware,async(req:any,res:any)=>{
   }
 })  
 
+sessionRouter.get("/session/:sessionId/recording",userMiddleware,async(req:any,res:any)=>{
+   try{
+    const sessionId = req.params.sessionId;
+    const sessionRecording = await client.sessionRecording.findMany({
+      where:{
+        sessionId
+      },
+      orderBy:{
+        timestamp:"asc"
+      }
+    })
+    if(!sessionRecording){
+      return res.status(400).json({
+        message:"session recording not found"
+      })
+    }
+    res.status(200).json({
+      sessionRecording
+    })
+   }catch(error){
+    res.status(500).json({
+      message:"internal server error"
+    })
+   }
+})
+
 export default sessionRouter;
