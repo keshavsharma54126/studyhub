@@ -4,7 +4,9 @@ import { userMiddleware } from "../middlewares/userMiddleware";
 import client from "@repo/db/client";
 import amqp from "amqplib";
 //@ts-ignore
-import { AccessToken } from 'livekit-server-sdk';
+import { AccessToken, EgressClient } from 'livekit-server-sdk';
+
+const egressClient = new EgressClient(process.env.LIVEKIT_URL!,process.env.LIVEKIT_API_KEY!,process.env.LIVEKIT_API_SECRET!)
 
 export const SessionStatus = {
   PENDING: 'PENDING',
@@ -521,6 +523,49 @@ sessionRouter.get("/session/:sessionId/recording",userMiddleware,async(req:any,r
       message:"internal server error"
     })
    }
+})
+
+sessionRouter.post("/session/:sessionId/start-recording",userMiddleware,async(req:any,res:any)=>{
+  try{
+    const sessionId = req.params.sessionId;
+    const egressId = req.body.egressId;
+    const output = await egressClient.startRoomCompositeEgress(sessionId,{
+      file:{
+        filepath:"/Users/abhishek/Downloads/output.mp4",
+        fileType:"mp4",
+        disableManifest:true,
+        output:egressId
+      },
+      options:{
+        width:1280,
+        height:720,
+        fps:30,
+        layout:"grid",
+      }
+    })
+    res.status(200).json({
+      message:"recording started successfully",
+      egressId:output.egressId
+    })
+  }catch(error){
+    res.status(500).json({
+      message:"internal server error"
+    })
+  }
+})
+
+sessionRouter.post("/session/:sessionId/stop-recording",userMiddleware,async(req:any,res:any)=>{
+  try{
+    const egressId = req.body.egressId;
+    await egressClient.stopEgress(egressId);
+    res.status(200).json({
+      message:"recording stopped successfully"
+    })
+  }catch(error){
+    res.status(500).json({
+      message:"internal server error"
+    })
+  }
 })
 
 export default sessionRouter;

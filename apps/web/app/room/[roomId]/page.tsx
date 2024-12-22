@@ -612,7 +612,7 @@ export default function RoomPage() {
                         {/* Video Component */}
                         <div className="h-[280px] lg:h-1/4 p-2">
                             <div className="w-full h-full rounded-lg overflow-hidden bg-gray-900">
-                                <VideoComponent token={token} isHost={isHost} />
+                                <VideoComponent token={token} isHost={isHost} sessionId={sessionId as string} />
                             </div>
                         </div>
 

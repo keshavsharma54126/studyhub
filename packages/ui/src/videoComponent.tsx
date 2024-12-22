@@ -10,15 +10,44 @@ import {
   
   import '@livekit/components-styles';
   
-  import { Track, TrackPublication } from 'livekit-client';
-import { useEffect } from 'react';
+import { Track, TrackPublication } from 'livekit-client';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+const serverUrl = process.env.LIVEKIT_URL;
   
-  const serverUrl = 'wss://myacademy-lznxzk2x.livekit.cloud';
   
-  
-  export  function VideoComponent({token, isHost}: {token: string, isHost: boolean}) {
+  export  function VideoComponent({token, isHost, sessionId}: {token: string, isHost: boolean, sessionId: string}) {
+    const [isRecording,setIsRecording] = useState(false);
+    const [egressId,setEgressId] = useState<string | null>(null);
 
-    
+    const startRecording = async()=>{
+      try{
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}/start-recording`,{},{
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        });
+        setEgressId(response.data.egressId);
+        setIsRecording(true);
+      }catch(error){
+        console.error('Failed to start recording:', error);
+      }
+    }
+
+    const stopRecording = async()=>{
+      if(!egressId) return;
+      try{
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}/stop-recording`,{egressId},{
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        });
+        setIsRecording(false);
+        setEgressId(null);
+      }catch(error){
+        console.error('Failed to stop recording:', error);
+      }
+    }
 
     return (
       <LiveKitRoom
@@ -42,6 +71,20 @@ import { useEffect } from 'react';
             }}
             variation="minimal"
           />
+          {isHost && (
+            <div className="flex justify-center pb-2">
+              <button
+                onClick={isRecording ? stopRecording : startRecording}
+                className={`px-4 py-2 rounded-full ${
+                  isRecording 
+                    ? 'bg-red-500 hover:bg-red-600' 
+                    : 'bg-blue-500 hover:bg-blue-600'
+                } text-white transition-colors`}
+              >
+                {isRecording ? 'Stop Recording' : 'Start Recording'}
+              </button>
+            </div>
+          )}
         </div>
       </LiveKitRoom>
     );

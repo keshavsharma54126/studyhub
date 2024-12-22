@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { FiCalendar, FiClock, FiUsers, FiFilter } from 'react-icons/fi';
 import { useGetUser } from '../../hooks';
-
+import { useRouter } from 'next/navigation';
 // You might want to replace this with your actual session type
 type Session = {
   id: string;
@@ -17,6 +17,7 @@ type Session = {
 };
 
 export default function SessionsPage() {
+  const router = useRouter();
   const token = localStorage.getItem("auth_token");
   const {user,isLoading,error} = useGetUser();
   const [filterOpen, setFilterOpen] = useState(false);
@@ -185,7 +186,7 @@ export default function SessionsPage() {
               <div className="flex items-center">
                 <button
                   className="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
-                  onClick={() => {/* Handle view details */}}
+                  onClick={() => {router.push(`/recording/${session.id}`)}}
                 >
                   Watch Recording
                 </button>
