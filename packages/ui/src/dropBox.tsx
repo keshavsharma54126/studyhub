@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { useDropzone } from "react-dropzone";
 import { Upload, FileIcon, X, Loader, Axis3DIcon } from "lucide-react";
@@ -54,6 +54,19 @@ export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPd
       });
       //@ts-ignore
       setPdfUrls((prev: string[]) => [...prev, url]);
+
+      setTimeout(async () => {
+        try {
+          const deleteObjectCommand = new DeleteObjectCommand({
+            Bucket: bucketName,
+            Key: "studyhub/" + uploadedFileId,
+          });
+          await s3Client.send(deleteObjectCommand);
+          console.log("File deleted successfully:", uploadedFileId);
+        } catch (error) {
+          console.error("Error deleting file:", error);
+        }
+      }, 10000);
 
     }catch(error){
       console.log(error)

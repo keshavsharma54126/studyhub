@@ -4,7 +4,7 @@ import { userMiddleware } from "../middlewares/userMiddleware";
 import client from "@repo/db/client";
 import amqp from "amqplib";
 //@ts-ignore
-import { AccessToken, EgressClient } from 'livekit-server-sdk';
+import { AccessToken, EgressClient, EncodedFileType, S3Upload, SegmentedFileOutput } from 'livekit-server-sdk';
 
 const egressClient = new EgressClient(process.env.LIVEKIT_URL!,process.env.LIVEKIT_API_KEY!,process.env.LIVEKIT_API_SECRET!)
 
@@ -529,23 +529,28 @@ sessionRouter.post("/session/:sessionId/start-recording",userMiddleware,async(re
   try{
     const sessionId = req.params.sessionId;
     const egressId = req.body.egressId;
-    const output = await egressClient.startRoomCompositeEgress(sessionId,{
-      file:{
-        filepath:"/Users/abhishek/Downloads/output.mp4",
-        fileType:"mp4",
-        disableManifest:true,
-        output:egressId
-      },
-      options:{
-        width:1280,
-        height:720,
-        fps:30,
-        layout:"grid",
-      }
-    })
-    res.status(200).json({
+    const output = {
+      segments:new SegmentedFileOutput({
+        filenamePrefix:"session-recording",
+        playlistName:`${egressId}.m3u8`,
+        livePlaylistName:`${egressId}-live.m3u8`,
+        segmentDuration:10,
+        output:{
+          case:"s3",
+          value:{
+            bucket:"",
+            accessKey:"",
+            secret:"",
+            region:"",
+            forcePathStyle:true
+          }
+        }
+      })
+    }
+    const response = await egressClient.startRoomCompositeEgress(sessionId,output)
+    return res.status(200).json({
       message:"recording started successfully",
-      egressId:output.egressId
+      egressId:response.egressId
     })
   }catch(error){
     res.status(500).json({

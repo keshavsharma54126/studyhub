@@ -10,44 +10,24 @@ import {
   
   import '@livekit/components-styles';
   
-import { Track, TrackPublication } from 'livekit-client';
+  import { Track, TrackPublication } from 'livekit-client';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
-const serverUrl = process.env.LIVEKIT_URL;
+  
+  const serverUrl = 'wss://myacademy-lznxzk2x.livekit.cloud';
   
   
-  export  function VideoComponent({token, isHost, sessionId}: {token: string, isHost: boolean, sessionId: string}) {
+  export  function VideoComponent({token, isHost,}: {token: string, isHost: boolean}) {
     const [isRecording,setIsRecording] = useState(false);
-    const [egressId,setEgressId] = useState<string | null>(null);
 
-    const startRecording = async()=>{
-      try{
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}/start-recording`,{},{
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`
-          }
-        });
-        setEgressId(response.data.egressId);
-        setIsRecording(true);
-      }catch(error){
-        console.error('Failed to start recording:', error);
-      }
-    }
-
-    const stopRecording = async()=>{
-      if(!egressId) return;
-      try{
-        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}/stop-recording`,{egressId},{
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`
-          }
-        });
+    const handleRecording = async()=>{
+      if(isRecording){
         setIsRecording(false);
-        setEgressId(null);
-      }catch(error){
-        console.error('Failed to stop recording:', error);
+      }else{
+        setIsRecording(true);
       }
     }
+
+    
 
     return (
       <LiveKitRoom
@@ -66,25 +46,33 @@ const serverUrl = process.env.LIVEKIT_URL;
             controls={{
               microphone: isHost,
               camera: isHost,
-              screenShare: isHost,
+              screenShare:isHost,
               leave: isHost
             }}
             variation="minimal"
           />
           {isHost && (
-            <div className="flex justify-center pb-2">
-              <button
-                onClick={isRecording ? stopRecording : startRecording}
-                className={`px-4 py-2 rounded-full ${
-                  isRecording 
-                    ? 'bg-red-500 hover:bg-red-600' 
-                    : 'bg-blue-500 hover:bg-blue-600'
-                } text-white transition-colors`}
-              >
-                {isRecording ? 'Stop Recording' : 'Start Recording'}
+            <div className='absolute top-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent'> 
+              <button onClick={handleRecording} className={`${isRecording ? 'bg-red-500' : 'bg-green-500'} px-4 py-2 rounded-full flex items-center gap-2`}>
+                {isRecording ? (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 " viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="6" y="6" width="12" height="12" />
+                    </svg>
+                  </>
+                ) : (
+                  <>
+                    
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                      <span className='text-white'>Start Recording</span>
+                      <circle cx="12" cy="12" r="6" className="animate-pulse" />
+                    </svg>
+                  </>
+                )}
               </button>
             </div>
           )}
+
         </div>
       </LiveKitRoom>
     );

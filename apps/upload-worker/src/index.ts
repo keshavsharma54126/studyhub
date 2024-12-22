@@ -142,14 +142,14 @@ async function startConsumer() {
     
                         const putObjectCommand = new PutObjectCommand({
                             Bucket:bucketName,
-                            Key:`${sessionId}/${file}`,
+                            Key:`studyhub/slides/${sessionId}/${file}`,
                             Body:fileStream,
                             ContentType:"image/png"
                         })
                         await s3.send(putObjectCommand)
     
                         // Generate presigned URL
-                        const presignedUrl = await generatePresignedUrl(bucketName, `${sessionId}/${file}`);
+                        const presignedUrl = await generatePresignedUrl(bucketName, `studyhub/slides/${sessionId}/${file}`);
                         console.log(`Presigned URL for ${file}: ${presignedUrl}`);
                         await client.slide.create({
                             data:{
