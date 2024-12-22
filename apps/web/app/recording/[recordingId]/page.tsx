@@ -1,11 +1,15 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { VideoComponent } from '@repo/ui/videoComponent';
 import { ChatComponent } from '@repo/ui/chatComponent';
 import { Button } from '@repo/ui/button';
 import { PlayIcon, PauseIcon, RotateCcwIcon, MessageCircle, X as CloseIcon } from 'lucide-react';
-
+import { useGetUser } from "../../hooks";
+import { eachWeekOfInterval } from 'date-fns';
+import VideoJS from "video.js"
+import "video.js/dist/video-js.css"
+import Player from 'video.js/dist/types/player';
+import { VideoPlayer } from '@repo/ui/videoPlayer';
 interface SessionEvent {
     id: string;
     sessionId: string;
@@ -23,50 +27,90 @@ interface ChatMessage {
     timestamp: Date;
 }
 
-export default function SessionReplayPage({ params }: { params: { sessionId: string } }) {
+export default function SessionReplayPage({ params }: { params: { recordingId: string } }) {
+    const {user,isLoading,error} = useGetUser();
     const [events, setEvents] = useState<SessionEvent[]>([]);
-    const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
     const [isPlaying, setIsPlaying] = useState(false);
     const [playbackSpeed, setPlaybackSpeed] = useState(1);
     const [currentEventIndex, setCurrentEventIndex] = useState(0);
     const [isChatOpen, setIsChatOpen] = useState(false);
+    const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
     const slideCanvasRef = useRef<HTMLCanvasElement>(null);
     const drawingCanvasRef = useRef<HTMLCanvasElement>(null);
     const animationFrameId = useRef<number>();
     const startTimeRef = useRef<number>(0);
+    const sessionId = params.recordingId;
+    const [videoUrl,setVideoUrl] = useState<string>(`https://syncstream.s3.ap-south-1.amazonaws.com/studyhub/recordings/${sessionId}.m3u8`);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const playerRef = useRef<Player | null>(null);
 
+
+    const videoJsOptions = {
+        autoplay:true,
+        controls:true,
+        responsive:true,
+        fluid:true,
+        sources:[{
+            src:videoUrl,
+            type:"application/x-mpegURL"
+        }]
+    }
+    
     useEffect(() => {
+
         fetchSessionRecording();
+        fetchVideo();
         initCanvas();
-    }, [params.sessionId]);
+
+        if(!playerRef.current){
+            const videoElement = videoRef.current;
+            if(!videoElement){
+                return;
+            }
+            playerRef.current = VideoJS(videoElement,videoJsOptions);
+            playerRef.current.on("error",(error:any)=>{
+                console.error("VideoJS error",error);
+            })
+        }
+        return () => {
+            if(playerRef.current){
+                playerRef.current.dispose();
+                playerRef.current = null;
+            }
+        }
+    }, [params.recordingId]);
+     
 
     const fetchSessionRecording = async () => {
         try {
-            const [recordingResponse, chatResponse] = await Promise.all([
-                axios.get(
-                    `${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${params.sessionId}/recording`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${localStorage.getItem('auth_token')}`
-                        }
+            const token = localStorage.getItem("auth_token");
+            if(params.recordingId){
+            const recordingResponse = await axios.get(
+                `${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${params.recordingId}/recording`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
                     }
-                ),
-                axios.get(
-                    `${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${params.sessionId}/chat`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${localStorage.getItem('auth_token')}`
-                        }
-                    }
-                )
-            ]);
-            
+                }
+            )
             setEvents(recordingResponse.data.sessionRecording);
-            setChatMessages(chatResponse.data.chatMessages);
+            }
         } catch (error) {
             console.error('Failed to fetch session recording:', error);
         }
     };
+
+    const fetchVideo  = async()=>{
+        const token = localStorage.getItem("auth_token");
+        if(params.recordingId){
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${params.recordingId}/get-recording`,{
+                headers:{
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            setVideoUrl(response.data.url)
+        }
+    }
 
     const initCanvas = () => {
         const slideCanvas = slideCanvasRef.current;
@@ -139,11 +183,11 @@ export default function SessionReplayPage({ params }: { params: { sessionId: str
 
             while (
                 currentEventIndex < events.length &&
-                new Date(events[currentEventIndex].timestamp).getTime() <= elapsedTime
+                new Date(events[currentEventIndex]?.timestamp?.getTime() || 0).getTime() <= elapsedTime
             ) {
                 const event = events[currentEventIndex];
                 
-                switch (event.eventType) {
+                switch (event?.eventType) {
                     case 'STROKE':
                         handleStrokeEvent(event.eventData);
                         break;
@@ -155,6 +199,9 @@ export default function SessionReplayPage({ params }: { params: { sessionId: str
                         break;
                     case 'SLIDE_CHANGE':
                         displaySlide(event.eventData.url);
+                        break;
+                    case 'CHAT_MESSAGE':
+                        setChatMessages(prev => [...prev, event.eventData]);
                         break;
                 }
 
@@ -196,9 +243,7 @@ export default function SessionReplayPage({ params }: { params: { sessionId: str
 
     return (
         <div className="h-screen flex">
-            {/* Main Content */}
             <div className="flex-1 flex flex-col">
-                {/* Control Bar */}
                 <div className="flex justify-between items-center p-4 border-b">
                     <h1 className="text-2xl font-bold">Session Replay</h1>
                     <div className="flex gap-4 items-center">
@@ -215,16 +260,16 @@ export default function SessionReplayPage({ params }: { params: { sessionId: str
                         <Button
                             onClick={isPlaying ? pauseRecording : playRecording}
                             variant="outline"
-                            className="w-10 h-10 flex items-center justify-center"
+                            className="w-12 h-12 flex items-center justify-center"
                         >
-                            {isPlaying ? <PauseIcon className="w-5 h-5" /> : <PlayIcon className="w-5 h-5" />}
+                            {isPlaying ? <PauseIcon className="w-10 h-10" /> : <PlayIcon className="w-10 h-10" />}
                         </Button>
                         <Button 
                             onClick={resetRecording} 
                             variant="outline"
-                            className="w-10 h-10 flex items-center justify-center"
+                            className="w-12 h-12 flex items-center justify-center"
                         >
-                            <RotateCcwIcon className="w-5 h-5" />
+                            <RotateCcwIcon className="w-10 h-10" />
                         </Button>
                     </div>
                 </div>
@@ -245,15 +290,9 @@ export default function SessionReplayPage({ params }: { params: { sessionId: str
             {/* Right Sidebar */}
             <div className="w-80 border-l flex flex-col">
                 {/* Video Component */}
-                <div className="h-1/3 border-b">
-                    <video src={`${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${params.sessionId}/recording`}
-                    className='w-full h-full object-cover'
-                    controls={true}
-                    autoPlay={true}
-                    />
+                <div data-vjs-player>
+                    <video ref={videoRef} className="video-js vjs-theme-sea" />
                 </div>
-
-                {/* Chat Component */}
                 <div className="flex-1 relative">
                     <Button
                         onClick={() => setIsChatOpen(!isChatOpen)}
@@ -267,15 +306,22 @@ export default function SessionReplayPage({ params }: { params: { sessionId: str
                         transform transition-transform duration-300 ease-in-out
                         ${isChatOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
                     `}>
-                        <ChatComponent 
-                            isReplay={true}
-                            messages={chatMessages}
-                            currentTime={events[currentEventIndex]?.timestamp}
-                            playbackSpeed={playbackSpeed}
-                        />
+                                <ChatComponent 
+                                    currentUser={user || {id: "", username: "", profilePicture: ""}}
+                                    onSendMessage={() => {}}
+                                    //@ts-ignore
+                                    messages={chatMessages}
+                                    setChatMessages={setChatMessages}
+                                    sessionId={params.recordingId as string}
+                                />
+                     
                     </div>
                 </div>
             </div>
         </div>
     );
+}
+
+function useUser(): { user: any; isLoading: any; error: any; } {
+    throw new Error('Function not implemented.');
 }

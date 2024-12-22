@@ -3,6 +3,8 @@ import { sessionSchema } from "../types/types";
 import { userMiddleware } from "../middlewares/userMiddleware";
 import client from "@repo/db/client";
 import amqp from "amqplib";
+import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 //@ts-ignore
 import { AccessToken, EgressClient, EncodedFileType, S3Upload, SegmentedFileOutput } from 'livekit-server-sdk';
 
@@ -18,6 +20,17 @@ const RABBITMQ_URL = process.env.RABBITMQ_URL || "amqp://localhost:5672"
 const QUEUE_NAME = "upload-pdf"
 
 let channel:amqp.Channel|null = null;
+
+if(!process.env.REGION || !process.env.ACCESS_KEY_ID || !process.env.SECRET_ACCESS_KEY){
+    throw new Error("Missing environment variables")
+}
+const s3 = new S3Client({
+    region:process.env.REGION as string,
+    credentials:{
+        accessKeyId:process.env.ACCESS_KEY_ID as string,
+        secretAccessKey:process.env.SECRET_ACCESS_KEY as string
+    }
+})
 
 async function initializeRabbitMQ(){
   try{
@@ -38,9 +51,7 @@ const sessionRouter = Router();
 
 sessionRouter.post("/session", userMiddleware, async (req:any, res: any) => {
   try {
-    console.log(req.body)
     const parsedData = sessionSchema.safeParse(req.body);
-    console.log(parsedData)
     if(!parsedData.success){
       return res.status(400).json({
         message:"invalid input"
@@ -511,6 +522,7 @@ sessionRouter.get("/session/:sessionId/recording",userMiddleware,async(req:any,r
       }
     })
     if(!sessionRecording){
+      console.log("session recording not found")
       return res.status(400).json({
         message:"session recording not found"
       })
@@ -528,26 +540,34 @@ sessionRouter.get("/session/:sessionId/recording",userMiddleware,async(req:any,r
 sessionRouter.post("/session/:sessionId/start-recording",userMiddleware,async(req:any,res:any)=>{
   try{
     const sessionId = req.params.sessionId;
-    const egressId = req.body.egressId;
+
     const output = {
       segments:new SegmentedFileOutput({
-        filenamePrefix:"session-recording",
-        playlistName:`${egressId}.m3u8`,
-        livePlaylistName:`${egressId}-live.m3u8`,
+        filenamePrefix:`studyhub/recordings/${sessionId}-recording`,
+        playlistName:`studyhub/recordings/${sessionId}.m3u8`,
+        livePlaylistName:`studyhub/recordings/${sessionId}-live.m3u8`,
         segmentDuration:10,
         output:{
           case:"s3",
           value:{
-            bucket:"",
-            accessKey:"",
-            secret:"",
-            region:"",
+            bucket:process.env.BUCKET_NAME,
+            accessKey:process.env.ACCESS_KEY_ID,
+            secret:process.env.SECRET_ACCESS_KEY,
+            region:process.env.REGION,
             forcePathStyle:true
           }
         }
       })
     }
     const response = await egressClient.startRoomCompositeEgress(sessionId,output)
+    await client.sessionRecording.update({
+      where:{
+        sessionId
+      },
+      data:{
+        egressId:response.egressId
+      }
+    })
     return res.status(200).json({
       message:"recording started successfully",
       egressId:response.egressId
@@ -565,6 +585,34 @@ sessionRouter.post("/session/:sessionId/stop-recording",userMiddleware,async(req
     await egressClient.stopEgress(egressId);
     res.status(200).json({
       message:"recording stopped successfully"
+    })
+  }catch(error){
+    res.status(500).json({
+      message:"internal server error"
+    })
+  }
+})
+
+sessionRouter.get("/session/:sessionId/get-recording",userMiddleware,async(req:any,res:any)=>{
+  try{
+    const sessionId = req.params.sessionId;
+    const sessionRecording = await client.sessionRecording.findUnique({
+      where:{
+        sessionId
+      }
+    })
+    if(!sessionRecording){
+      return res.status(400).json({
+        message:"session recording not found"
+      })
+    }
+    const getObjectCommand = new GetObjectCommand({
+      Bucket:process.env.BUCKET_NAME,
+      Key:`studyhub/recordings/${sessionId}.m3u8`
+    })
+    const url = await getSignedUrl(s3,getObjectCommand)
+    res.status(200).json({
+      url
     })
   }catch(error){
     res.status(500).json({

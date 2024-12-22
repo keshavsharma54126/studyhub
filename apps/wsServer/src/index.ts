@@ -12,6 +12,7 @@ const kafka = new Kafka({
 });
 
 const producer = kafka.producer();
+const admin = kafka.admin();
 
 async function initKafka(){
   try{
@@ -58,6 +59,30 @@ async function initConsumer(){
 
 initConsumer();
 
+const cleanupKafka = async()=>{
+  try{
+    await producer.disconnect();
+    await consumer.disconnect();
+
+    await admin.connect()
+    await admin.deleteTopics({topics:["session-recorder"],timeout:5000})
+    await admin.disconnect()
+    console.log("kafka cleanup completed")
+
+    await admin.createTopics({
+      topics:[{
+        topic:"session-recorder",
+        numPartitions:1,
+        replicationFactor:1
+      }]
+    })
+    await admin.disconnect()
+    console.log("kafka cleanup completed")
+  }catch(error){
+    console.error("Error cleaning up Kafka",error);
+    setTimeout(cleanupKafka,5000);
+  }
+}
 const ws = new WebSocketServer({
   port: 8081,
 });
@@ -91,3 +116,15 @@ ws.on("connection", (ws: WebSocket,request) => {
   ws.close(1008,"Authentication Error");
  }
 });
+
+process.on("SIGINT",()=>{
+  console.log("received SIGINT signal");
+  cleanupKafka();
+  process.exit(0);
+})
+
+process.on("SIGTERM",()=>{
+  console.log("received SIGTERM signal");
+  cleanupKafka();
+  process.exit(0);
+})

@@ -7,27 +7,55 @@ import {
     RoomAudioRenderer,
     useTracks,
   } from '@livekit/components-react';
-  
   import '@livekit/components-styles';
-  
   import { Track, TrackPublication } from 'livekit-client';
 import { useEffect, useState } from 'react';
-  
+import axios from 'axios';
   const serverUrl = 'wss://myacademy-lznxzk2x.livekit.cloud';
   
   
-  export  function VideoComponent({token, isHost,}: {token: string, isHost: boolean}) {
+  export  function VideoComponent({token, isHost,sessionId}: {token: string, isHost: boolean,sessionId:string}) {
     const [isRecording,setIsRecording] = useState(false);
+    const[egressId,setEgressId] = useState<string | null>(null);
 
-    const handleRecording = async()=>{
-      if(isRecording){
-        setIsRecording(false);
-      }else{
-        setIsRecording(true);
-      }
+   
+  const startRecording = async () => {
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}/start-recording`,
+        {egressId},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        }
+      );
+      setEgressId(response.data.egressId);
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Failed to start recording:', error);
     }
+  };
 
+  const stopRecording = async () => {
+    if (!egressId) return;
     
+    try {
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}/stop-recording`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        }
+      );
+      setIsRecording(false);
+      setEgressId(null);
+    } catch (error) {
+      console.error('Failed to stop recording:', error);
+    }
+  };
 
     return (
       <LiveKitRoom
@@ -53,7 +81,7 @@ import { useEffect, useState } from 'react';
           />
           {isHost && (
             <div className='absolute top-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent'> 
-              <button onClick={handleRecording} className={`${isRecording ? 'bg-red-500' : 'bg-green-500'} px-4 py-2 rounded-full flex items-center gap-2`}>
+              <button onClick={isRecording ? stopRecording : startRecording} className={`${isRecording ? 'bg-red-500' : 'bg-green-500'} px-4 py-2 rounded-full flex items-center gap-2`}>
                 {isRecording ? (
                   <>
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 " viewBox="0 0 24 24" fill="currentColor">
