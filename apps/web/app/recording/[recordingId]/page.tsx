@@ -9,7 +9,6 @@ import { eachWeekOfInterval } from 'date-fns';
 import VideoJS from "video.js"
 import "video.js/dist/video-js.css"
 import Player from 'video.js/dist/types/player';
-import { VideoPlayer } from '@repo/ui/videoPlayer';
 interface SessionEvent {
     id: string;
     sessionId: string;

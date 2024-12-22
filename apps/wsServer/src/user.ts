@@ -123,12 +123,13 @@ export class User{
                             type:"STROKE_RECEIVED",
                             payload:message.payload
                         });
+                        await this.produceEvents({
+                            type:"STROKE_RECEIVED",
+                            sessionId:strokeSessionId,
+                            payload:message.payload
+                        })
                     }
-                    await this.produceEvents({
-                        type:"STROKE_RECEIVED",
-                        sessionId:strokeSessionId,
-                        payload:message.payload
-                    })
+                    
                     break;
 
                 case "CLEAR":
@@ -143,7 +144,6 @@ export class User{
                             userId:this.userId
                         }
                     });
-                    }
                     await this.produceEvents({
                         type:"CLEAR_RECEIVED",
                         sessionId:clearSessionId,
@@ -151,6 +151,8 @@ export class User{
                             message:"Admin cleared the canvas",
                         }
                     })
+                    }
+                    
                     break;
 
                 case "SLIDE_CHANGE":

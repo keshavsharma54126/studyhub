@@ -537,47 +537,58 @@ sessionRouter.get("/session/:sessionId/recording",userMiddleware,async(req:any,r
    }
 })
 
-sessionRouter.post("/session/:sessionId/start-recording",userMiddleware,async(req:any,res:any)=>{
-  try{
+sessionRouter.post("/session/:sessionId/start-recording", userMiddleware, async(req:any, res:any) => {
+  try {
     const sessionId = req.params.sessionId;
+    const session = await client.session.findUnique({
+      where:{
+        id:sessionId
+      }
+    })
+    if(!session){
+      return res.status(400).json({
+        message:"session not found"
+      })
+    }
+    await client.sessionRecording.create({
+      data:{
+        sessionId,
+        userId:req.userId,
+      }
+    })
 
     const output = {
-      segments:new SegmentedFileOutput({
-        filenamePrefix:`studyhub/recordings/${sessionId}-recording`,
-        playlistName:`studyhub/recordings/${sessionId}.m3u8`,
-        livePlaylistName:`studyhub/recordings/${sessionId}-live.m3u8`,
-        segmentDuration:10,
-        output:{
-          case:"s3",
-          value:{
-            bucket:process.env.BUCKET_NAME,
-            accessKey:process.env.ACCESS_KEY_ID,
-            secret:process.env.SECRET_ACCESS_KEY,
-            region:process.env.REGION,
-            forcePathStyle:true
+      segments: new SegmentedFileOutput({
+        filenamePrefix: `studyhub/recordings/${sessionId}-recording`,
+        playlistName: `studyhub/recordings/${sessionId}.m3u8`,
+        livePlaylistName: `studyhub/recordings/${sessionId}-live.m3u8`,
+        segmentDuration: 10,
+        output: {
+          case: "s3",
+          value: {
+            bucket: process.env.BUCKET_NAME,
+            accessKey: process.env.ACCESS_KEY_ID,
+            secret: process.env.SECRET_ACCESS_KEY,
+            region: process.env.REGION,
+            forcePathStyle: true
           }
         }
       })
     }
-    const response = await egressClient.startRoomCompositeEgress(sessionId,output)
-    await client.sessionRecording.update({
-      where:{
-        sessionId
-      },
-      data:{
-        egressId:response.egressId
-      }
-    })
+
+    const response = await egressClient.startRoomCompositeEgress(sessionId, output);
+
     return res.status(200).json({
-      message:"recording started successfully",
-      egressId:response.egressId
-    })
-  }catch(error){
+      message: "recording started successfully",
+      egressId: response.egressId
+    });
+  } catch(error) {
+    console.error("Recording start error:", error);
     res.status(500).json({
       message:"internal server error"
-    })
+    });
   }
-})
+});
 
 sessionRouter.post("/session/:sessionId/stop-recording",userMiddleware,async(req:any,res:any)=>{
   try{

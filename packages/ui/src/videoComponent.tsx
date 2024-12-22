@@ -14,19 +14,19 @@ import axios from 'axios';
   const serverUrl = 'wss://myacademy-lznxzk2x.livekit.cloud';
   
   
-  export  function VideoComponent({token, isHost,sessionId}: {token: string, isHost: boolean,sessionId:string}) {
+  export  function VideoComponent({token, isHost,sessionId,}: {token: string, isHost: boolean,sessionId:string}) {
     const [isRecording,setIsRecording] = useState(false);
     const[egressId,setEgressId] = useState<string | null>(null);
-
    
   const startRecording = async () => {
     try {
+      const token = localStorage.getItem('auth_token');
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}/start-recording`,
-        {egressId},
+        {},
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+            Authorization: `Bearer ${token}`
           }
         }
       );

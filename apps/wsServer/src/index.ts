@@ -38,6 +38,14 @@ async function initConsumer(){
         if(message.value){
           const event = JSON.parse(message.value.toString());
           console.log("received event",event);
+          const session = await client.session.findUnique({
+            where:{
+              id:event.sessionId
+            }
+          })
+          if(!session){
+            return;
+          }
           await client.sessionRecording.create({
             data:{
               sessionId:event.sessionId,
@@ -60,34 +68,57 @@ async function initConsumer(){
 initConsumer();
 
 const cleanupKafka = async()=>{
-  try{
+  try {
+    // Disconnect existing connections
     await producer.disconnect();
     await consumer.disconnect();
+    await admin.connect();
 
-    await admin.connect()
-    await admin.deleteTopics({topics:["session-recorder"],timeout:5000})
-    await admin.disconnect()
-    console.log("kafka cleanup completed")
+    // Delete the topic
+    await admin.deleteTopics({
+      topics: ["session-recorder"],
+      timeout: 5000
+    });
+    await admin.disconnect();
+    console.log("kafka topic deleted");
 
+    // Wait a bit to ensure topic is fully deleted
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Recreate the topic with cleanup policy
+    await admin.connect();
     await admin.createTopics({
-      topics:[{
-        topic:"session-recorder",
-        numPartitions:1,
-        replicationFactor:1
+      topics: [{
+        topic: "session-recorder",
+        numPartitions: 1,
+        replicationFactor: 1,
+        configEntries: [
+          {
+            name: "cleanup.policy",
+            value: "delete"  // Use delete policy
+          },
+          {
+            name: "retention.ms",
+            value: "60000"   // Keep messages for 1 minute
+          }
+        ]
       }]
-    })
-    await admin.disconnect()
-    console.log("kafka cleanup completed")
-  }catch(error){
-    console.error("Error cleaning up Kafka",error);
-    setTimeout(cleanupKafka,5000);
+    });
+    await admin.disconnect();
+    console.log("kafka topic recreated with cleanup policy");
+
+    // Reconnect producer and consumer
+    await initKafka();
+    await initConsumer();
+  } catch (error) {
+    console.error("Error cleaning up Kafka", error);
+    setTimeout(cleanupKafka, 5000);
   }
 }
 const ws = new WebSocketServer({
   port: 8081,
 });
 
-console.log("web socket server started");
 
 ws.on("connection", (ws: WebSocket,request) => {
  try{
@@ -110,6 +141,7 @@ ws.on("connection", (ws: WebSocket,request) => {
   ws.on("close", () => {
    console.log("user disconnected");
    user.destory()
+   
   });
  }catch(err){
   console.log(err);

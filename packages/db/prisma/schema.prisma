@@ -62,9 +62,9 @@ model SessionRecording{
   userId String
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  eventType String
-  eventData Json
-  timestamp DateTime
+  eventType String?
+  eventData Json?
+  timestamp DateTime?
   createdAt DateTime @default(now())
 }
 
