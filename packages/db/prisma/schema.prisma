@@ -58,6 +58,7 @@ model Slide{
 model SessionRecording{
   id String @id @default(cuid())
   sessionId String  @unique
+  egressId String?
   userId String
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
