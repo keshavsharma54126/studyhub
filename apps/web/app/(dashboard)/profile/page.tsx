@@ -35,9 +35,9 @@ export default function ProfilePage() {
         <Image 
             src={user?.profilePicture || 'https://static.vecteezy.com/system/resources/previews/020/168/719/non_2x/pretty-boy-with-stylish-hairstyle-flat-avatar-icon-with-green-dot-editable-default-persona-for-ux-ui-design-profile-character-picture-with-online-status-color-messaging-app-user-badge-vector.jpg'}
             alt="profile"
-            width={60}
-            height={60}
-            className="rounded-full object-cover"
+            width={40}
+            height={40}
+            className="rounded-full object-cover w-[40px] h-[40px]"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = '/default-avatar.png';

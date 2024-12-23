@@ -3,8 +3,6 @@ import { sessionSchema } from "../types/types";
 import { userMiddleware } from "../middlewares/userMiddleware";
 import client from "@repo/db/client";
 import amqp from "amqplib";
-import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 //@ts-ignore
 import { AccessToken, EgressClient, EncodedFileType, S3Upload, SegmentedFileOutput } from 'livekit-server-sdk';
 
@@ -24,13 +22,6 @@ let channel:amqp.Channel|null = null;
 if(!process.env.REGION || !process.env.ACCESS_KEY_ID || !process.env.SECRET_ACCESS_KEY){
     throw new Error("Missing environment variables")
 }
-const s3 = new S3Client({
-    region:process.env.REGION as string,
-    credentials:{
-        accessKeyId:process.env.ACCESS_KEY_ID as string,
-        secretAccessKey:process.env.SECRET_ACCESS_KEY as string
-    }
-})
 
 async function initializeRabbitMQ(){
   try{
@@ -47,7 +38,7 @@ async function initializeRabbitMQ(){
 
 initializeRabbitMQ()
 
-const sessionRouter = Router();
+export const sessionRouter = Router();
 
 sessionRouter.post("/session", userMiddleware, async (req:any, res: any) => {
   try {
@@ -550,12 +541,6 @@ sessionRouter.post("/session/:sessionId/start-recording", userMiddleware, async(
         message:"session not found"
       })
     }
-    await client.sessionRecording.create({
-      data:{
-        sessionId,
-        userId:req.userId,
-      }
-    })
 
     const output = {
       segments: new SegmentedFileOutput({
@@ -604,32 +589,3 @@ sessionRouter.post("/session/:sessionId/stop-recording",userMiddleware,async(req
   }
 })
 
-sessionRouter.get("/session/:sessionId/get-recording",userMiddleware,async(req:any,res:any)=>{
-  try{
-    const sessionId = req.params.sessionId;
-    const sessionRecording = await client.sessionRecording.findUnique({
-      where:{
-        sessionId
-      }
-    })
-    if(!sessionRecording){
-      return res.status(400).json({
-        message:"session recording not found"
-      })
-    }
-    const getObjectCommand = new GetObjectCommand({
-      Bucket:process.env.BUCKET_NAME,
-      Key:`studyhub/recordings/${sessionId}.m3u8`
-    })
-    const url = await getSignedUrl(s3,getObjectCommand)
-    res.status(200).json({
-      url
-    })
-  }catch(error){
-    res.status(500).json({
-      message:"internal server error"
-    })
-  }
-})
-
-export default sessionRouter;

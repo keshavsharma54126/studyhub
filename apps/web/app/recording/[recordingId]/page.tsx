@@ -58,7 +58,6 @@ export default function SessionReplayPage({ params }: { params: { recordingId: s
     useEffect(() => {
 
         fetchSessionRecording();
-        fetchVideo();
         initCanvas();
 
         if(!playerRef.current){
@@ -99,17 +98,6 @@ export default function SessionReplayPage({ params }: { params: { recordingId: s
         }
     };
 
-    const fetchVideo  = async()=>{
-        const token = localStorage.getItem("auth_token");
-        if(params.recordingId){
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${params.recordingId}/get-recording`,{
-                headers:{
-                    Authorization: `Bearer ${token}`
-                }
-            })
-            setVideoUrl(response.data.url)
-        }
-    }
 
     const initCanvas = () => {
         const slideCanvas = slideCanvasRef.current;

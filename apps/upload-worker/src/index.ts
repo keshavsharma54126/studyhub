@@ -171,7 +171,6 @@ async function startConsumer() {
         console.error("Failed to connect to RabbitMQ", error);
         purgeQueue()
         setTimeout(() => {
-           
             startConsumer()
         }, 5000);
     }

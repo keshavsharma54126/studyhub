@@ -24,6 +24,7 @@ export class User{
 
     private async produceEvents(event:any){
         try{
+            console.log("attempting to produce event",event);
             await this.producer.send({
                 topic:"session-recorder",
                 messages:[{
@@ -36,8 +37,10 @@ export class User{
                     })
                 }]
             })
+            console.log("produced event",event);
         }catch(error){
             console.error("Error producing event",error);
+            throw error
         }
     }
 
@@ -47,7 +50,7 @@ export class User{
             console.log("message received",message);
             switch(message.type){
                 case "SUBSCRIBE_ADMIN":
-                    console.log("subscribe admin received",message);
+                   
                     const adminsessionId = message.payload.sessionId;
                     const adminsession = await client.session.findUnique({
                         where:{
@@ -83,7 +86,7 @@ export class User{
                     break;
 
                 case "SUBSCRIBE_USER":
-                    console.log("subscribe user received",message);
+            
                     const userSessionId = message.payload.sessionId;
                     const userSession = await client.session.findUnique({
                         where:{
@@ -115,7 +118,7 @@ export class User{
                     break;
 
                 case "STROKE":
-                    console.log("stroke received",message);
+                    
                     const strokeSessionId = message.payload.sessionId;
                     if(this.isHost){
                         RoomManager.getInstance().broadcast(strokeSessionId,this,{
@@ -133,7 +136,7 @@ export class User{
                     break;
 
                 case "CLEAR":
-                    console.log("clear received",message);
+                    
                     const clearSessionId = message.payload.sessionId;
                     if(this.isHost){
                         RoomManager.getInstance().broadcast(clearSessionId,this,{
@@ -156,7 +159,7 @@ export class User{
                     break;
 
                 case "SLIDE_CHANGE":
-                    console.log("slide change received",message);
+                    
                     const slideChangeSessionId = message.payload.sessionId;
                     
                         RoomManager.getInstance().broadcast(slideChangeSessionId,this,{
@@ -172,7 +175,7 @@ export class User{
                     break;
 
                 case "CHAT_MESSAGE":
-                    console.log("chat message sent")
+    
                     const chatSessionId = message.sessionId;
                     RoomManager.getInstance().broadcast(chatSessionId,this,{
                         sessionId:chatSessionId,

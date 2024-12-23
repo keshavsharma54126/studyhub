@@ -32,7 +32,7 @@ export class RoomManager{
 
     broadcast(sessionId:string,user:User,message:any){
         if(!this.rooms.has(sessionId)){
-            console.log("session not found");
+            
             return;
         }
         this.rooms.get(sessionId)?.forEach((u)=>{

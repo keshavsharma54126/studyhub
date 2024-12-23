@@ -35,9 +35,10 @@ async function initConsumer(){
     await consumer.subscribe({topic:"session-recorder"})
     await consumer.run({
       eachMessage:async ({message})=>{
+        console.log("consumer received message",message);
         if(message.value){
           const event = JSON.parse(message.value.toString());
-          console.log("received event",event);
+          console.log("received event",message.value);
           const session = await client.session.findUnique({
             where:{
               id:event.sessionId
@@ -56,7 +57,7 @@ async function initConsumer(){
             }
           })
         }
-       
+       console.log("event consumed and send to database",message.value);
       }
     })
   }catch(error){

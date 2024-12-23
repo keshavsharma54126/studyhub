@@ -17,7 +17,6 @@ import axios from 'axios';
   export  function VideoComponent({token, isHost,sessionId,}: {token: string, isHost: boolean,sessionId:string}) {
     const [isRecording,setIsRecording] = useState(false);
     const[egressId,setEgressId] = useState<string | null>(null);
-   
   const startRecording = async () => {
     try {
       const token = localStorage.getItem('auth_token');
