@@ -9,6 +9,9 @@ import { eachWeekOfInterval } from 'date-fns';
 import VideoJS from "video.js"
 import "video.js/dist/video-js.css"
 import Player from 'video.js/dist/types/player';
+import {use} from "react"
+import { useParams } from 'next/navigation';
+
 interface SessionEvent {
     id: string;
     sessionId: string;
@@ -26,7 +29,7 @@ interface ChatMessage {
     timestamp: Date;
 }
 
-export default function SessionReplayPage({ params }: { params: { recordingId: string } }) {
+export default function SessionReplayPage() {
     const {user,isLoading,error} = useGetUser();
     const [events, setEvents] = useState<SessionEvent[]>([]);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -38,7 +41,7 @@ export default function SessionReplayPage({ params }: { params: { recordingId: s
     const drawingCanvasRef = useRef<HTMLCanvasElement>(null);
     const animationFrameId = useRef<number>();
     const startTimeRef = useRef<number>(0);
-    const sessionId = params.recordingId;
+    const sessionId = useParams().recordingId;
     const [videoUrl,setVideoUrl] = useState<string>(`https://syncstream.s3.ap-south-1.amazonaws.com/studyhub/recordings/${sessionId}.m3u8`);
     const videoRef = useRef<HTMLVideoElement>(null);
     const playerRef = useRef<Player | null>(null);
@@ -59,6 +62,7 @@ export default function SessionReplayPage({ params }: { params: { recordingId: s
 
         fetchSessionRecording();
         initCanvas();
+        
 
         if(!playerRef.current){
             const videoElement = videoRef.current;
@@ -76,15 +80,15 @@ export default function SessionReplayPage({ params }: { params: { recordingId: s
                 playerRef.current = null;
             }
         }
-    }, [params.recordingId]);
+    }, [sessionId]);
      
 
     const fetchSessionRecording = async () => {
         try {
             const token = localStorage.getItem("auth_token");
-            if(params.recordingId){
+            if(sessionId){
             const recordingResponse = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${params.recordingId}/recording`,
+                `${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}/recording`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -299,7 +303,7 @@ export default function SessionReplayPage({ params }: { params: { recordingId: s
                                     //@ts-ignore
                                     messages={chatMessages}
                                     setChatMessages={setChatMessages}
-                                    sessionId={params.recordingId as string}
+                                    sessionId={sessionId as string}
                                 />
                      
                     </div>

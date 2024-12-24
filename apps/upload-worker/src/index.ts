@@ -84,6 +84,7 @@ const purgeQueue = async()=>{
 
 async function startConsumer() {
     try {
+        purgeQueue()
         const connection = await amqp.connect(RABBITMQ_URL)
         const channel = await connection.createChannel()
         await channel.assertQueue(QUEUE_NAME, {
