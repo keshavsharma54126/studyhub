@@ -29,6 +29,12 @@ interface ChatMessage {
     timestamp: Date;
 }
 
+interface Slide{
+    url:string;
+    timestamp:Date;
+    id:string;
+}
+
 export default function SessionReplayPage() {
     const {user,isLoading,error} = useGetUser();
     const [events, setEvents] = useState<SessionEvent[]>([]);
@@ -45,6 +51,7 @@ export default function SessionReplayPage() {
     const [videoUrl,setVideoUrl] = useState<string>(`https://syncstream.s3.ap-south-1.amazonaws.com/studyhub/recordings/${sessionId}.m3u8`);
     const videoRef = useRef<HTMLVideoElement>(null);
     const playerRef = useRef<Player | null>(null);
+    const[slides,setSlides] = useState<Slide[]>([]);
 
 
     const videoJsOptions = {
@@ -59,21 +66,24 @@ export default function SessionReplayPage() {
     }
     
     useEffect(() => {
-
-        fetchSessionRecording();
-        initCanvas();
-        
-
-        if(!playerRef.current){
-            const videoElement = videoRef.current;
-            if(!videoElement){
-                return;
+        const initializeSession = async () => {
+            await fetchSessionRecording();
+            initCanvas();
+            console.log(slides);
+            
+            if(!playerRef.current){
+                const videoElement = videoRef.current;
+                if(!videoElement) return;
+                
+                playerRef.current = VideoJS(videoElement,videoJsOptions);
+                playerRef.current.on("error",(error:any)=>{
+                    console.error("VideoJS error",error);
+                });
             }
-            playerRef.current = VideoJS(videoElement,videoJsOptions);
-            playerRef.current.on("error",(error:any)=>{
-                console.error("VideoJS error",error);
-            })
-        }
+        };
+
+        initializeSession();
+
         return () => {
             if(playerRef.current){
                 playerRef.current.dispose();
@@ -81,7 +91,30 @@ export default function SessionReplayPage() {
             }
         }
     }, [sessionId]);
-     
+    
+
+    const fetchSlides = async ()=>{
+        try{
+            const token = localStorage.getItem("auth_token");
+            const response = await axios.get(`http://localhost:3001/api/v1/sessions/session/${sessionId}/slides/images`,{
+                headers:{
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+            console.log(response.data);
+            setSlides(response.data.images.map((slide:any)=>({
+                url:slide.url,
+                sessionId:sessionId,
+                id:slide.id
+            }))); 
+            console.log(slides);
+            if(response.data.images.length > 0){
+                displaySlide(response.data.images[0]?.url||"");
+            }
+        }catch(error){
+            console.error(error);
+        }
+    }
 
     const fetchSessionRecording = async () => {
         try {
@@ -150,6 +183,7 @@ export default function SessionReplayPage() {
     };
 
     const displaySlide = (slideUrl: string) => {
+        console.log(slideUrl);
         const canvas = slideCanvasRef.current;
         if (!canvas) return;
 
@@ -158,6 +192,17 @@ export default function SessionReplayPage() {
 
         const img = new Image();
         img.onload = () => {
+            // Set canvas dimensions to match the container size
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            // Set drawing canvas to match
+            if (drawingCanvasRef.current) {
+                drawingCanvasRef.current.width = canvas.width;
+                drawingCanvasRef.current.height = canvas.height;
+            }
+
+            // Draw image to fill entire canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         };
@@ -231,6 +276,8 @@ export default function SessionReplayPage() {
             }
         }
     };
+
+
 
     return (
         <div className="h-screen flex">

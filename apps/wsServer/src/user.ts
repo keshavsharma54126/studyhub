@@ -152,6 +152,7 @@ export class User{
                         sessionId:clearSessionId,
                         payload:{
                             message:"Admin cleared the canvas",
+                            userId:this.userId
                         }
                     })
                     }
