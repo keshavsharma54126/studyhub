@@ -76,13 +76,13 @@ export class User{
                             userId:this.userId
                         }
                     });
-                    await this.produceEvents({
-                        type:"ADMIN_SUBSCRIBED",
-                        sessionId:adminsessionId,
-                        payload:{
-                            message:"Admin subscribed to session",
-                        }
-                    })
+                    // await this.produceEvents({
+                    //     type:"ADMIN_SUBSCRIBED",
+                    //     sessionId:adminsessionId,
+                    //     payload:{
+                    //         message:"Admin subscribed to session",
+                    //     }
+                    // })
                     break;
 
                 case "SUBSCRIBE_USER":
@@ -108,13 +108,13 @@ export class User{
                             userId:this.userId
                         }
                     });
-                    await this.produceEvents({
-                        type:"USER_SUBSCRIBED",
-                        sessionId:userSessionId,
-                        payload:{
-                            message:"User subscribed to session",
-                        }
-                    })
+                    // await this.produceEvents({
+                    //     type:"USER_SUBSCRIBED",
+                    //     sessionId:userSessionId,
+                    //     payload:{
+                    //         message:"User subscribed to session",
+                    //     }
+                    // })
                     break;
 
                 case "STROKE":

@@ -11,6 +11,7 @@ import "video.js/dist/video-js.css"
 import Player from 'video.js/dist/types/player';
 import {use} from "react"
 import { useParams } from 'next/navigation';
+import { emptyEl } from 'video.js/dist/types/utils/dom';
 
 interface SessionEvent {
     id: string;
@@ -36,6 +37,7 @@ interface Slide{
 }
 
 export default function SessionReplayPage() {
+    const isPlayingRef = useRef(false);
     const {user,isLoading,error} = useGetUser();
     const [events, setEvents] = useState<SessionEvent[]>([]);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -107,7 +109,6 @@ export default function SessionReplayPage() {
                 sessionId:sessionId,
                 id:slide.id
             }))); 
-            console.log(slides);
             if(response.data.images.length > 0){
                 displaySlide(response.data.images[0]?.url||"");
             }
@@ -128,7 +129,11 @@ export default function SessionReplayPage() {
                     }
                 }
             )
-            setEvents(recordingResponse.data.sessionRecording);
+            const eventWithDates = recordingResponse.data.sessionRecording.map((event:any)=>({
+                ...event,
+                timestamp:new Date(event.timestamp)
+            }));
+            setEvents(eventWithDates);
             }
         } catch (error) {
             console.error('Failed to fetch session recording:', error);
@@ -183,7 +188,6 @@ export default function SessionReplayPage() {
     };
 
     const displaySlide = (slideUrl: string) => {
-        console.log(slideUrl);
         const canvas = slideCanvasRef.current;
         if (!canvas) return;
 
@@ -192,17 +196,12 @@ export default function SessionReplayPage() {
 
         const img = new Image();
         img.onload = () => {
-            // Set canvas dimensions to match the container size
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
-            
-            // Set drawing canvas to match
             if (drawingCanvasRef.current) {
                 drawingCanvasRef.current.width = canvas.width;
                 drawingCanvasRef.current.height = canvas.height;
             }
-
-            // Draw image to fill entire canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         };
@@ -210,43 +209,66 @@ export default function SessionReplayPage() {
     };
 
     const playRecording = () => {
+        // Create a local ref to track playing state to avoid state closure issues
+        isPlayingRef.current = true;
         setIsPlaying(true);
-        startTimeRef.current = Date.now() - (events[currentEventIndex]?.timestamp?.getTime() || 0);
+        const firstEventTime = events[0]?.timestamp?.getTime() || 0;
+        startTimeRef.current = Date.now() - ((events[currentEventIndex]?.timestamp?.getTime() || firstEventTime) - firstEventTime);
 
         const animate = () => {
-            const currentTime = Date.now();
-            const elapsedTime = (currentTime - startTimeRef.current) * playbackSpeed;
-
-            while (
-                currentEventIndex < events.length &&
-                new Date(events[currentEventIndex]?.timestamp?.getTime() || 0).getTime() <= elapsedTime
-            ) {
-                const event = events[currentEventIndex];
-                
-                switch (event?.eventType) {
-                    case 'STROKE':
-                        handleStrokeEvent(event.eventData);
-                        break;
-                    case 'CLEAR':
-                        const ctx = drawingCanvasRef.current?.getContext('2d');
-                        if (ctx) {
-                            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-                        }
-                        break;
-                    case 'SLIDE_CHANGE':
-                        displaySlide(event.eventData.url);
-                        break;
-                    case 'CHAT_MESSAGE':
-                        setChatMessages(prev => [...prev, event.eventData]);
-                        break;
-                }
-
-                setCurrentEventIndex(prev => prev + 1);
+            // Use ref instead of state
+            if (!isPlayingRef.current) {
+                console.log("Animation stopped - isPlaying is false");
+                return;
             }
 
-            if (currentEventIndex < events.length && isPlaying) {
+            const currentTime = Date.now();
+            const firstEventTime = events[0]?.timestamp?.getTime() || 0;
+            const playbackTime = (currentTime - startTimeRef.current) * playbackSpeed;
+            const currentPlaybackTime = firstEventTime + playbackTime;
+
+            let shouldContinue = false;
+
+            // Process all events that should have occurred by now
+            for (let i = currentEventIndex; i < events.length; i++) {
+                const eventReceived= events[i];
+                console.log(eventReceived)
+                
+                if (!eventReceived?.timestamp) continue;
+
+                if (eventReceived.timestamp.getTime() <= currentPlaybackTime) {
+                    switch (eventReceived.eventType) {
+                        case 'STROKE_RECEIVED':
+                            console.log("Stroke event received");
+                            handleStrokeEvent(eventReceived.eventData);
+                            break;
+                        case 'CLEAR_RECEIVED':
+                            console.log("Clear event received");
+                            const ctx = drawingCanvasRef.current?.getContext('2d');
+                            if (ctx) {
+                                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                            }
+                            break;
+                        case 'SLIDE_CHANGE_RECEIVED':
+                            console.log("Slide change event received");
+                            displaySlide(eventReceived.eventData.url);
+                            break;
+                        case 'CHAT_MESSAGE_RECEIVED':
+                            console.log("Chat message event received");
+                            setChatMessages(prev => [...prev, eventReceived.eventData]);
+                            break;
+                    }
+                    setCurrentEventIndex(i + 1);
+                } else {
+                    shouldContinue = true;
+                    break;
+                }
+            }
+
+            if (shouldContinue) {
                 animationFrameId.current = requestAnimationFrame(animate);
             } else {
+                isPlayingRef.current = false;
                 setIsPlaying(false);
             }
         };
@@ -255,7 +277,9 @@ export default function SessionReplayPage() {
     };
 
     const pauseRecording = () => {
+        // Update both state and ref
         setIsPlaying(false);
+        isPlayingRef.current = false;
         if (animationFrameId.current) {
             cancelAnimationFrame(animationFrameId.current);
         }
@@ -277,11 +301,8 @@ export default function SessionReplayPage() {
         }
     };
 
-    console.log(events);
-
-
     return (
-        <div className="h-screen flex">
+        <div suppressHydrationWarning className="h-screen flex">
             <div className="flex-1 flex flex-col">
                 <div className="flex justify-between items-center p-4 border-b">
                     <h1 className="text-2xl font-bold">Session Replay</h1>
@@ -297,7 +318,10 @@ export default function SessionReplayPage() {
                             <option value={4}>4x</option>
                         </select>
                         <Button
-                            onClick={isPlaying ? pauseRecording : playRecording}
+                            onClick={() => {
+                                console.log("Button clicked");
+                                isPlaying ? pauseRecording() : playRecording();
+                            }}
                             variant="outline"
                             className="w-12 h-12 flex items-center justify-center"
                         >
@@ -316,10 +340,12 @@ export default function SessionReplayPage() {
                 {/* Canvas Container */}
                 <div className="flex-1 relative">
                     <canvas
+                        suppressHydrationWarning
                         ref={slideCanvasRef}
                         className="absolute inset-0 w-full h-full"
                     />
                     <canvas
+                        suppressHydrationWarning
                         ref={drawingCanvasRef}
                         className="absolute inset-0 w-full h-full pointer-events-none"
                     />

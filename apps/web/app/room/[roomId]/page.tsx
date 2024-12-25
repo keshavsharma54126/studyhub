@@ -462,7 +462,7 @@ export default function RoomPage() {
     };
 
     return (
-        <div className="flex flex-col h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
+        <div suppressHydrationWarning className="flex flex-col h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
             <div className="flex flex-col h-full">
                 {/* Main Content Grid - Modified for responsiveness */}
                 <div className="grid grid-cols-1 lg:grid-cols-[1fr,380px] h-screen relative">
