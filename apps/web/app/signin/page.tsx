@@ -47,8 +47,8 @@ export default function SignIn() {
         setLoading(true);
         const urlResponse = await axios.get("http://localhost:3001/api/v1/auth/google/url");
         if(urlResponse.status!==200){
-            setError("Failed to generate auth url");
             setLoading(false);
+            setError("Failed to generate auth url");
             console.error(urlResponse.data.message);
             return;
         }
@@ -95,9 +95,10 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-cyan-50 relative">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-cyan-50 relative" suppressHydrationWarning>
       <BackgroundBeams />
       <motion.div 
+        suppressHydrationWarning
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}

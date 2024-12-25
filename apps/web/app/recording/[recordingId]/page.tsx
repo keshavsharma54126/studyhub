@@ -68,8 +68,8 @@ export default function SessionReplayPage() {
     useEffect(() => {
         const initializeSession = async () => {
             await fetchSessionRecording();
+            await fetchSlides();
             initCanvas();
-            console.log(slides);
             
             if(!playerRef.current){
                 const videoElement = videoRef.current;
@@ -277,6 +277,7 @@ export default function SessionReplayPage() {
         }
     };
 
+    console.log(events);
 
 
     return (
