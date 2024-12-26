@@ -56,6 +56,7 @@ export default function SessionReplayPage() {
     const[slides,setSlides] = useState<Slide[]>([]);
     const startVideoRef = useRef<boolean>(false);
 
+    const animate = useRef<() => void>();
 
     const videoJsOptions = {
         autoplay:startVideoRef.current,
@@ -217,18 +218,8 @@ export default function SessionReplayPage() {
         img.src = slideUrl;
     };
 
-    const playRecording = () => {
-        startVideoRef.current = !startVideoRef.current;
-        setIsPlaying(true);
-
-        if(playerRef.current){
-            isPlayingRef.current = true;
-            playerRef.current.play();
-        }
-        const firstEventTime = events[0]?.timestamp?.getTime() || 0;
-        startTimeRef.current = Date.now() - ((events[currentEventIndex]?.timestamp?.getTime() || firstEventTime) - firstEventTime);
-
-        const animate = () => {
+    useEffect(() => {
+        animate.current = () => {
             if (!isPlayingRef.current) {
                 console.log("Animation stopped - isPlaying is false");
                 return;
@@ -241,32 +232,25 @@ export default function SessionReplayPage() {
 
             let shouldContinue = false;
 
-            // Process all events that should have occurred by now
             for (let i = currentEventIndex; i < events.length; i++) {
-                const eventReceived= events[i];
-                console.log(eventReceived)
-                
+                const eventReceived = events[i];
                 if (!eventReceived?.timestamp) continue;
 
                 if (eventReceived.timestamp.getTime() <= currentPlaybackTime) {
                     switch (eventReceived.eventType) {
                         case 'STROKE_RECEIVED':
-                            console.log("Stroke event received");
                             handleStrokeEvent(eventReceived.eventData);
                             break;
                         case 'CLEAR_RECEIVED':
-                            console.log("Clear event received");
                             const ctx = drawingCanvasRef.current?.getContext('2d');
                             if (ctx) {
                                 ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
                             }
                             break;
                         case 'SLIDE_CHANGE_RECEIVED':
-                            console.log("Slide change event received");
                             displaySlide(eventReceived.eventData.url);
                             break;
                         case 'CHAT_MESSAGE_RECEIVED':
-                            console.log("Chat message event received");
                             setChatMessages(prev => [...prev, eventReceived.eventData]);
                             break;
                     }
@@ -278,14 +262,29 @@ export default function SessionReplayPage() {
             }
 
             if (shouldContinue) {
-                animationFrameId.current = requestAnimationFrame(animate);
+                animationFrameId.current = requestAnimationFrame(animate.current!);
             } else {
                 isPlayingRef.current = false;
                 setIsPlaying(false);
             }
         };
+    }, [events, currentEventIndex, playbackSpeed]);
 
-        animationFrameId.current = requestAnimationFrame(animate);
+    const playRecording = () => {
+        startVideoRef.current = !startVideoRef.current;
+        setIsPlaying(true);
+
+        if(playerRef.current){
+            isPlayingRef.current = true;
+            playerRef.current.play();
+        }
+        
+        const firstEventTime = events[0]?.timestamp?.getTime() || 0;
+        startTimeRef.current = Date.now() - ((events[currentEventIndex]?.timestamp?.getTime() || firstEventTime) - firstEventTime);
+
+        if (animate.current) {
+            animationFrameId.current = requestAnimationFrame(animate.current);
+        }
     };
 
     const pauseRecording = () => {
@@ -300,22 +299,51 @@ export default function SessionReplayPage() {
     };
 
     const resetRecording = () => {
-        setCurrentEventIndex(0);
-        playRecording();
-        if(playerRef.current){
-            playerRef.current.currentTime(0);
-            playerRef.current.play();
+        // First pause any ongoing playback
+        isPlayingRef.current = false;
+        setIsPlaying(false);
+        if (animationFrameId.current) {
+            cancelAnimationFrame(animationFrameId.current);
         }
+
+        // Reset video
+        if (playerRef.current) {
+            playerRef.current.currentTime(0);
+        }
+
+        // Reset canvas
         const drawingCtx = drawingCanvasRef.current?.getContext('2d');
         if (drawingCtx) {
             drawingCtx.clearRect(0, 0, drawingCtx.canvas.width, drawingCtx.canvas.height);
         }
-        // Reset slide to initial state
+
+        // Reset event index and chat messages
+        setCurrentEventIndex(0);
+        setChatMessages([]);
+
+        // Reset initial slide if exists
         if (events.length > 0) {
-            const initialSlideEvent = events.find(event => event.eventType === 'SLIDE_CHANGE');
+            const initialSlideEvent = events.find(event => 
+                event.eventType === 'SLIDE_CHANGE_RECEIVED' || 
+                event.eventType === 'SLIDE_CHANGE'
+            );
             if (initialSlideEvent) {
                 displaySlide(initialSlideEvent.eventData.url);
             }
+        }
+
+        // Reset timing reference to match first event
+        const firstEventTime = events[0]?.timestamp?.getTime() || 0;
+        startTimeRef.current = Date.now() - (firstEventTime - firstEventTime);
+
+        // Start playback immediately
+        isPlayingRef.current = true;
+        setIsPlaying(true);
+        if (playerRef.current) {
+            playerRef.current.play();
+        }
+        if (animate.current) {
+            animationFrameId.current = requestAnimationFrame(animate.current);
         }
     };
 
