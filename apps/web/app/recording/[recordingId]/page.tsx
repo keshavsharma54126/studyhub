@@ -54,11 +54,12 @@ export default function SessionReplayPage() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const playerRef = useRef<Player | null>(null);
     const[slides,setSlides] = useState<Slide[]>([]);
+    const startVideoRef = useRef<boolean>(false);
 
 
     const videoJsOptions = {
-        autoplay:true,
-        controls:true,
+        autoplay:startVideoRef.current,
+        controls:false,
         responsive:true,
         fluid:true,
         sources:[{
@@ -78,9 +79,17 @@ export default function SessionReplayPage() {
                 if(!videoElement) return;
                 
                 playerRef.current = VideoJS(videoElement,videoJsOptions);
-                playerRef.current.on("error",(error:any)=>{
-                    console.error("VideoJS error",error);
-                });
+                playerRef.current.ready(()=>{
+                    playerRef.current?.on("play",()=>{
+                        console.log("Video is playing");
+                    })
+                    playerRef.current?.on("pause",()=>{
+                        console.log("Video is paused");
+                    })
+                    playerRef.current?.on("restart",()=>{
+                        console.log("Video is restarted");
+                    })
+                })
             }
         };
 
@@ -209,14 +218,17 @@ export default function SessionReplayPage() {
     };
 
     const playRecording = () => {
-        // Create a local ref to track playing state to avoid state closure issues
-        isPlayingRef.current = true;
+        startVideoRef.current = !startVideoRef.current;
         setIsPlaying(true);
+
+        if(playerRef.current){
+            isPlayingRef.current = true;
+            playerRef.current.play();
+        }
         const firstEventTime = events[0]?.timestamp?.getTime() || 0;
         startTimeRef.current = Date.now() - ((events[currentEventIndex]?.timestamp?.getTime() || firstEventTime) - firstEventTime);
 
         const animate = () => {
-            // Use ref instead of state
             if (!isPlayingRef.current) {
                 console.log("Animation stopped - isPlaying is false");
                 return;
@@ -279,15 +291,21 @@ export default function SessionReplayPage() {
     const pauseRecording = () => {
         // Update both state and ref
         setIsPlaying(false);
-        isPlayingRef.current = false;
+        if(playerRef.current){
+            playerRef.current.pause();
+        }
         if (animationFrameId.current) {
             cancelAnimationFrame(animationFrameId.current);
         }
     };
 
     const resetRecording = () => {
-        setIsPlaying(false);
         setCurrentEventIndex(0);
+        playRecording();
+        if(playerRef.current){
+            playerRef.current.currentTime(0);
+            playerRef.current.play();
+        }
         const drawingCtx = drawingCanvasRef.current?.getContext('2d');
         if (drawingCtx) {
             drawingCtx.clearRect(0, 0, drawingCtx.canvas.width, drawingCtx.canvas.height);
@@ -356,7 +374,7 @@ export default function SessionReplayPage() {
             <div className="w-80 border-l flex flex-col">
                 {/* Video Component */}
                 <div data-vjs-player>
-                    <video ref={videoRef} className="video-js vjs-theme-sea" />
+                    <video ref={videoRef} playsInline={startVideoRef.current} className="video-js vjs-theme-sea" />
                 </div>
                 <div className="flex-1 relative">
                     <Button
