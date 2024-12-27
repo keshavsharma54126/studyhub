@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { ChatComponent } from '@repo/ui/chatComponent';
 import { Button } from '@repo/ui/button';
-import { PlayIcon, PauseIcon, RotateCcwIcon, MessageCircle, X as CloseIcon } from 'lucide-react';
+import { PlayIcon, PauseIcon, RotateCcwIcon, MessageCircle, X as CloseIcon, Loader2 } from 'lucide-react';
 import { useGetUser } from "../../hooks";
 import { eachWeekOfInterval } from 'date-fns';
 import VideoJS from "video.js"
@@ -12,6 +12,7 @@ import Player from 'video.js/dist/types/player';
 import {use} from "react"
 import { useParams } from 'next/navigation';
 import { emptyEl } from 'video.js/dist/types/utils/dom';
+import { markCurrentScopeAsDynamic } from 'next/dist/server/app-render/dynamic-rendering';
 
 interface SessionEvent {
     id: string;
@@ -50,16 +51,17 @@ export default function SessionReplayPage() {
     const animationFrameId = useRef<number>();
     const startTimeRef = useRef<number>(0);
     const sessionId = useParams().recordingId;
-    const [videoUrl,setVideoUrl] = useState<string>(`https://syncstream.s3.ap-south-1.amazonaws.com/studyhub/recordings/${sessionId}.m3u8`);
+    const [videoUrl,setVideoUrl] = useState<string>(`${process.env.NEXT_PUBLIC_AWS_URL}/${sessionId}.m3u8`);
     const videoRef = useRef<HTMLVideoElement>(null);
     const playerRef = useRef<Player | null>(null);
     const[slides,setSlides] = useState<Slide[]>([]);
     const startVideoRef = useRef<boolean>(false);
+    const[loading,setLoading] = useState<boolean>(true);
 
     const animate = useRef<() => void>();
 
     const videoJsOptions = {
-        autoplay:startVideoRef.current,
+        autoplay:false,
         controls:false,
         responsive:true,
         fluid:true,
@@ -70,17 +72,20 @@ export default function SessionReplayPage() {
     }
     
     useEffect(() => {
+        setLoading(true);
         const initializeSession = async () => {
             await fetchSessionRecording();
             await fetchSlides();
             initCanvas();
-            
+            setLoading(false);
             if(!playerRef.current){
                 const videoElement = videoRef.current;
                 if(!videoElement) return;
                 
                 playerRef.current = VideoJS(videoElement,videoJsOptions);
+                
                 playerRef.current.ready(()=>{
+                    
                     playerRef.current?.on("play",()=>{
                         console.log("Video is playing");
                     })
@@ -108,7 +113,7 @@ export default function SessionReplayPage() {
     const fetchSlides = async ()=>{
         try{
             const token = localStorage.getItem("auth_token");
-            const response = await axios.get(`http://localhost:3001/api/v1/sessions/session/${sessionId}/slides/images`,{
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}/slides/images`,{
                 headers:{
                     "Authorization": `Bearer ${token}`
                 }
@@ -347,6 +352,28 @@ export default function SessionReplayPage() {
         }
     };
 
+    const plus5 = ()=>{
+        if(playerRef.current){
+            const currentTime = playerRef.current.currentTime();
+            if(currentTime){
+                playerRef.current.currentTime(currentTime + 5);
+            }
+        }
+        
+    }
+    const minus5 =()=>{
+        if(playerRef.current){
+            const currentTime = playerRef.current.currentTime();
+            if(currentTime){
+                playerRef.current.currentTime(Math.max(0,currentTime - 5));
+            }
+        }
+    }
+
+    if(loading){
+        return <div className="h-screen flex justify-center items-center"> <Loader2 className="w-10 h-10 animate-spin" /> </div>
+    }
+
     return (
         <div suppressHydrationWarning className="h-screen flex">
             <div className="flex-1 flex flex-col">
@@ -363,6 +390,7 @@ export default function SessionReplayPage() {
                             <option value={2}>2x</option>
                             <option value={4}>4x</option>
                         </select>
+                        <Button onClick={minus5} className='bg-blue-600 hover:bg-blue-400 text-white'>-5 <RotateCcwIcon className="w-5 h-5" /></Button>
                         <Button
                             onClick={() => {
                                 console.log("Button clicked");
@@ -373,6 +401,7 @@ export default function SessionReplayPage() {
                         >
                             {isPlaying ? <PauseIcon className="w-10 h-10" /> : <PlayIcon className="w-10 h-10" />}
                         </Button>
+                        <Button onClick={plus5} className='bg-blue-600 hover:bg-blue-400 text-white'>+5 <RotateCcwIcon className="w-5 h-5" /></Button>
                         <Button 
                             onClick={resetRecording} 
                             variant="outline"
@@ -402,7 +431,7 @@ export default function SessionReplayPage() {
             <div className="w-80 border-l flex flex-col">
                 {/* Video Component */}
                 <div data-vjs-player>
-                    <video ref={videoRef} playsInline={startVideoRef.current} className="video-js vjs-theme-sea" />
+                    <video suppressHydrationWarning ref={videoRef} playsInline={startVideoRef.current} className="video-js vjs-theme-sea" />
                 </div>
                 <div className="flex-1 relative">
                     <Button
@@ -431,8 +460,4 @@ export default function SessionReplayPage() {
             </div>
         </div>
     );
-}
-
-function useUser(): { user: any; isLoading: any; error: any; } {
-    throw new Error('Function not implemented.');
 }

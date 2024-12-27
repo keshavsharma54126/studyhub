@@ -177,6 +177,8 @@ sessionRouter.get("/ended/:userId",userMiddleware,async(req:any,res:any)=>{
         },
         startTime:true,
         endTime:true
+      },orderBy:{
+        endTime:"desc"
       }
     })
     res.status(200).json({
@@ -547,7 +549,7 @@ sessionRouter.post("/session/:sessionId/start-recording", userMiddleware, async(
         filenamePrefix: `studyhub/recordings/${sessionId}-recording`,
         playlistName: `studyhub/recordings/${sessionId}.m3u8`,
         livePlaylistName: `studyhub/recordings/${sessionId}-live.m3u8`,
-        segmentDuration: 10,
+        segmentDuration: 5,
         output: {
           case: "s3",
           value: {
