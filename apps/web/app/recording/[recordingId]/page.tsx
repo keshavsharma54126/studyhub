@@ -5,14 +5,10 @@ import { ChatComponent } from '@repo/ui/chatComponent';
 import { Button } from '@repo/ui/button';
 import { PlayIcon, PauseIcon, RotateCcwIcon, MessageCircle, X as CloseIcon, Loader2 } from 'lucide-react';
 import { useGetUser } from "../../hooks";
-import { eachWeekOfInterval } from 'date-fns';
 import VideoJS from "video.js"
 import "video.js/dist/video-js.css"
 import Player from 'video.js/dist/types/player';
-import {use} from "react"
 import { useParams } from 'next/navigation';
-import { emptyEl } from 'video.js/dist/types/utils/dom';
-import { markCurrentScopeAsDynamic } from 'next/dist/server/app-render/dynamic-rendering';
 
 interface SessionEvent {
     id: string;
@@ -59,6 +55,8 @@ export default function SessionReplayPage() {
     const[loading,setLoading] = useState<boolean>(true);
 
     const animate = useRef<() => void>();
+    
+    
 
     const videoJsOptions = {
         autoplay:false,
@@ -78,10 +76,11 @@ export default function SessionReplayPage() {
             await fetchSlides();
             initCanvas();
             setLoading(false);
-            if(!playerRef.current){
-                const videoElement = videoRef.current;
-                if(!videoElement) return;
-                
+            
+
+            const videoElement = videoRef.current;
+
+            if(!videoElement) return;
                 playerRef.current = VideoJS(videoElement,videoJsOptions);
                 
                 playerRef.current.ready(()=>{
@@ -96,7 +95,7 @@ export default function SessionReplayPage() {
                         console.log("Video is restarted");
                     })
                 })
-            }
+            
         };
 
         initializeSession();
@@ -105,9 +104,14 @@ export default function SessionReplayPage() {
             if(playerRef.current){
                 playerRef.current.dispose();
                 playerRef.current = null;
+                console.log("Player disposed");
             }
         }
-    }, [sessionId]);
+
+        
+    }, [sessionId,videoUrl,videoRef,playerRef]);
+
+
     
 
     const fetchSlides = async ()=>{
@@ -276,6 +280,7 @@ export default function SessionReplayPage() {
     }, [events, currentEventIndex, playbackSpeed]);
 
     const playRecording = () => {
+       if(playerRef.current){
         startVideoRef.current = !startVideoRef.current;
         setIsPlaying(true);
 
@@ -290,6 +295,9 @@ export default function SessionReplayPage() {
         if (animate.current) {
             animationFrameId.current = requestAnimationFrame(animate.current);
         }
+       }else{
+         window.location.reload();
+       }
     };
 
     const pauseRecording = () => {
@@ -390,7 +398,7 @@ export default function SessionReplayPage() {
                             <option value={2}>2x</option>
                             <option value={4}>4x</option>
                         </select>
-                        <Button onClick={minus5} className='bg-blue-600 hover:bg-blue-400 text-white'>-5 <RotateCcwIcon className="w-5 h-5" /></Button>
+                        <Button onClick={minus5} className='bg-blue-600 hover:bg-blue-400 text-white'><RotateCcwIcon className="w-5 h-5" />-5</Button>
                         <Button
                             onClick={() => {
                                 console.log("Button clicked");
@@ -401,7 +409,7 @@ export default function SessionReplayPage() {
                         >
                             {isPlaying ? <PauseIcon className="w-10 h-10" /> : <PlayIcon className="w-10 h-10" />}
                         </Button>
-                        <Button onClick={plus5} className='bg-blue-600 hover:bg-blue-400 text-white'>+5 <RotateCcwIcon className="w-5 h-5" /></Button>
+                        <Button onClick={plus5} className='bg-blue-600 hover:bg-blue-400 text-white'>+5 <RotateCcwIcon className="w-5 h-5 scale-x-[-1]" /></Button>
                         <Button 
                             onClick={resetRecording} 
                             variant="outline"
@@ -428,10 +436,15 @@ export default function SessionReplayPage() {
             </div>
 
             {/* Right Sidebar */}
-            <div className="w-80 border-l flex flex-col">
+            <div suppressHydrationWarning className="w-80 border-l flex flex-col">
                 {/* Video Component */}
-                <div data-vjs-player>
-                    <video suppressHydrationWarning ref={videoRef} playsInline={startVideoRef.current} className="video-js vjs-theme-sea" />
+                <div suppressHydrationWarning data-vjs-player>
+                    <video 
+                        suppressHydrationWarning 
+                        ref={videoRef} 
+                        playsInline={playerRef.current ? true : false} 
+                        className="video-js vjs-theme-sea" 
+                    />
                 </div>
                 <div className="flex-1 relative">
                     <Button

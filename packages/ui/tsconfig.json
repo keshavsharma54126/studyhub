@@ -4,5 +4,28 @@
     "outDir": "dist"
   },
   "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist"],
+  "module": "commonjs",  
 }
+
+// {
+//   "name": "wsserver",
+//   "version": "1.0.0",
+//   "main": "index.js",
+//   "scripts": {
+//     "test": "echo \"Error: no test specified\" && exit 1",
+//     "start": "node dist/index.js",
+//     "dev": "npm run build && npm run start",
+//     "build": "npx esbuild src/index.ts --bundle --outfile=dist/index.js --platform=node --tsconfig=tsconfig.json --loader:.html=text --external:mock-aws-s3 --external:aws-sdk --external:nock"
+//   },
+//   "keywords": [],
+//   "author": "",
+//   "license": "ISC",
+//   "description": "",
+//   "dependencies": {
+//     "@types/ws": "^8.5.13",
+//     "ws": "^8.18.0",
+//     "jsonwebtoken": "^9.0.2",
+//     "@repo/db": "*"
+//   }
+// }
