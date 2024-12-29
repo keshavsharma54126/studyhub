@@ -87,7 +87,6 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className,
               username: currentUser.username,
               profilePicture: currentUser.profilePicture,
               timestamp: new Date(),
-              
             }
           }));
         

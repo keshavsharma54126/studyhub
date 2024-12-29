@@ -11,7 +11,6 @@ import {
 } from "./dialogSkeleton.js"
 import { Input } from "./input.js"
 import { Label } from "./label.js"
-import { FiPlay } from "react-icons/fi"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -30,6 +29,7 @@ interface DialogDemoProps {
   trigger?: React.ReactNode
   title?: string
   description?: string
+  className?: string
 }
 
 export function DialogDemo({
@@ -41,6 +41,7 @@ export function DialogDemo({
   trigger,
   title = "Edit Profile",
   description = "Make changes to your profile here. Click save when you're done.",
+  className,
 }: DialogDemoProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -69,39 +70,50 @@ export function DialogDemo({
   }
 
   const defaultTrigger = (
-    <Button className="flex items-center justify-center space-x-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-16 py-6 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-sm hover:shadow-md">
-      <FiPlay className="w-5 h-5" />
-      <span className="font-medium">Start a New Session</span>
+    <Button className="flex items-center justify-center space-x-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-8 py-4 rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 shadow-md hover:shadow-lg">
+      <span className="font-medium">Start New Session</span>
     </Button>
   )
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className={`sm:max-w-[425px] bg-black/90 backdrop-blur-sm border border-gray-800 shadow-xl ${className}`}>
         <form onSubmit={handleSubmit(onSubmitHandler)}>
           <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
-            <DialogDescription>{description}</DialogDescription>
+            <DialogTitle className="text-xl font-bold bg-gradient-to-r from-teal-500 to-cyan-500 bg-clip-text text-transparent">
+              {title}
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              {description}
+            </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-6 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
+              <Label htmlFor="name" className="text-right text-gray-300">
                 Name
               </Label>
               <div className="col-span-3">
-                <Input id="name" {...register("name")} />
+                <Input
+                  id="name"
+                  {...register("name")}
+                  className="bg-black/50 border-gray-800 text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                />
                 {errors.name && (
                   <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
                 )}
               </div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="username" className="text-right">
+              <Label htmlFor="username" className="text-right text-gray-300">
                 Username
               </Label>
               <div className="col-span-3">
-                <Input id="username" {...register("username")} />
+                <Input
+                  id="username"
+                  {...register("username")}
+                  className="bg-black/50 border-gray-800 text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                />
                 {errors.username && (
                   <p className="text-sm text-red-500 mt-1">
                     {errors.username.message}
@@ -111,7 +123,11 @@ export function DialogDemo({
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={isLoading}>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600"
+            >
               {isLoading ? "Saving..." : "Save changes"}
             </Button>
           </DialogFooter>

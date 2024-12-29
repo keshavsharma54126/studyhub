@@ -1,13 +1,13 @@
 'use client';
 import { useEffect, useState } from "react";
-import { FiPlay, FiUsers, FiPlus, FiTrash2 } from 'react-icons/fi';
+import { FiPlay, FiUsers, FiPlus, FiTrash2, FiClock, FiCalendar } from 'react-icons/fi';
 import { Dropbox } from "@repo/ui/dropBox";
-import { useParams } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { v4 as uuidv4 } from 'uuid';
 import { useGetUser } from "../../hooks";
-import { format,parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
+import { GeistMono } from 'geist/font/mono';
 
 type Session={
   id:string,
@@ -162,10 +162,10 @@ enum SessionStatus {
         {/* Stats Cards Loading State */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm animate-pulse">
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
-              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-2"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+            <div key={i} className="bg-black/40 backdrop-blur-sm p-6 rounded-2xl animate-pulse border border-teal-500/10">
+              <div className="h-4 bg-teal-500/10 rounded w-1/3 mb-4"></div>
+              <div className="h-8 bg-teal-500/10 rounded w-1/4 mb-2"></div>
+              <div className="h-4 bg-teal-500/10 rounded w-1/4"></div>
             </div>
           ))}
         </div>
@@ -173,28 +173,15 @@ enum SessionStatus {
         {/* Action Buttons Loading State */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {[1, 2].map((i) => (
-            <div key={i} className="h-14 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+            <div key={i} className="h-14 bg-black/40 backdrop-blur-sm rounded-xl animate-pulse border border-teal-500/10"></div>
           ))}
         </div>
 
-        {/* Current Session Loading State */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 mb-8 animate-pulse">
-          <div className="flex justify-between items-center mb-6">
-            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
-            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
-          </div>
-          <div className="space-y-4">
-            <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
-          </div>
-        </div>
-
-        {/* Scheduled Events Loading State */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 animate-pulse">
-          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-6"></div>
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
-            ))}
+        {/* Sessions Loading States */}
+        <div className="space-y-6">
+          <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-6 animate-pulse border border-teal-500/10">
+            <div className="h-8 bg-teal-500/10 rounded w-1/4 mb-6"></div>
+            <div className="h-32 bg-teal-500/10 rounded-xl"></div>
           </div>
         </div>
       </>
@@ -202,169 +189,175 @@ enum SessionStatus {
   }
 
   return (
-    <>
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
-          <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Sessions</h3>
-          <p className="text-3xl font-bold text-gray-800 dark:text-white mt-2">24</p>
-          <div className="mt-2 text-sm text-green-600 dark:text-green-400">↑ 12% from last week</div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
-          <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">Active Users</h3>
-          <p className="text-3xl font-bold text-gray-800 dark:text-white mt-2">12</p>
-          <div className="mt-2 text-sm text-blue-600 dark:text-blue-400">↑ 8% from last hour</div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
-          <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">Average Session Time</h3>
-          <p className="text-3xl font-bold text-gray-800 dark:text-white mt-2">45m</p>
-          <div className="mt-2 text-sm text-purple-600 dark:text-purple-400">↑ 15% improvement</div>
+    <div className={`space-y-8 ${GeistMono.className}`}>
+      {/* Hero Stats Section */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-black via-gray-900 to-gray-800 p-8 border border-gray-800 mb-8">
+        <div className="absolute inset-0 bg-grid-white/5 [mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]" />
+        <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[
+            { title: 'Total Sessions', value: '24', change: '+12%', icon: FiPlay },
+            { title: 'Active Users', value: '12', change: '+8%', icon: FiUsers },
+            { title: 'Avg. Duration', value: '45m', change: '+15%', icon: FiClock }
+          ].map((stat, index) => (
+            <div key={index} className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-500/10 to-cyan-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative p-6 rounded-2xl border border-gray-800 bg-black/40 backdrop-blur-sm">
+                <stat.icon className="w-8 h-8 text-teal-500 mb-4" />
+                <p className="text-sm text-gray-400 mb-1">{stat.title}</p>
+                <div className="flex items-end justify-between">
+                  <h3 className="text-3xl font-bold text-white">{stat.value}</h3>
+                  <span className="text-teal-500 text-sm">{stat.change}</span>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Action Buttons */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        
-      <button 
-          className="flex items-center justify-center space-x-3 bg-blue-600 text-white px-6 py-4 rounded-xl hover:bg-blue-500 transition-all duration-300 shadow-sm hover:shadow-md"
-          onClick={() => setIsStartModalOpen(true)}
-        >
-          <FiUsers className="w-5 h-5" />
-          <span className="font-medium">Start a Session</span>
-        </button>
-        
         <button 
-          className="flex items-center justify-center space-x-3 bg-gradient-to-r bg-blue-600 hover:bg-blue-500 text-white px-6 py-4 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
-          onClick={() => setIsJoinModalOpen(true)}
+          onClick={() => setIsStartModalOpen(true)}
+          className="group relative overflow-hidden rounded-2xl p-0.5"
         >
-          <FiUsers className="w-5 h-5" />
-          <span className="font-medium">Join a Session</span>
+          <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-500 transition-all duration-500" />
+          <div className="relative flex items-center justify-center space-x-4 bg-black/90 backdrop-blur-sm px-8 py-6 rounded-[15px] transition-all duration-500 group-hover:bg-black/70">
+            <FiPlay className="w-6 h-6 text-teal-500" />
+            <span className="font-medium text-white">Start New Session</span>
+          </div>
+        </button>
+
+        <button 
+          onClick={() => setIsJoinModalOpen(true)}
+          className="group relative overflow-hidden rounded-2xl border border-gray-800 hover:border-teal-500/50 transition-colors duration-500"
+        >
+          <div className="flex items-center justify-center space-x-4 px-8 py-6">
+            <FiUsers className="w-6 h-6 text-gray-400 group-hover:text-teal-500 transition-colors" />
+            <span className="font-medium text-gray-400 group-hover:text-teal-500 transition-colors">Join Session</span>
+          </div>
         </button>
       </div>
 
-      {/* Current Session Card */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Current Session</h2>
-          {currentSessions? (
-            <span className="px-4 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-sm font-medium">
-              Active
+      {/* Active Sessions and Scheduled Events Container */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Active Sessions */}
+        <div className="rounded-3xl border border-gray-800 bg-black/40 backdrop-blur-sm p-8">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-bold text-white">Active Sessions</h2>
+            <span className="px-4 py-1.5 rounded-full text-sm bg-teal-500/10 text-teal-500">
+              {currentSessions?.length || 0} Active
             </span>
-          ) : (
-            <span className="px-4 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-sm font-medium">
-              Inactive
-            </span>
-          )}
-        </div>
-        <div className="space-y-4">
-          {currentSessions && currentSessions.length > 0 ? (
-            currentSessions.map((session) => (
-              <div key={session.id} className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-full">
-                      <FiPlay className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                      {session.title}
-                    </h3>
-                  </div>
-                  <button 
-                    onClick={() => router.push(`/room/${session.id}`)}
-                    className="px-4 py-2  bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors duration-200"
-                  >
-                    Join Now
-                  </button>
-                </div>
-                
-                <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Start Time</p>
-                      <p className="text-sm font-medium text-gray-800 dark:text-white">
-                        {format(parseISO(session.startTime), 'dd MMM, HH:mm')}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Session Code</p>
-                      <p className="text-sm font-medium text-gray-800 dark:text-white">
-                        {session.secretCode}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Description</p>
-                    <p className="text-sm text-gray-800 dark:text-white mt-1">
-                      {session.description || 'No description provided'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="text-center py-8">
-              <div className="bg-gray-100 dark:bg-gray-700/50 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                <FiPlay className="w-6 h-6 text-gray-400 dark:text-gray-500" />
-              </div>
-              <p className="text-gray-600 dark:text-gray-400 mb-2">
-                No active session at the moment
-              </p>
-              <button 
-                onClick={() => setIsStartModalOpen(true)}
-                className="text-blue-600 dark:text-blue-400 text-sm hover:underline"
-              >
-                Start a new session
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
+          </div>
 
-      {/* Scheduled Events */}
-      <div className="mt-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 p-6">
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Scheduled Events</h2>
-        <div className="space-y-4">
-          {scheduledEvents.length > 0 ? (
-            scheduledEvents.map((event) => (
-              <div 
-                key={event.id}
-                onClick={() => router.push(`/room/${event.id}`)}
-                className="flex items-center space-x-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors cursor-pointer"
-              >
-                <div className="bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50 p-3 rounded-full">
-                  <FiPlay className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex justify-between items-center">
-                    <p className="text-sm font-medium text-gray-800 dark:text-white">{event.title}</p>
-                    <div>
-                      <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full text-xs">
-                        {format(parseISO(event.startTime), 'dd MMM, HH:mm')}
-                      </span>
+          <div className="space-y-6">
+            {currentSessions && currentSessions.length > 0 ? (
+              currentSessions.map((session) => (
+                <div key={session.id} className="group relative overflow-hidden rounded-2xl border border-gray-800 hover:border-teal-500/50 transition-all duration-500">
+                  <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="relative p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 className="text-xl font-semibold text-white mb-2">{session.title}</h3>
+                        <p className="text-gray-400">{session.description || 'No description provided'}</p>
+                      </div>
                       <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSessionToDelete(event);
-                          setIsDeleteModalOpen(true);
-                        }}
-                        className="ml-2 inline-flex items-center px-2 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/50 dark:hover:bg-red-800/50 text-red-600 dark:text-red-400 rounded-lg transition-colors duration-200"
+                        onClick={() => router.push(`/room/${session.id}`)}
+                        className="px-6 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-medium hover:from-teal-600 hover:to-cyan-600 transition-all duration-300"
                       >
-                        <FiTrash2 className="w-4 h-4" />
+                        Join Now
                       </button>
                     </div>
+
+                    <div className="grid grid-cols-3 gap-4 mt-6">
+                      <div className="flex items-center space-x-2">
+                        <FiCalendar className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-400">
+                          {format(parseISO(session.startTime), 'dd MMM, HH:mm')}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <FiUsers className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-400">
+                          12 Participants
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <FiClock className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-400">
+                          45m Duration
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{event.description}</p>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-800 mb-4">
+                  <FiPlay className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-300 mb-2">No Active Sessions</h3>
+                <p className="text-gray-400 mb-6">Start a new session to begin teaching</p>
+                <button 
+                  onClick={() => setIsStartModalOpen(true)}
+                  className="px-6 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-medium hover:from-teal-600 hover:to-cyan-600 transition-all duration-300"
+                >
+                  Start Session
+                </button>
               </div>
-            ))
-          ) : (
-            <div className="text-center text-gray-500 dark:text-gray-400 py-4">
-              No scheduled events
-            </div>
-          )}
+            )}
+          </div>
+        </div>
+
+        {/* Scheduled Events */}
+        <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-6 border border-gray-700">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-teal-500 to-cyan-500 bg-clip-text text-transparent mb-6">
+            Scheduled Events
+          </h2>
+          <div className="space-y-4">
+            {scheduledEvents.length > 0 ? (
+              scheduledEvents.map((event) => (
+                <div 
+                  key={event.id}
+                  onClick={() => router.push(`/room/${event.id}`)}
+                  className="flex items-center space-x-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors cursor-pointer"
+                >
+                  <div className="bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50 p-3 rounded-full">
+                    <FiPlay className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm font-medium text-gray-800 dark:text-white">{event.title}</p>
+                      <div>
+                        <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full text-xs">
+                          {format(parseISO(event.startTime), 'dd MMM, HH:mm')}
+                        </span>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSessionToDelete(event);
+                            setIsDeleteModalOpen(true);
+                          }}
+                          className="ml-2 inline-flex items-center px-2 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/50 dark:hover:bg-red-800/50 text-red-600 dark:text-red-400 rounded-lg transition-colors duration-200"
+                        >
+                          <FiTrash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{event.description}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center text-gray-500 dark:text-gray-400 py-4">
+                No scheduled events
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
       {isJoinModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl w-full max-w-md shadow-xl">
@@ -394,46 +387,48 @@ enum SessionStatus {
         </div>
       )}
       {isStartModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center">
-        <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl w-full max-w-md shadow-xl">
-          <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Join Session</h3>
-          <input
-            type="text"
-            placeholder="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
-          />
-          <input
-            type="text"
-            placeholder="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
-          />
-          <div className="flex space-x-4">
-            <input onChange={(e) => setSessionDate(e.target.value)} aria-label="Date and time" type="datetime-local" className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white" />
-          </div>
-          <div className="flex space-x-4 justify-center items-center mb-4">
-            <Dropbox setPdfUrls={setPdfUrls} accessKeyId={process.env.NEXT_PUBLIC_ACCESS_KEY_ID!} secretAccessKey={process.env.NEXT_PUBLIC_SECRET_ACCESS_KEY!} region={process.env.NEXT_PUBLIC_REGION!} bucketName={process.env.NEXT_PUBLIC_BUCKET_NAME!}/>
-          </div>
-          
-          <div className="flex space-x-4">
-            <button
-              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
-              onClick={() => {handleStartSession()}}
-            >
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-black/80 p-8 rounded-2xl w-full max-w-md border border-teal-500/10">
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-teal-500 to-cyan-500 bg-clip-text text-transparent mb-6">
               Start Session
-            </button>
-            <button
-              className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300"
-              onClick={() => setIsStartModalOpen(false)}
-            >
-              Cancel
-            </button>
+            </h3>
+            <input
+              type="text"
+              placeholder="Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+            />
+            <input
+              type="text"
+              placeholder="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+            />
+            <div className="flex space-x-4">
+              <input onChange={(e) => setSessionDate(e.target.value)} aria-label="Date and time" type="datetime-local" className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white" />
+            </div>
+            <div className="flex space-x-4 justify-center items-center mb-4">
+              <Dropbox setPdfUrls={setPdfUrls} accessKeyId={process.env.NEXT_PUBLIC_ACCESS_KEY_ID!} secretAccessKey={process.env.NEXT_PUBLIC_SECRET_ACCESS_KEY!} region={process.env.NEXT_PUBLIC_REGION!} bucketName={process.env.NEXT_PUBLIC_BUCKET_NAME!}/>
+            </div>
+            
+            <div className="flex space-x-4">
+              <button
+                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
+                onClick={() => {handleStartSession()}}
+              >
+                Start Session
+              </button>
+              <button
+                className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300"
+                onClick={() => setIsStartModalOpen(false)}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
-      </div>
       )}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center">
@@ -447,6 +442,6 @@ enum SessionStatus {
           </div>
         </div>    
       )}
-    </>
+    </div>
   );
 } 

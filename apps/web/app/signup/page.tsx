@@ -6,6 +6,7 @@ import { BackgroundBeams } from "@repo/ui/background-beams";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { GeistMono } from 'geist/font/mono';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -21,90 +22,76 @@ export default function SignupPage() {
     setError('');
 
     try {
-     const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup`,{email,password,username})
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup`, {
+        email,
+        password,
+        username
+      });
       setLoading(false);
       router.push('/signin');
     } catch (err: any) {
       setError(err.message);
       setLoading(false);
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-cyan-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className={`min-h-screen flex items-center justify-center bg-[conic-gradient(at_bottom_left,_var(--tw-gradient-stops))] from-black via-gray-950 to-gray-900 relative ${GeistMono.className}`} suppressHydrationWarning>
       <BackgroundBeams />
-      
-      <motion.div
+      <motion.div 
+        suppressHydrationWarning
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-md w-full space-y-8 relative z-10"
+        className="max-w-md w-full space-y-8 relative z-10 bg-black/40 backdrop-blur-sm p-8 rounded-3xl border border-gray-800"
       >
         <div>
-          <Link 
-            href="/" 
-            className="text-2xl font-light tracking-tight hover:text-teal-500 transition-colors block text-center"
+          <motion.h2 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="mt-6 text-center text-3xl font-extrabold bg-gradient-to-r from-teal-500 to-cyan-500 bg-clip-text text-transparent"
           >
-            TeachStream
-          </Link>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
             Create your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link href="/signin" className="font-medium text-teal-500 hover:text-teal-400">
-              sign in to your account
-            </Link>
+          </motion.h2>
+          <p className="text-center text-md text-gray-400">
+            already have an account? <Link href="/signin" className="text-teal-500 hover:text-teal-400 transition-colors">Sign in</Link>
           </p>
         </div>
 
-       
-          
-          <div className="space-y-4 rounded-md">
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-2">
             <div>
-              <label htmlFor="username" className="sr-only">
-                Username
-              </label>
               <input
                 id="username"
                 name="username"
                 type="text"
                 required
-                className="relative block w-full rounded-full border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-teal-500"
+                className="appearance-none rounded-xl relative block w-full px-3 py-2 bg-black/50 border border-gray-800 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm transition-all duration-200"
                 placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="email-address" className="sr-only">
-                Email address
-              </label>
               <input
-                id="email-address"
+                id="email"
                 name="email"
                 type="email"
-                autoComplete="email"
                 required
-                className="relative block w-full rounded-full border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-teal-500"
+                className="appearance-none rounded-xl relative block w-full px-3 py-2 bg-black/50 border border-gray-800 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm transition-all duration-200"
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
               <input
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="new-password"
                 required
-                className="relative block w-full rounded-full border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-teal-500"
+                className="appearance-none rounded-xl relative block w-full px-3 py-2 bg-black/50 border border-gray-800 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm transition-all duration-200"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -112,29 +99,28 @@ export default function SignupPage() {
             </div>
           </div>
 
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-red-500 text-sm text-center"
+            >
+              {error}
+            </motion.div>
+          )}
+
           <div>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className={`group relative flex w-full justify-center rounded-full bg-gradient-to-r from-teal-500 to-cyan-500 py-3 px-4 text-sm font-semibold text-white hover:shadow-lg hover:shadow-teal-500/25 transition-all duration-200 ${
-                loading ? 'opacity-70 cursor-not-allowed' : ''
-              }`}
-              onClick={handleSubmit}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-200"
             >
               {loading ? 'Creating account...' : 'Sign up'}
-          
-            </button>
+            </motion.button>
           </div>
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
-            </div>
-        
-          </div>
-
-        </div>
-        {error && <p className="text-red-500 text-center">{error}</p>}
+        </form>
       </motion.div>
     </div>
   );

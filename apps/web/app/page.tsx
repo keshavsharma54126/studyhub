@@ -6,6 +6,8 @@ import { BackgroundBeams } from "@repo/ui/background-beams";
 import { TypewriterEffect } from "@repo/ui/typewriter-effect.tsx";
 import { useRef } from "react";
 import { ThemeToggle } from "@repo/ui/themetoggle";
+import { GeistMono } from 'geist/font/mono';
+import { FloatingLines } from "@repo/ui/floating-lines";
 export default function Home() {
   const targetRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -45,35 +47,35 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-cyan-50 dark:bg-gray-900">
+    <div className={`min-h-screen bg-[conic-gradient(at_bottom_left,_var(--tw-gradient-stops))] from-black via-gray-950 to-gray-900 ${GeistMono.className}`}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Enhanced Navigation */}
-        <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-cyan-100">
+        {/* Navigation */}
+        <nav className="fixed top-0 left-0 right-0 bg-black/50 backdrop-blur-md z-50 border-b border-gray-800">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
-              <div className="text-xl sm:text-2xl font-light tracking-tight hover:text-teal-500 transition-colors cursor-pointer">
+              <div className="text-xl sm:text-2xl font-light tracking-tight text-white hover:text-teal-500 transition-colors cursor-pointer">
                 TeachStream
               </div>
-              <button className="md:hidden p-2">
+              <button className="md:hidden p-2 text-white">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
               <div className="hidden md:flex items-center space-x-4 lg:space-x-8">
                 <ThemeToggle />
-                <Link href="/features" className="text-gray-600 hover:text-teal-500 transition-colors">
+                <Link href="/features" className="text-gray-400 hover:text-teal-500 transition-colors">
                   Features
                 </Link>
-                <Link href="/pricing" className="text-gray-600 hover:text-teal-500 transition-colors">
+                <Link href="/pricing" className="text-gray-400 hover:text-teal-500 transition-colors">
                   Pricing
                 </Link>
                 <div className="relative group">
-                  <div className="bg-teal-500 text-white px-6 py-2 rounded-full flex items-center space-x-2 group-hover:bg-teal-600 transition-colors">
-                    <Link href="/signin" className="hover:text-blue-200 transition-colors">
+                  <div className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-6 py-2 rounded-xl flex items-center space-x-2 hover:from-teal-600 hover:to-cyan-600 transition-all duration-200">
+                    <Link href="/signin" className="hover:text-white/90 transition-colors">
                       Sign in
                     </Link>
-                    <span className="text-gray-400">/</span>
-                    <Link href="/signup" className="hover:text-blue-200 transition-colors">
+                    <span className="text-white/60">/</span>
+                    <Link href="/signup" className="hover:text-white/90 transition-colors">
                       Sign up
                     </Link>
                   </div>
@@ -83,26 +85,15 @@ export default function Home() {
           </div>
         </nav>
 
-        {/* Enhanced Animated Hero Section */}
+        {/* Rest of the sections */}
         <div ref={targetRef} className="relative min-h-screen w-full">
           <motion.div 
             style={{ opacity, scale, position }}
             className="relative min-h-screen flex flex-col items-center justify-center py-16 md:py-32"
           >
-            <BackgroundBeams />
+            <FloatingLines />
             
-            {/* Floating Elements Animation */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 1, 0.8, 1] }}
-              transition={{ duration: 4, repeat: Infinity, repeatType: "reverse" }}
-              className="absolute inset-0 overflow-hidden pointer-events-none"
-            >
-              <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-64 h-64 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob" />
-              <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-64 h-64 bg-cyan-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000" />
-              <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 w-64 h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000" />
-            </motion.div>
-
+            {/* Keep existing content but update styling to match dark theme */}
             <div className="text-center relative z-10 max-w-5xl mx-auto">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -110,7 +101,7 @@ export default function Home() {
                 transition={{ duration: 1 }}
                 className="space-y-8"
               >
-                {/* Animated Icon */}
+                {/* Update icon container styling */}
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
@@ -122,7 +113,7 @@ export default function Home() {
                   }}
                   className="mx-auto mb-8"
                 >
-                  <div className="w-20 h-20 mx-auto bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full flex items-center justify-center">
+                  <div className="w-20 h-20 mx-auto bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center">
                     <svg 
                       className="w-10 h-10 text-white" 
                       fill="none" 
@@ -138,33 +129,25 @@ export default function Home() {
                     </svg>
                   </div>
                 </motion.div>
-                  <div className="flex flex-col items-center justify-center px-10">
-                    
-                    <TypewriterEffect 
-                      words={words} 
-                      className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight" 
-                    />
-                    <TypewriterEffect 
-                      words={words2} 
-                      className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight" 
-                    />
-                  </div>
-                
+
+                {/* Keep TypewriterEffect components */}
+                <div className="flex flex-col items-center justify-center px-10 text-white">
+                  <TypewriterEffect words={words} className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight" />
+                  <TypewriterEffect words={words2} className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight" />
+                </div>
+
+                {/* Update paragraph text color */}
                 <motion.p 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
-                  className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mt-6 sm:mt-8 leading-relaxed px-4"
+                  className="text-base sm:text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mt-6 sm:mt-8 leading-relaxed px-4"
                 >
                   Create engaging, interactive teaching sessions and connect with your students in real-time through our 
-                  <motion.span
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.8 }}
-                    className="text-teal-500 font-medium"
-                  > innovative AI-powered platform</motion.span>
+                  <motion.span className="text-teal-500 font-medium"> innovative AI-powered platform</motion.span>
                 </motion.p>
 
+                {/* Update CTA buttons */}
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -173,8 +156,8 @@ export default function Home() {
                 >
                   <Link 
                     href="/create-session" 
-                    className="w-full sm:w-auto bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-8 py-4 rounded-full 
-                      hover:shadow-lg hover:shadow-teal-500/25 transition-all duration-200 transform hover:scale-105
+                    className="w-full sm:w-auto bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-8 py-4 rounded-xl 
+                      hover:from-teal-600 hover:to-cyan-600 transition-all duration-200 transform hover:scale-105
                       flex items-center justify-center space-x-2 group"
                   >
                     <span>Get Started Free</span>
@@ -190,8 +173,9 @@ export default function Home() {
                   
                   <Link 
                     href="/demo" 
-                    className="w-full sm:w-auto group px-8 py-4 rounded-full border-2 border-teal-500/20 hover:border-teal-500 
-                      transition-colors flex items-center justify-center space-x-2 text-gray-600 hover:text-teal-500"
+                    className="w-full sm:w-auto group px-8 py-4 rounded-xl border border-gray-800 hover:border-teal-500/50 
+                      transition-all duration-200 flex items-center justify-center space-x-2 text-gray-400 hover:text-teal-500
+                      bg-black/50 backdrop-blur-sm"
                   >
                     <svg 
                       className="w-5 h-5" 
@@ -206,11 +190,12 @@ export default function Home() {
                   </Link>
                 </motion.div>
 
+                {/* Update stats section */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1 }}
-                  className="mt-12 pt-8 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-center gap-8 text-sm text-gray-500"
+                  className="mt-12 pt-8 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-center gap-8 text-sm text-gray-400"
                 >
                   <div className="flex items-center gap-2">
                     <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -232,8 +217,8 @@ export default function Home() {
         {/* Features Section */}
         <div className="py-24 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Why TeachStream?</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-4xl font-bold mb-4 text-white">Why TeachStream?</h2>
+            <p className="text-gray-400 max-w-2xl mx-auto">
               Discover how our platform revolutionizes online teaching
             </p>
           </div>
@@ -261,11 +246,11 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.2 }}
-                className="p-6 rounded-2xl bg-white border border-gray-100 hover:shadow-lg transition-all duration-200"
+                className="p-6 rounded-2xl bg-black/40 backdrop-blur-sm border border-gray-800 hover:border-teal-500/50 transition-all duration-200"
               >
                 <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
+                <h3 className="text-xl font-semibold mb-2 text-white">{feature.title}</h3>
+                <p className="text-gray-400">{feature.description}</p>
               </motion.div>
             ))}
           </div>
@@ -276,22 +261,26 @@ export default function Home() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-3xl p-6 sm:p-8 md:p-12 mx-4"
+            className="bg-black/40 backdrop-blur-sm rounded-3xl p-6 sm:p-8 md:p-12 mx-4 border border-gray-800"
           >
             <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">See TeachStream in Action</h2>
-              <p className="text-lg sm:text-xl mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-white">See TeachStream in Action</h2>
+              <p className="text-lg sm:text-xl mb-6 sm:mb-8 text-gray-400">
                 Schedule a personalized demo with our team and discover how TeachStream can transform your teaching experience.
               </p>
               <form className="flex flex-col sm:flex-row gap-4 justify-center">
                 <input
                   type="email"
                   placeholder="Enter your email"
-                  className="w-full sm:w-auto px-6 py-3 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-black/50 border border-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                 />
-                <button className="bg-white text-teal-500 px-8 py-3 rounded-full hover:bg-opacity-90 transition-all duration-200">
+                <motion.button 
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-8 py-3 rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-200"
+                >
                   Request Demo
-                </button>
+                </motion.button>
               </form>
             </div>
           </motion.div>
@@ -300,8 +289,8 @@ export default function Home() {
         {/* New Pricing Section */}
         <div className="py-24 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">Choose the perfect plan for your teaching needs</p>
+            <h2 className="text-4xl font-bold mb-4 text-white">Simple, Transparent Pricing</h2>
+            <p className="text-gray-400 max-w-2xl mx-auto">Choose the perfect plan for your teaching needs</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 px-4">
@@ -332,28 +321,30 @@ export default function Home() {
                 transition={{ delay: index * 0.2 }}
                 className={`p-8 rounded-2xl ${
                   plan.highlighted
-                    ? "bg-gradient-to-b from-teal-500 to-cyan-500 text-white scale-105"
-                    : "bg-white border border-cyan-100"
+                    ? "bg-gradient-to-b from-teal-500 to-cyan-500 text-white"
+                    : "bg-black/40 backdrop-blur-sm border border-gray-800 hover:border-teal-500/50"
                 }`}
               >
-                <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                <div className="text-3xl font-bold mb-6">{plan.price}<span className="text-sm font-normal">/month</span></div>
+                <h3 className="text-2xl font-bold mb-2 text-white">{plan.name}</h3>
+                <div className="text-3xl font-bold mb-6 text-white">{plan.price}<span className="text-sm font-normal text-gray-400">/month</span></div>
                 <ul className="space-y-4 mb-8">
                   {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-center">
-                      <span className="mr-2">✓</span> {feature}
+                    <li key={i} className="flex items-center text-gray-300">
+                      <span className="mr-2 text-teal-500">✓</span> {feature}
                     </li>
                   ))}
                 </ul>
-                <button
-                  className={`w-full py-3 rounded-full transition-all duration-200 ${
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`w-full py-3 rounded-xl transition-all duration-200 ${
                     plan.highlighted
                       ? "bg-white text-teal-500 hover:bg-opacity-90"
-                      : "bg-teal-500 text-white hover:bg-teal-600"
+                      : "bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600"
                   }`}
                 >
                   Get Started
-                </button>
+                </motion.button>
               </motion.div>
             ))}
           </div>
@@ -364,18 +355,19 @@ export default function Home() {
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
-            className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-3xl p-6 sm:p-8 md:p-12 mx-4 text-center"
+            className="bg-black/40 backdrop-blur-sm rounded-3xl p-6 sm:p-8 md:p-12 mx-4 text-center border border-gray-800"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">Ready to transform your teaching?</h2>
-            <p className="text-gray-300 max-w-2xl mx-auto mb-6 sm:mb-8 text-base sm:text-lg">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-white">Ready to transform your teaching?</h2>
+            <p className="text-gray-400 max-w-2xl mx-auto mb-6 sm:mb-8 text-base sm:text-lg">
               Join thousands of educators who are already using TeachStream to create engaging learning experiences.
             </p>
-            <Link 
-              href="/signup" 
-              className="bg-white text-black px-8 py-4 rounded-full hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 inline-block"
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-8 py-4 rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-200"
             >
               Start Teaching Today
-            </Link>
+            </motion.button>
           </motion.div>
         </div>
 

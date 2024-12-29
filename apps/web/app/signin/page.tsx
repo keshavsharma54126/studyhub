@@ -6,6 +6,8 @@ import { BackgroundBeams } from "@repo/ui/background-beams";
 import { motion } from "framer-motion";
 import axios from "axios";
 import Link from 'next/link';
+import { GeistMono } from 'geist/font/mono';
+
 export default function SignIn() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -95,14 +97,14 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-cyan-50 relative" suppressHydrationWarning>
+    <div className={`min-h-screen flex items-center justify-center bg-[conic-gradient(at_bottom_left,_var(--tw-gradient-stops))] from-black via-gray-950 to-gray-900 relative ${GeistMono.className}`} suppressHydrationWarning>
       <BackgroundBeams />
       <motion.div 
         suppressHydrationWarning
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-md w-full space-y-8 relative z-10 bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl"
+        className="max-w-md w-full space-y-8 relative z-10 bg-black/40 backdrop-blur-sm p-8 rounded-3xl border border-gray-800"
       >
         <div>
           <motion.h2 
@@ -113,35 +115,32 @@ export default function SignIn() {
           >
             Sign in to your account
           </motion.h2>
-          <p className="text-center text-md text-gray-500">new here? <Link href="/signup" className="text-teal-500 hover:text-teal-600 underline">Sign up</Link></p>
+          <p className="text-center text-md text-gray-400">
+            new here? <Link href="/signup" className="text-teal-500 hover:text-teal-400 transition-colors">Sign up</Link>
+          </p>
         </div>
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
+          <div className="rounded-md -space-y-px">
             <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
               <input
                 id="email"
                 name="email"
                 type="email"
                 required
-                className="appearance-none rounded-t-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-t-xl relative block w-full px-3 py-2 bg-black/50 border border-gray-800 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm transition-all duration-200"
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
               <input
                 id="password"
                 name="password"
                 type="password"
                 required
-                className="appearance-none rounded-b-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-b-xl relative block w-full px-3 py-2 bg-black/50 border border-gray-800 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm transition-all duration-200"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -165,7 +164,7 @@ export default function SignIn() {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-200"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-200"
             >
               {loading ? 'Signing in...' : 'Sign in'}
             </motion.button>
@@ -175,10 +174,10 @@ export default function SignIn() {
         <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
+              <div className="w-full border-t border-gray-800" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">
+              <span className="px-2 bg-black text-gray-400">
                 Or continue with
               </span>
             </div>
@@ -188,8 +187,8 @@ export default function SignIn() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick = {handleGoogleSignIn}
-              className="w-full flex items-center justify-center gap-3 rounded-full bg-white py-3 px-4 text-sm font-semibold text-gray-700 border border-gray-300 hover:border-gray-400 transition-all duration-200"
+              onClick={handleGoogleSignIn}
+              className="w-full flex items-center justify-center gap-3 rounded-xl bg-black/50 py-3 px-4 text-sm font-medium text-white border border-gray-800 hover:bg-black/70 hover:border-teal-500/50 transition-all duration-200"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24">
                 <path
@@ -209,7 +208,7 @@ export default function SignIn() {
                   fill="#EA4335"
                 />
               </svg>
-              Sign up with Google
+              Sign in with Google
             </motion.button>
           </div>
         </div>

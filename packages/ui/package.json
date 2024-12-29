@@ -22,7 +22,8 @@
     "./chatComponent": "./src/chatComponent.tsx",
     "./tooltip": "./src/tooltip.tsx",
     "./utils/cn": "./src/utils/cn.js",
-    "./VideoPlayer": "./src/videoPlayer.tsx"
+    "./VideoPlayer": "./src/videoPlayer.tsx",
+    "./floating-lines": "./src/floating-lines.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
