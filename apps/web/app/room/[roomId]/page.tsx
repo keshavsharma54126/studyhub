@@ -52,7 +52,7 @@ export default function RoomPage() {
     const [chatMessages,setChatMessages] = useState<ChatMessage[]>([]);
     const [isChatOpen,setIsChatOpen] = useState(false);
     const [isDrawingControlsOpen,setIsDrawingControlsOpen] = useState(false);
-    const [isRecording,setIsRecording] = useState(false);
+    const [recordingStarted,setRecordingStarted] = useState(false);
 
     const currentSlideIndexRef = useRef<number>(
         parseInt(localStorage.getItem(`slideIndex-${sessionId}`) || "0")
@@ -112,7 +112,8 @@ export default function RoomPage() {
                         sessionId,
                         slideIndex: newIndex,
                         move: "next",
-                        url: slides[newIndex]?.url
+                        url: slides[newIndex]?.url,
+                        recording:recordingStarted
                     }
                 }));
             }
@@ -138,7 +139,8 @@ export default function RoomPage() {
                         sessionId,
                         slideIndex: newIndex,
                         move: "previous",
-                        url: slides[newIndex]?.url
+                        url: slides[newIndex]?.url,
+                        recording:recordingStarted
                     }
                 }));
             }
@@ -429,7 +431,8 @@ export default function RoomPage() {
                     y: normalizedY,
                     color: strokeColor,
                     width: strokeSize,
-                    isEraser
+                    isEraser,
+                    recording:recordingStarted
                 }
             }));
         }
@@ -455,7 +458,8 @@ export default function RoomPage() {
             roomWebSocketRef.current.send(JSON.stringify({
                 type: "CLEAR",
                 payload: {
-                    sessionId
+                    sessionId,
+                    recording:recordingStarted
                 }
             }));
         }
@@ -614,7 +618,7 @@ export default function RoomPage() {
                         {/* Video Component */}
                         <div className="h-[280px] lg:h-1/4 p-2">
                             <div className="w-full h-full rounded-lg overflow-hidden bg-gray-900">
-                                <VideoComponent token={token} isHost={isHost} sessionId={sessionId as string} />
+                                <VideoComponent token={token} isHost={isHost} sessionId={sessionId as string} setRecordingStarted={setRecordingStarted} />
                             </div>
                         </div>
 

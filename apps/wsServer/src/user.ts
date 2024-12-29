@@ -126,11 +126,13 @@ export class User{
                             type:"STROKE_RECEIVED",
                             payload:message.payload
                         });
-                        await this.produceEvents({
-                            type:"STROKE_RECEIVED",
-                            sessionId:strokeSessionId,
-                            payload:message.payload
-                        })
+                        if(message.payload.recording){
+                            await this.produceEvents({
+                                type:"STROKE_RECEIVED",
+                                sessionId:strokeSessionId,
+                                payload:message.payload
+                            })
+                        }
                     }
                     
                     break;
@@ -147,15 +149,18 @@ export class User{
                             userId:this.userId
                         }
                     });
-                    await this.produceEvents({
-                        type:"CLEAR_RECEIVED",
-                        sessionId:clearSessionId,
-                        payload:{
+                    if(message.payload.recording){
+                        await this.produceEvents({
+                            type:"CLEAR_RECEIVED",
+                            sessionId:clearSessionId,
+                            payload:{
                             message:"Admin cleared the canvas",
                             userId:this.userId
                         }
                     })
                     }
+
+                }
                     
                     break;
 
@@ -168,11 +173,13 @@ export class User{
                             type:"SLIDE_CHANGE_RECEIVED",
                             payload:message.payload
                     });
-                    await this.produceEvents({
-                        type:"SLIDE_CHANGE_RECEIVED",
-                        sessionId:slideChangeSessionId,
-                        payload:message.payload
-                    })
+                    if(message.payload.recording){
+                        await this.produceEvents({
+                            type:"SLIDE_CHANGE_RECEIVED",
+                            sessionId:slideChangeSessionId,
+                            payload:message.payload
+                        })
+                    }
                     break;
 
                 case "CHAT_MESSAGE":
@@ -183,8 +190,9 @@ export class User{
                         type:"CHAT_MESSAGE_RECEIVED",
                         payload:message.payload
                     });
-                    await this.produceEvents({
-                        type:"CHAT_MESSAGE_RECEIVED",
+                    
+                        await this.produceEvents({
+                            type:"CHAT_MESSAGE_RECEIVED",
                         sessionId:chatSessionId,
                         payload:message.payload
                     })

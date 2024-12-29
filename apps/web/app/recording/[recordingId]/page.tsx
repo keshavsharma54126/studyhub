@@ -9,6 +9,7 @@ import VideoJS from "video.js"
 import "video.js/dist/video-js.css"
 import Player from 'video.js/dist/types/player';
 import { useParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 
 interface SessionEvent {
     id: string;
@@ -33,7 +34,12 @@ interface Slide{
     id:string;
 }
 
-export default function SessionReplayPage() {
+const SessionReplayPageClient = dynamic(
+    () => Promise.resolve(SessionReplayPage),
+    { ssr: false }
+);
+
+function SessionReplayPage() {
     const isPlayingRef = useRef(false);
     const {user,isLoading,error} = useGetUser();
     const [events, setEvents] = useState<SessionEvent[]>([]);
@@ -474,3 +480,5 @@ export default function SessionReplayPage() {
         </div>
     );
 }
+
+export default SessionReplayPageClient;

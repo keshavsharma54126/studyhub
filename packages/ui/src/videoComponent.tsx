@@ -14,7 +14,7 @@ import axios from 'axios';
   const serverUrl = 'wss://myacademy-lznxzk2x.livekit.cloud';
   
   
-  export  function VideoComponent({token, isHost,sessionId,}: {token: string, isHost: boolean,sessionId:string}) {
+  export  function VideoComponent({token, isHost,sessionId,setRecordingStarted}: {token: string, isHost: boolean,sessionId:string,setRecordingStarted: (value: boolean) => void}) {
     const [isRecording,setIsRecording] = useState(false);
     const[egressId,setEgressId] = useState<string | null>(null);
   const startRecording = async () => {
@@ -31,6 +31,7 @@ import axios from 'axios';
       );
       setEgressId(response.data.egressId);
       setIsRecording(true);
+      setRecordingStarted(true);
     } catch (error) {
       console.error('Failed to start recording:', error);
     }
@@ -42,7 +43,7 @@ import axios from 'axios';
     try {
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}/stop-recording`,
-        {},
+        {egressId},
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('auth_token')}`
@@ -50,6 +51,7 @@ import axios from 'axios';
         }
       );
       setIsRecording(false);
+      setRecordingStarted(false);
       setEgressId(null);
     } catch (error) {
       console.error('Failed to stop recording:', error);

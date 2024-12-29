@@ -564,6 +564,7 @@ sessionRouter.post("/session/:sessionId/start-recording", userMiddleware, async(
     }
 
     const response = await egressClient.startRoomCompositeEgress(sessionId, output);
+    console.log("response",response)
 
     return res.status(200).json({
       message: "recording started successfully",
@@ -580,6 +581,7 @@ sessionRouter.post("/session/:sessionId/start-recording", userMiddleware, async(
 sessionRouter.post("/session/:sessionId/stop-recording",userMiddleware,async(req:any,res:any)=>{
   try{
     const egressId = req.body.egressId;
+    console.log("egressId",egressId)
     await egressClient.stopEgress(egressId);
     res.status(200).json({
       message:"recording stopped successfully"
