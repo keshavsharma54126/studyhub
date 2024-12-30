@@ -7,7 +7,7 @@ import userRouter from "./routes/userRouter";
 const app = express();
 
 app.use(cors({
-  origin:"http://localhost:3000",
+  origin:process.env.FRONTEND_URL,
   credentials:true
 }))
 
@@ -20,6 +20,6 @@ app.get("/", (req: Request, res: Response) => {
 app.use("/api/v1/auth",authRouter)
 app.use("/api/v1/sessions",sessionRouter)
 app.use("/api/v1/user",userRouter)
-app.listen(3001, () => {
-  console.log("Server is running on port 3001");
+app.listen(3007, () => {
+  console.log("Server is running on port 3007");
 });

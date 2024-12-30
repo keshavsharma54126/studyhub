@@ -44,7 +44,7 @@ enum SessionStatus {
 
   const handleStartSession = async () =>{
     try{
-      const response = await axios.post(`http://localhost:3001/api/v1/sessions/session`,{
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session`,{
         sessionCode: sessionCode,
         title: title,
         description: description,
@@ -56,7 +56,7 @@ enum SessionStatus {
       })
 
       if(response.status === 200){
-        await axios.post(`http://localhost:3001/api/v1/sessions/session/${response.data.sessionId}/slides/upload`,{
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${response.data.sessionId}/slides/upload`,{
           pdfUrls: pdfUrls
         },{
           headers:{
@@ -74,7 +74,7 @@ enum SessionStatus {
   }
   const preFetchSessions = async () =>{
     try{
-      const response = await axios.get(`http://localhost:3001/api/v1/sessions/sessions/${user?.id}`,{
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/sessions/${user?.id}`,{
         headers:{
           Authorization: `Bearer ${localStorage.getItem("auth_token")}`
         }
@@ -114,7 +114,7 @@ enum SessionStatus {
       if(!token){
         return;
       }
-      await axios.delete(`http://localhost:3001/api/v1/sessions/session/${sessionId}`,{
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}`,{
         headers:{
           Authorization: `Bearer ${token}`
         }
@@ -133,7 +133,7 @@ enum SessionStatus {
       if(!token){
         return;
       }
-      const response = await axios.get(`http://localhost:3001/api/v1/sessions/session/tojoin/${sessionToJoin}`,{
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session/tojoin/${sessionToJoin}`,{
         headers:{
           Authorization: `Bearer ${token}`
         }

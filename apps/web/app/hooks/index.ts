@@ -31,7 +31,7 @@ export const useGetUser = () => {
             if (!token) return { success: false, error: "No token found" };
 
             setIsLoading(true);
-            const response = await axios.get(`http://localhost:3001/api/v1/user`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

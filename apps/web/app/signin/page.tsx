@@ -46,7 +46,7 @@ export default function SignIn() {
             return;
         }
         setLoading(true);
-        const urlResponse = await axios.get("http://localhost:3001/api/v1/auth/google/url");
+        const urlResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/auth/google/url`);
         if(urlResponse.status!==200){
             setLoading(false);
             setError("Failed to generate auth url");
@@ -62,7 +62,7 @@ export default function SignIn() {
 
                 const {code} = event.data;
                 console.log("code",code);
-                const tokenResponse = await axios.get(`http://localhost:3001/api/v1/auth/google/callback?code=${code}`);
+                const tokenResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/auth/google/callback?code=${code}`);
                 if(tokenResponse.data.status!==200){
                     setError("Failed to get token");
                     setLoading(false);

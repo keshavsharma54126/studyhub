@@ -132,12 +132,12 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className,
   }, [messages]);
 
   return (
-    <div className={cn("flex flex-col h-full", className)}>
-      <div className="flex-none h-[40px] p-2 border-b border-gray-200 dark:border-gray-700">
+    <div className={cn("flex flex-col h-full bg-gray-100 dark:bg-gray-800", className)}>
+      <div className="flex-none h-[40px] p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
         <h3 className="text-sm font-semibold text-gray-800 dark:text-white">Chat</h3>
       </div>
 
-      <ScrollAreaPrimitive.Root className="flex-1">
+      <ScrollAreaPrimitive.Root className="flex-1 bg-gray-100 dark:bg-gray-800">
         <ScrollAreaPrimitive.Viewport ref={chatContainerRef} className="h-full w-full">
           <div className="p-4 space-y-2">
             {messages.map((message, index) => (
@@ -150,8 +150,8 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className,
                 <div
                   className={`max-w-[85%] rounded-lg p-2 text-sm ${
                     message.userId === currentUser.id
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 text-gray-800'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100'
                   }`}
                 >
                   {message.userId !== currentUser.id && (
@@ -174,7 +174,7 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className,
         </ScrollAreaPrimitive.Scrollbar>
       </ScrollAreaPrimitive.Root>
 
-      <div className="flex-none p-2 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex-none p-2 border-t border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
         <div  className="flex gap-2">
           <Input
             type="text"
@@ -183,7 +183,7 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className,
             onChange={(e) => setNewMessage(e.target.value)}
             onFocus={() => setIsEmojiPickerOpen(false)}
             onKeyDown={handleKeyDown}
-            className="flex-1 text-sm"
+            className="flex-1 text-sm bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100`"
           />
           <Button onClick={() => setIsEmojiPickerOpen(!isEmojiPickerOpen)}>
             <FiSmile />

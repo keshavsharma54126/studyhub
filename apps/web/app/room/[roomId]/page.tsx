@@ -62,7 +62,7 @@ export default function RoomPage() {
     const getSlides = async () => {
        try{
         const auth_token = localStorage.getItem("auth_token");
-        const response = await axios.get(`http://localhost:3001/api/v1/sessions/session/${sessionId}/slides/images`,{
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}/slides/images`,{
             headers:{
                 "Authorization": `Bearer ${auth_token}`
             }
@@ -159,7 +159,7 @@ export default function RoomPage() {
         try{
             console.log("checking session ended");
             const auth_token = localStorage.getItem("auth_token");
-            const response = await axios.get(`http://localhost:3001/api/v1/sessions/session/${sessionId}/status`,{
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}/status`,{
                 headers:{
                     "Authorization": `Bearer ${auth_token}`
                 }
@@ -178,7 +178,7 @@ export default function RoomPage() {
     const checkAdmin = async () => {
         try {
             const auth_token = localStorage.getItem("auth_token");
-            const response = await axios.get(`http://localhost:3001/api/v1/sessions/session/${sessionId}`, {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}`, {
                 headers: {
                     "Authorization": `Bearer ${auth_token}`
                 }
@@ -209,7 +209,7 @@ export default function RoomPage() {
         }
         checkAdmin();
         if(user){
-        axios.post(`http://localhost:3001/api/v1/sessions/token`,
+        axios.post(`${process.env.NEXT_PUBLIC_API_URL}/sessions/token`,
             {
                 roomName:sessionId,
                 participantName: user?.username,
@@ -353,7 +353,7 @@ export default function RoomPage() {
     const handleStartSession = async()=>{
         try{
             const auth_token = localStorage.getItem("auth_token");
-            const response = await axios.put(`http://localhost:3001/api/v1/sessions/session/${sessionId}/start`,{},{
+            const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}/start`,{},{
                 headers:{
                     "Authorization": `Bearer ${auth_token}`
                 }
@@ -368,7 +368,7 @@ export default function RoomPage() {
     const handleEndSession = async()=>{
         try{
             const auth_token = localStorage.getItem("auth_token");
-            const response = await axios.put(`http://localhost:3001/api/v1/sessions/session/${sessionId}/end`,{},{
+            const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}/end`,{},{
                 headers:{
                     "Authorization": `Bearer ${auth_token}`
                 }

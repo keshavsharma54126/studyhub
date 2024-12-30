@@ -130,13 +130,16 @@ export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPd
           {isLoading && <Loader className="w-5 h-5 text-primary-400" />}
         </div>
       )}
+      <div className="flex justify-center items-center mt-4 ">
       <button
+       className="bg-teal-500 text-white px-4 py-2 rounded-lg w-full mt-4"
         onClick={() => {
           handleSubmit();
         }}
       >
         Submit
       </button>
+      </div>
     </div>
   );
 }
