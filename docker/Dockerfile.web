@@ -7,6 +7,9 @@ COPY package.json package-lock.json ./
 COPY turbo.json ./
 COPY packages/ui/package.json ./packages/ui/package.json
 COPY packages/db/package.json ./packages/db/package.json
+COPY apps/http-backend/package.json ./apps/http-backend/package.json
+COPY apps/upload-service/package.json ./apps/upload-service/package.json
+COPY apps/ws-service/package.json ./apps/ws-service/package.json
 COPY apps/web/package.json ./apps/web/package.json
 
 RUN npm install
@@ -14,7 +17,7 @@ RUN npm install
 FROM base AS builder 
 WORKDIR /app 
 COPY --from=deps /app/node_modules ./node_modules
-COPY . . 
+COPY . .
 
 RUN npm run db:generate
 
