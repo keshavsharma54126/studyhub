@@ -8,7 +8,7 @@ COPY turbo.json ./
 COPY packages/ui/package.json ./packages/ui/package.json
 COPY packages/db/package.json ./packages/db/package.json
 COPY apps/http-backend/package.json ./apps/http-backend/package.json
-COPY apps/upload-service/package.json ./apps/upload-service/package.json
+COPY apps/upload-worker/package.json ./apps/upload-worker/package.json
 COPY apps/wsServer/package.json ./apps/wsServer/package.json
 COPY apps/web/package.json ./apps/web/package.json
 
