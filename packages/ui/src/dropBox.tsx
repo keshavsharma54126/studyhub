@@ -87,7 +87,7 @@ export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPd
   const { toast } = useToast();
 
   return (
-    <div className="w-full">
+    <div className="w-full bg-teal-500/10 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-800">
       <div
         {...getRootProps()}
         className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors duration-300 ${
@@ -103,7 +103,7 @@ export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPd
             ? "Drop the files here"
             : "Drag & drop files here, or click to select files"}
         </p>
-        <p className="text-sm text-gray-400 mt-2">Supported formats: CSV</p>
+        <p className="text-sm text-gray-400 mt-2">Supported formats: PDF</p>
       </div>
 
       {files.length > 0 && (

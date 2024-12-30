@@ -385,7 +385,53 @@ function SessionReplayPage() {
     }
 
     if(loading){
-        return <div className="h-screen flex justify-center items-center"> <Loader2 className="w-10 h-10 animate-spin" /> </div>
+        return (
+            <div className="h-screen flex">
+                {/* Main Content Area */}
+                <div className="flex-1 flex flex-col">
+                    {/* Header Skeleton */}
+                    <div className="flex justify-between items-center p-4 border-b">
+                        <div className="h-8 w-48 bg-gray-900 animate-pulse rounded"></div>
+                        <div className="flex gap-4 items-center">
+                            <div className="h-10 w-20 bg-gray-900 animate-pulse rounded"></div>
+                            <div className="h-12 w-12 bg-gray-900 animate-pulse rounded-full"></div>
+                            <div className="h-12 w-12 bg-gray-900 animate-pulse rounded-full"></div>
+                        </div>
+                    </div>
+
+                    {/* Canvas Area Skeleton */}
+                    <div className="flex-1 relative bg-gray-900">
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="flex flex-col items-center gap-4">
+                                <Loader2 className="w-10 h-10 animate-spin text-gray-400" />
+                                <div className="text-gray-500">Loading session replay...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Sidebar Skeleton */}
+                <div className="w-80 border-l flex flex-col">
+                    {/* Video Player Skeleton */}
+                    <div className="h-48 bg-gray-200 animate-pulse"></div>
+                    
+                    {/* Chat Skeleton */}
+                    <div className="flex-1 p-4">
+                        <div className="space-y-4">
+                            {[...Array(3)].map((_, i) => (
+                                <div key={i} className="flex gap-3">
+                                    <div className="h-10 w-10 bg-gray-200 animate-pulse rounded-full"></div>
+                                    <div className="flex-1 space-y-2">
+                                        <div className="h-4 w-1/4 bg-gray-200 animate-pulse rounded"></div>
+                                        <div className="h-4 w-3/4 bg-gray-200 animate-pulse rounded"></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     return (

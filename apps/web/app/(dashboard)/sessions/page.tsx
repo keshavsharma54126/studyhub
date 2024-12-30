@@ -220,13 +220,9 @@ export default function SessionsPage() {
               <div className="flex items-center">
                 <button
                   onClick={() => router.push(`/recording/${session.id}`)}
-                  className="w-full md:w-auto px-6 py-3 text-sm font-medium text-white 
-                    bg-gradient-to-r from-teal-600 to-cyan-600 
-                    hover:from-teal-500 hover:to-cyan-500 
-                    rounded-lg transition-all duration-300 
-                    shadow-md hover:shadow-lg transform hover:scale-105"
+                  className="text-sm text-teal-300 border border-teal-400 px-4 py-2 rounded-lg hover:text-white hover:bg-teal-400 transition-colors duration-300"
                 >
-                  Watch Recording
+                  Watch Recording →
                 </button>
               </div>
             </div>

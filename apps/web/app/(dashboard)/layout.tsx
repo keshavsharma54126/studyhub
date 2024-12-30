@@ -44,18 +44,111 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!mounted) return null;
 
-  if(isLoading) return (
-    <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
-      <div className="m-auto">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-700 dark:text-gray-300 text-lg font-medium">
-            Loading your dashboard...
-          </p>
+  if(isLoading){
+    return (
+      <div className="flex h-screen bg-[conic-gradient(at_bottom_left,_var(--tw-gradient-stops))] from-black via-gray-950 to-gray-900">
+        {/* Sidebar Skeleton */}
+        <div className="w-64 h-screen bg-black/90 backdrop-blur-md border-r border-teal-500/10">
+          <div className="p-6">
+            <div className="h-8 w-32 bg-teal-500/10 rounded animate-pulse" />
+          </div>
+          <div className="px-4 space-y-2">
+            {[1, 2, 3, 4].map((index) => (
+              <div key={index} className="p-3 rounded-lg bg-teal-500/5 animate-pulse" />
+            ))}
+          </div>
+        </div>
+
+        {/* Main Content Skeleton */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Top Bar Skeleton */}
+          <div className="h-16 bg-black/90 backdrop-blur-md border-b border-teal-500/10 px-6 flex items-center justify-between">
+            <div className="flex space-x-4">
+              <div className="w-8 h-8 rounded-lg bg-teal-500/10 animate-pulse" />
+              <div className="w-8 h-8 rounded-lg bg-teal-500/10 animate-pulse" />
+            </div>
+            <div className="flex space-x-4">
+              <div className="w-8 h-8 rounded-lg bg-teal-500/10 animate-pulse" />
+              <div className="w-8 h-8 rounded-full bg-teal-500/10 animate-pulse" />
+            </div>
+          </div>
+
+          {/* Page Content Skeleton */}
+          <div className="flex-1 overflow-auto p-6 bg-gradient-to-br from-black via-gray-950 to-gray-900">
+            <div className="space-y-8">
+              {/* Hero Stats Section */}
+              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-black via-gray-900 to-gray-800 p-8 border border-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {[1, 2, 3].map((index) => (
+                    <div key={index} className="relative p-6 rounded-2xl border border-gray-800 bg-black/40 backdrop-blur-sm">
+                      <div className="w-8 h-8 rounded-lg bg-teal-500/10 animate-pulse mb-4" />
+                      <div className="h-6 w-32 bg-teal-500/10 rounded animate-pulse mb-4" />
+                      <div className="flex items-end justify-between">
+                        <div className="h-10 w-20 bg-teal-500/10 rounded animate-pulse" />
+                        <div className="h-4 w-16 bg-teal-500/10 rounded animate-pulse" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quick Actions Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[1, 2].map((index) => (
+                  <div 
+                    key={index}
+                    className="h-[72px] rounded-2xl bg-black/40 backdrop-blur-sm border border-gray-800 animate-pulse"
+                  />
+                ))}
+              </div>
+
+              {/* Main Content Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Left Column */}
+                <div className="rounded-3xl border border-gray-800 bg-black/40 backdrop-blur-sm p-8">
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="h-8 w-48 bg-teal-500/10 rounded animate-pulse" />
+                    <div className="h-8 w-32 bg-teal-500/10 rounded-full animate-pulse" />
+                  </div>
+                  <div className="space-y-6">
+                    {[1, 2].map((index) => (
+                      <div key={index} className="rounded-2xl border border-gray-800 p-6">
+                        <div className="space-y-4">
+                          <div className="h-6 w-3/4 bg-teal-500/10 rounded animate-pulse" />
+                          <div className="h-4 w-1/2 bg-teal-500/10 rounded animate-pulse" />
+                          <div className="grid grid-cols-3 gap-4">
+                            {[1, 2, 3].map((i) => (
+                              <div key={i} className="h-4 bg-teal-500/10 rounded animate-pulse" />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-6">
+                  {[1, 2, 3].map((index) => (
+                    <div key={index} className="rounded-2xl border border-gray-800 bg-black/40 backdrop-blur-sm p-6">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-12 h-12 rounded-full bg-teal-500/10 animate-pulse" />
+                        <div className="flex-1">
+                          <div className="h-5 w-48 bg-teal-500/10 rounded animate-pulse mb-2" />
+                          <div className="h-4 w-32 bg-teal-500/10 rounded animate-pulse" />
+                        </div>
+                        <div className="h-8 w-24 bg-teal-500/10 rounded-full animate-pulse" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   if(error) return <div>Error: {error.message}</div>;
 
@@ -90,30 +183,36 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             className={`flex items-center w-full p-3 mb-2 rounded-lg text-gray-300 hover:bg-gradient-to-r hover:from-teal-500/10 hover:to-cyan-500/10 transition-all group ${GeistMono.className}`}
             onClick={() => router.push("/home")}
           >
-            <FiHome className="w-5 h-5 group-hover:text-teal-500 transition-colors" />
-            <span className={`ml-3 font-medium group-hover:text-teal-500 transition-colors ${!isSidebarOpen && 'md:hidden'}`}>
-              Home
-            </span>
+            <FiHome className={`w-5 h-5 group-hover:text-teal-500 transition-colors ${!isSidebarOpen ? 'mx-auto' : ''}`} />
+            {isSidebarOpen && (
+              <span className="ml-3 font-medium group-hover:text-teal-500 transition-colors">
+                Home
+              </span>
+            )}
           </button>
 
           <button 
             className={`flex items-center w-full p-3 mb-2 rounded-lg text-gray-300 hover:bg-gradient-to-r hover:from-teal-500/10 hover:to-cyan-500/10 transition-all group ${GeistMono.className}`}
             onClick={() => router.push("/profile")}
           >
-            <FiUser className="w-5 h-5 group-hover:text-teal-500 transition-colors" />
-            <span className={`ml-3 font-medium group-hover:text-teal-500 transition-colors ${!isSidebarOpen && 'md:hidden'}`}>
-              Profile
-            </span>
+            <FiUser className={`w-5 h-5 group-hover:text-teal-500 transition-colors ${!isSidebarOpen ? 'mx-auto' : ''}`} />
+            {isSidebarOpen && (
+              <span className="ml-3 font-medium group-hover:text-teal-500 transition-colors">
+                Profile
+              </span>
+            )}
           </button>
           
           <button 
             className={`flex items-center w-full p-3 mb-2 rounded-lg text-gray-300 hover:bg-gradient-to-r hover:from-teal-500/10 hover:to-cyan-500/10 transition-all group ${GeistMono.className}`}
             onClick={() => router.push("/sessions")}
           >
-            <FiClock className="w-5 h-5 group-hover:text-teal-500 transition-colors" />
-            <span className={`ml-3 font-medium group-hover:text-teal-500 transition-colors ${!isSidebarOpen && 'md:hidden'}`}>
-              Sessions
-            </span>
+            <FiClock className={`w-5 h-5 group-hover:text-teal-500 transition-colors ${!isSidebarOpen ? 'mx-auto' : ''}`} />
+            {isSidebarOpen && (
+              <span className="ml-3 font-medium group-hover:text-teal-500 transition-colors">
+                Sessions
+              </span>
+            )}
           </button>
 
           <div className="border-t border-teal-500/10 my-4" />
@@ -125,10 +224,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               router.push("/signin");
             }}
           >
-            <FiLogOut className="w-5 h-5 group-hover:text-red-500 transition-colors" />
-            <span className={`ml-3 font-medium group-hover:text-red-500 transition-colors ${!isSidebarOpen && 'md:hidden'}`}>
-              Logout
-            </span>
+            <FiLogOut className={`w-5 h-5 group-hover:text-red-500 transition-colors ${!isSidebarOpen ? 'mx-auto' : ''}`} />
+            {isSidebarOpen && (
+              <span className="ml-3 font-medium group-hover:text-red-500 transition-colors">
+                Logout
+              </span>
+            )}
           </button>
         </nav>
       </div>

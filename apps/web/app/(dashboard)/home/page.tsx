@@ -158,33 +158,82 @@ enum SessionStatus {
 
   if(loading){
     return (
-      <>
-        {/* Stats Cards Loading State */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-black/40 backdrop-blur-sm p-6 rounded-2xl animate-pulse border border-teal-500/10">
-              <div className="h-4 bg-teal-500/10 rounded w-1/3 mb-4"></div>
-              <div className="h-8 bg-teal-500/10 rounded w-1/4 mb-2"></div>
-              <div className="h-4 bg-teal-500/10 rounded w-1/4"></div>
-            </div>
-          ))}
-        </div>
-
-        {/* Action Buttons Loading State */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {[1, 2].map((i) => (
-            <div key={i} className="h-14 bg-black/40 backdrop-blur-sm rounded-xl animate-pulse border border-teal-500/10"></div>
-          ))}
-        </div>
-
-        {/* Sessions Loading States */}
-        <div className="space-y-6">
-          <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-6 animate-pulse border border-teal-500/10">
-            <div className="h-8 bg-teal-500/10 rounded w-1/4 mb-6"></div>
-            <div className="h-32 bg-teal-500/10 rounded-xl"></div>
+      <div className={`space-y-8 ${GeistMono.className}`}>
+        {/* Hero Stats Section Skeleton */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-black via-gray-900 to-gray-800 p-8 border border-gray-800 mb-8">
+          <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[1, 2, 3].map((index) => (
+              <div key={index} className="relative group">
+                <div className="relative p-6 rounded-2xl border border-gray-800 bg-black/40 backdrop-blur-sm">
+                  <div className="w-8 h-8 rounded-lg bg-teal-500/10 animate-pulse mb-4" />
+                  <div className="h-4 w-24 bg-teal-500/10 rounded animate-pulse mb-4" />
+                  <div className="flex items-end justify-between">
+                    <div className="h-8 w-16 bg-teal-500/10 rounded animate-pulse" />
+                    <div className="h-4 w-12 bg-teal-500/10 rounded animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-      </>
+
+        {/* Action Buttons Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {[1, 2].map((index) => (
+            <div 
+              key={index}
+              className="h-[72px] rounded-2xl bg-black/40 backdrop-blur-sm border border-gray-800 animate-pulse"
+            />
+          ))}
+        </div>
+
+        {/* Active Sessions and Scheduled Events Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Active Sessions Skeleton */}
+          <div className="rounded-3xl border border-gray-800 bg-black/40 backdrop-blur-sm p-8">
+            <div className="flex items-center justify-between mb-8">
+              <div className="h-8 w-48 bg-teal-500/10 rounded animate-pulse" />
+              <div className="h-6 w-24 bg-teal-500/10 rounded-full animate-pulse" />
+            </div>
+            
+            <div className="space-y-6">
+              {[1, 2].map((index) => (
+                <div key={index} className="group relative overflow-hidden rounded-2xl border border-gray-800 p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="space-y-3 flex-1">
+                      <div className="h-6 w-48 bg-teal-500/10 rounded animate-pulse" />
+                      <div className="h-4 w-72 bg-teal-500/10 rounded animate-pulse" />
+                    </div>
+                    <div className="h-10 w-24 bg-teal-500/10 rounded-xl animate-pulse" />
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 mt-6">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="h-4 w-24 bg-teal-500/10 rounded animate-pulse" />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Scheduled Events Skeleton */}
+          <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-6 border border-gray-800">
+            <div className="h-8 w-48 bg-teal-500/10 rounded animate-pulse mb-6" />
+            <div className="space-y-4">
+              {[1, 2, 3].map((index) => (
+                <div key={index} className="flex items-center space-x-4 p-4 rounded-xl border border-gray-800">
+                  <div className="w-12 h-12 rounded-full bg-teal-500/10 animate-pulse" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-48 bg-teal-500/10 rounded animate-pulse" />
+                    <div className="h-3 w-72 bg-teal-500/10 rounded animate-pulse" />
+                  </div>
+                  <div className="h-8 w-24 bg-teal-500/10 rounded-full animate-pulse" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -359,25 +408,27 @@ enum SessionStatus {
       </div>
 
       {isJoinModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl w-full max-w-md shadow-xl">
-            <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Start Session</h3>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-black/80 p-8 rounded-2xl w-full max-w-md border border-teal-500">
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-teal-500 to-cyan-500 bg-clip-text text-transparent mb-6">
+              Join Session
+            </h3>
             <input
               type="text"
               placeholder="Enter session code"
               value={sessionToJoin}
               onChange={(e) => setSessionToJoin(e.target.value)}
-              className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+              className="w-full p-3 bg-black/40 border border-gray-800 rounded-xl mb-6 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none text-white placeholder-gray-500"
             />
             <div className="flex space-x-4">
               <button
-                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-300 hover:to-blue-800 transition-all duration-300"
+                className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-6 py-3 rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-300"
                 onClick={handleJoinSession}
               >
                 Join
               </button>
               <button
-                className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300"
+                className="flex-1 border border-gray-800 text-gray-400 px-6 py-3 rounded-xl hover:bg-gray-800/50 transition-all duration-300"
                 onClick={() => setIsJoinModalOpen(false)}
               >
                 Cancel
@@ -388,7 +439,7 @@ enum SessionStatus {
       )}
       {isStartModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-black/80 p-8 rounded-2xl w-full max-w-md border border-teal-500/10">
+          <div className="bg-black/80 p-8 rounded-2xl w-full max-w-md border border-teal-500">
             <h3 className="text-2xl font-bold bg-gradient-to-r from-teal-500 to-cyan-500 bg-clip-text text-transparent mb-6">
               Start Session
             </h3>
@@ -397,31 +448,48 @@ enum SessionStatus {
               placeholder="Title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+              className="w-full p-3 bg-black/40 border border-gray-800 rounded-xl mb-6 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none text-white placeholder-gray-500"
             />
             <input
               type="text"
               placeholder="Description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+              className="w-full p-3 bg-black/40 border border-gray-800 rounded-xl mb-6 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none text-white placeholder-gray-500"
             />
             <div className="flex space-x-4">
-              <input onChange={(e) => setSessionDate(e.target.value)} aria-label="Date and time" type="datetime-local" className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white" />
+              <input 
+                onChange={(e) => setSessionDate(e.target.value)} 
+                aria-label="Date and time" 
+                type="datetime-local" 
+                className="w-full p-3 bg-black/40 border border-gray-800 rounded-xl mb-6 
+                  focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none 
+                  text-gray-400 placeholder-gray-400
+                  [&::-webkit-calendar-picker-indicator]:invert
+                  [&::-webkit-calendar-picker-indicator]:opacity-70
+                  [&::-webkit-calendar-picker-indicator]:hover:opacity-100
+                  [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+              />
             </div>
             <div className="flex space-x-4 justify-center items-center mb-4">
-              <Dropbox setPdfUrls={setPdfUrls} accessKeyId={process.env.NEXT_PUBLIC_ACCESS_KEY_ID!} secretAccessKey={process.env.NEXT_PUBLIC_SECRET_ACCESS_KEY!} region={process.env.NEXT_PUBLIC_REGION!} bucketName={process.env.NEXT_PUBLIC_BUCKET_NAME!}/>
+              <Dropbox 
+                setPdfUrls={setPdfUrls} 
+                accessKeyId={process.env.NEXT_PUBLIC_ACCESS_KEY_ID!} 
+                secretAccessKey={process.env.NEXT_PUBLIC_SECRET_ACCESS_KEY!} 
+                region={process.env.NEXT_PUBLIC_REGION!} 
+                bucketName={process.env.NEXT_PUBLIC_BUCKET_NAME!}
+              />
             </div>
             
             <div className="flex space-x-4">
               <button
-                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
+                className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-6 py-3 rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-300"
                 onClick={() => {handleStartSession()}}
               >
                 Start Session
               </button>
               <button
-                className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300"
+                className="flex-1 border border-gray-800 text-gray-400 px-6 py-3 rounded-xl hover:bg-gray-800/50 transition-all duration-300"
                 onClick={() => setIsStartModalOpen(false)}
               >
                 Cancel
@@ -431,13 +499,25 @@ enum SessionStatus {
         </div>
       )}
       {isDeleteModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl w-full max-w-md shadow-xl">
-            <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Delete Session</h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-4">Are you sure you want to delete this session?</p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-black/80 p-8 rounded-2xl w-full max-w-md border border-teal-500/10">
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-teal-500 to-cyan-500 bg-clip-text text-transparent mb-6">
+              Delete Session
+            </h3>
+            <p className="text-gray-400 mb-6">Are you sure you want to delete this session?</p>
             <div className="flex space-x-4">
-              <button className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300" onClick={() => handleDeleteSession(sessionToDelete?.id!)}>Delete</button>
-              <button className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300" onClick={() => setIsDeleteModalOpen(false)}>Cancel</button>
+              <button 
+                className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-300"
+                onClick={() => handleDeleteSession(sessionToDelete?.id!)}
+              >
+                Delete
+              </button>
+              <button 
+                className="flex-1 border border-gray-800 text-gray-400 px-6 py-3 rounded-xl hover:bg-gray-800/50 transition-all duration-300"
+                onClick={() => setIsDeleteModalOpen(false)}
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>    

@@ -9,6 +9,7 @@ import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, PlayIcon, XIcon, Eras
 import { useGetUser } from "../../hooks";
 import { HexColorPicker } from "react-colorful";
 import { RoomWebSocket } from "../../webSocket";
+import { promiseHooks } from "v8";
 
 interface Slide {
     id: string;
@@ -53,6 +54,7 @@ export default function RoomPage() {
     const [isChatOpen,setIsChatOpen] = useState(false);
     const [isDrawingControlsOpen,setIsDrawingControlsOpen] = useState(false);
     const [recordingStarted,setRecordingStarted] = useState(false);
+    const [loading,setLoading] = useState(false);
 
     const currentSlideIndexRef = useRef<number>(
         parseInt(localStorage.getItem(`slideIndex-${sessionId}`) || "0")
@@ -225,7 +227,12 @@ export default function RoomPage() {
             .catch(err => console.error(err));
         }
         getSlides();
-           
+
+        Promise.all([getSlides(),checkAdmin(),getSlides()])
+            .then(()=>{
+                setLoading(false);
+            })
+            .catch(err => console.error(err));
     }, [router,user]);
 
     useEffect(() => {
@@ -465,11 +472,78 @@ export default function RoomPage() {
         }
     };
 
+    if (loading) {
+        return (
+            <div className="flex flex-col h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr,380px] h-screen">
+                    {/* Left Side - Slides Area Skeleton */}
+                    <div className="relative h-full p-4">
+                        {/* Top Controls Skeleton */}
+                        <div className="flex justify-between items-center mb-4">
+                            <div className="flex gap-2">
+                                <div className="h-9 w-24 bg-gray-200 animate-pulse rounded-lg"></div>
+                                <div className="h-9 w-24 bg-gray-200 animate-pulse rounded-lg"></div>
+                            </div>
+                            <div className="flex gap-2">
+                                <div className="h-9 w-32 bg-gray-200 animate-pulse rounded-lg"></div>
+                                <div className="h-9 w-32 bg-gray-200 animate-pulse rounded-lg"></div>
+                            </div>
+                        </div>
+
+                        {/* Main Slide Area Skeleton */}
+                        <div className="w-full h-[calc(100%-4rem)] bg-gray-200 animate-pulse rounded-xl">
+                            {/* Slide Navigation Skeleton */}
+                            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2">
+                                <div className="h-8 w-8 bg-white/60 animate-pulse rounded-full"></div>
+                                <div className="h-8 w-20 bg-white/60 animate-pulse rounded-full"></div>
+                                <div className="h-8 w-8 bg-white/60 animate-pulse rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Side - Video and Chat Skeleton */}
+                    <div className="hidden lg:flex flex-col h-full border-l border-gray-200">
+                        {/* Video Area Skeleton */}
+                        <div className="h-1/4 p-2">
+                            <div className="w-full h-full bg-gray-300 animate-pulse rounded-lg"></div>
+                        </div>
+
+                        {/* Chat Area Skeleton */}
+                        <div className="flex-1 p-4 border-t border-gray-200">
+                            {/* Chat Messages Skeleton */}
+                            <div className="space-y-4">
+                                {[...Array(3)].map((_, i) => (
+                                    <div key={i} className="flex items-start gap-3">
+                                        <div className="h-10 w-10 bg-gray-200 animate-pulse rounded-full"></div>
+                                        <div className="flex-1 space-y-2">
+                                            <div className="h-4 w-24 bg-gray-200 animate-pulse rounded"></div>
+                                            <div className="h-16 w-full bg-gray-200 animate-pulse rounded-lg"></div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            {/* Chat Input Skeleton */}
+                            <div className="absolute bottom-4 left-4 right-4">
+                                <div className="h-12 w-full bg-gray-200 animate-pulse rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Mobile Video/Chat Controls Skeleton */}
+                    <div className="fixed bottom-0 left-0 right-0 lg:hidden">
+                        <div className="h-[280px] bg-gray-200 animate-pulse"></div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div suppressHydrationWarning className="flex flex-col h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
             <div className="flex flex-col h-full">
                 {/* Main Content Grid - Modified for responsiveness */}
-                <div className="grid grid-cols-1 lg:grid-cols-[1fr,380px] h-screen relative">
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr,480px] h-screen relative">
                     {/* Left Side - Slides and Drawing */}
                     <div className="relative h-full">
                         {/* Host Controls - Adjusted positioning */}
@@ -574,13 +648,13 @@ export default function RoomPage() {
                                         <div className="flex gap-2">
                                             <Button 
                                                 onClick={() => setIsEraser(false)}
-                                                className={`flex-1 px-3 py-2 rounded-lg ${!isEraser ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                                                className={`flex-1 px-3 py-2 rounded-lg ${!isEraser ? 'bg-teal-500 text-white' : 'bg-gray-200'}`}
                                             >
                                                 <Pen size={18} />
                                             </Button>
                                             <Button 
                                                 onClick={() => setIsEraser(true)}
-                                                className={`flex-1 px-3 py-2 rounded-lg ${isEraser ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                                                className={`flex-1 px-3 py-2 rounded-lg ${isEraser ? 'bg-teal-500 text-white' : 'bg-gray-200'}`}
                                             >
                                                 <ClearIcon size={18} />
                                             </Button>
@@ -614,7 +688,7 @@ export default function RoomPage() {
                     </div>
 
                     {/* Right Side - Video and Chat */}
-                    <div className="fixed lg:relative bottom-0 left-0 right-0 lg:bottom-auto lg:left-auto lg:right-auto h-[280px] lg:h-screen bg-white/95 border-t lg:border-l border-gray-200">
+                    <div className="fixed lg:relative bottom-0 left-0 right-1 lg:bottom-auto lg:left-auto lg:right-auto h-[280px] lg:h-screen bg-white/95 border-t lg:border-l border-gray-200 ">
                         {/* Video Component */}
                         <div className="h-[280px] lg:h-1/4 p-2">
                             <div className="w-full h-full rounded-lg overflow-hidden bg-gray-900">
@@ -635,7 +709,7 @@ export default function RoomPage() {
                             {/* Chat Drawer */}
                             <div className={`
                                 fixed lg:relative bottom-0 left-0 right-0 
-                                h-[60vh] lg:max-h-[calc(100vh-280px)]
+                                h-[60vh] lg:h-[calc(100vh-250px)]
                                 bg-white shadow-lg lg:shadow-none
                                 transform transition-transform duration-300 ease-in-out
                                 ${isChatOpen ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'}

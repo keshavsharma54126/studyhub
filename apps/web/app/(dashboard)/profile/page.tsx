@@ -24,7 +24,36 @@ export default function ProfilePage() {
     fetchUser();
   }, []);
 
-  if(isLoading) return <div className="text-gray-400">Loading...</div>;
+  if(isLoading) return (
+    <div className="max-w-4xl mx-auto">
+      <div className="h-8 w-32 bg-gray-800 rounded-lg mb-8 animate-pulse" />
+      
+      <div className="bg-black/60 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-gray-800">
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="w-[40px] h-[40px] rounded-full bg-gray-800 animate-pulse" />
+          <div className="space-y-2">
+            <div className="h-6 w-32 bg-gray-800 rounded animate-pulse" />
+            <div className="h-4 w-48 bg-gray-800 rounded animate-pulse" />
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div>
+            <div className="h-4 w-20 bg-gray-800 rounded mb-2 animate-pulse" />
+            <div className="w-full h-12 bg-gray-800 rounded-xl animate-pulse" />
+          </div>
+
+          <div>
+            <div className="h-4 w-16 bg-gray-800 rounded mb-2 animate-pulse" />
+            <div className="w-full h-12 bg-gray-800 rounded-xl animate-pulse" />
+          </div>
+
+          <div className="w-full h-12 bg-gray-700 rounded-xl animate-pulse" />
+        </div>
+      </div>
+    </div>
+  );
+
   if(error) return <div className="text-red-500">Error: {error.message}</div>;
   
   return (

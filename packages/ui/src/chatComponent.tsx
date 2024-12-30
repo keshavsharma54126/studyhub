@@ -124,7 +124,7 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className,
   }, [isEmojiPickerOpen]);
 
   return (
-    <div className={`flex flex-col h-full bg-white dark:bg-gray-800 rounded-lg shadow-sm ${className}`}>
+    <div className={`flex flex-col h-full bg-gray-900 rounded-lg shadow-sm ${className}`}>
       <div className="flex-none h-[40px] p-2 border-b border-gray-200 dark:border-gray-700">
         <h3 className="text-sm font-semibold text-gray-800 dark:text-white">Chat</h3>
       </div>
@@ -140,12 +140,12 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className,
               <div
                 className={`max-w-[85%] rounded-lg p-2 text-sm ${
                   message.userId === currentUser.id
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 text-gray-800'
                 }`}
               >
                 {message.userId !== currentUser.id && (
-                  <p className="text-xs font-medium mb-1 text-gray-600 dark:text-gray-400">
+                  <p className="text-md font-medium mb-1 text-gray-600 dark:text-gray-400">
                     {message.username}
                   </p>
                 )}
