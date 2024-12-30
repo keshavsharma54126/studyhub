@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Button } from "./button.js"
+import { Button } from "./button"
 import {
   Dialog,
   DialogContent,
@@ -8,9 +8,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./dialogSkeleton.js"
-import { Input } from "./input.js"
-import { Label } from "./label.js"
+} from "./dialogSkeleton"
+import { Input } from "./input"
+import { Label } from "./label"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"

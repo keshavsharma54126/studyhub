@@ -264,15 +264,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </button>
             <div className="relative">
               <Image 
-                src={user?.profilePicture || '/default-avatar.png'}
+                src={user?.profilePicture ||'https://static.vecteezy.com/system/resources/previews/020/168/719/non_2x/pretty-boy-with-stylish-hairstyle-flat-avatar-icon-with-green-dot-editable-default-persona-for-ux-ui-design-profile-character-picture-with-online-status-color-messaging-app-user-badge-vector.jpg'}
                 alt="profile"
                 width={32}
                 height={32}
                 className="rounded-full object-cover ring-2 ring-teal-500/20 hover:ring-teal-500/40 transition-all"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = '/default-avatar.png';
-                }}
               />
             </div>
           </div>

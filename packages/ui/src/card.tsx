@@ -1,5 +1,5 @@
 import { type JSX } from "react";
-import { cn } from "../utils/cn.js";
+import { cn } from "../utils/cn";
 
 interface CardProps {
   className?: string;

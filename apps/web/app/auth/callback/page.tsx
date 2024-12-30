@@ -2,8 +2,18 @@
 
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
-export default function AuthCallback() {
+export default function CallbackPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CallbackContent />
+    </Suspense>
+  );
+}
+
+
+ function CallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 

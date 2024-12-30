@@ -435,40 +435,45 @@ function SessionReplayPage() {
     }
 
     return (
-        <div suppressHydrationWarning className="h-screen flex">
-            <div className="flex-1 flex flex-col">
-                <div className="flex justify-between items-center p-4 border-b">
-                    <h1 className="text-2xl font-bold">Session Replay</h1>
-                    <div className="flex gap-4 items-center">
+        <div suppressHydrationWarning className="h-screen flex flex-col lg:flex-row">
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col h-[calc(100vh-320px)] lg:h-screen">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row justify-between items-center p-4 border-b gap-4">
+                    <h1 className="text-xl sm:text-2xl font-bold">Session Replay</h1>
+                    <div className="flex flex-wrap gap-2 sm:gap-4 items-center justify-center">
                         <select
                             value={playbackSpeed}
                             onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
-                            className="px-3 py-2 border rounded"
+                            className="px-2 sm:px-3 py-1 sm:py-2 border rounded text-sm sm:text-base"
                         >
                             <option value={0.5}>0.5x</option>
                             <option value={1}>1x</option>
                             <option value={2}>2x</option>
                             <option value={4}>4x</option>
                         </select>
-                        <Button onClick={minus5} className='bg-blue-600 hover:bg-blue-400 text-white'><RotateCcwIcon className="w-5 h-5" />-5</Button>
-                        <Button
-                            onClick={() => {
-                                console.log("Button clicked");
-                                isPlaying ? pauseRecording() : playRecording();
-                            }}
-                            variant="outline"
-                            className="w-12 h-12 flex items-center justify-center"
-                        >
-                            {isPlaying ? <PauseIcon className="w-10 h-10" /> : <PlayIcon className="w-10 h-10" />}
-                        </Button>
-                        <Button onClick={plus5} className='bg-blue-600 hover:bg-blue-400 text-white'>+5 <RotateCcwIcon className="w-5 h-5 scale-x-[-1]" /></Button>
-                        <Button 
-                            onClick={resetRecording} 
-                            variant="outline"
-                            className="w-12 h-12 flex items-center justify-center"
-                        >
-                            <RotateCcwIcon className="w-10 h-10" />
-                        </Button>
+                        <div className="flex gap-2">
+                            <Button onClick={minus5} className='bg-blue-600 hover:bg-blue-400 text-white text-sm px-2 sm:px-3'>
+                                <RotateCcwIcon className="w-4 h-4" />-5
+                            </Button>
+                            <Button
+                                onClick={() => isPlaying ? pauseRecording() : playRecording()}
+                                variant="outline"
+                                className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center"
+                            >
+                                {isPlaying ? <PauseIcon className="w-6 h-6 sm:w-8 sm:h-8" /> : <PlayIcon className="w-6 h-6 sm:w-8 sm:h-8" />}
+                            </Button>
+                            <Button onClick={plus5} className='bg-blue-600 hover:bg-blue-400 text-white text-sm px-2 sm:px-3'>
+                                +5 <RotateCcwIcon className="w-4 h-4 scale-x-[-1]" />
+                            </Button>
+                            <Button 
+                                onClick={resetRecording} 
+                                variant="outline"
+                                className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center"
+                            >
+                                <RotateCcwIcon className="w-6 h-6 sm:w-8 sm:h-8" />
+                            </Button>
+                        </div>
                     </div>
                 </div>
 
@@ -488,9 +493,9 @@ function SessionReplayPage() {
             </div>
 
             {/* Right Sidebar */}
-            <div suppressHydrationWarning className="w-80 border-l flex flex-col">
+            <div suppressHydrationWarning className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l flex flex-col h-[320px] lg:h-screen">
                 {/* Video Component */}
-                <div suppressHydrationWarning data-vjs-player>
+                <div suppressHydrationWarning data-vjs-player className="h-[180px] lg:h-[240px]">
                     <video 
                         suppressHydrationWarning 
                         ref={videoRef} 
@@ -501,7 +506,7 @@ function SessionReplayPage() {
                 <div className="flex-1 relative">
                     <Button
                         onClick={() => setIsChatOpen(!isChatOpen)}
-                        className="lg:hidden fixed bottom-3/4 right-1 z-50 rounded-full w-12 h-12 flex items-center justify-center bg-blue-500 text-white shadow-lg"
+                        className="lg:hidden fixed bottom-4 right-4 z-50 rounded-full w-12 h-12 flex items-center justify-center bg-blue-500 text-white shadow-lg"
                     >
                         {isChatOpen ? <CloseIcon size={24} /> : <MessageCircle size={24} />}
                     </Button>
@@ -511,15 +516,13 @@ function SessionReplayPage() {
                         transform transition-transform duration-300 ease-in-out
                         ${isChatOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
                     `}>
-                                <ChatComponent 
-                                    currentUser={user || {id: "", username: "", profilePicture: ""}}
-                                    onSendMessage={() => {}}
-                                    //@ts-ignore
-                                    messages={chatMessages}
-                                    setChatMessages={setChatMessages}
-                                    sessionId={sessionId as string}
-                                />
-                     
+                        <ChatComponent 
+                            currentUser={user || {id: "", username: "", profilePicture: ""}}
+                            onSendMessage={() => {}}
+                            messages={chatMessages}
+                            setChatMessages={setChatMessages}
+                            sessionId={sessionId as string}
+                        />
                     </div>
                 </div>
             </div>

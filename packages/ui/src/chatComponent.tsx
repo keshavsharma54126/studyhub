@@ -1,11 +1,13 @@
+import * as React from 'react';
 import { useState, useRef, useEffect } from 'react';
-import { ScrollArea } from './scrollArea.js';
-import { Input } from './input.js';
-import { Button } from './button.js';
+import { Input } from './input';
+import { Button } from './button';
 import { FiSend, FiSmile } from 'react-icons/fi';
-import { RoomWebSocket } from '../../../apps/web/app/webSocket.js';
+import { RoomWebSocket } from '../../../apps/web/app/webSocket';
 import data from "@emoji-mart/data"
 import EmojiPicker from "@emoji-mart/react"
+import { cn } from '../utils/cn';
+import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 
 interface Message {
   userId: string;
@@ -123,42 +125,54 @@ export function ChatComponent({ currentUser, onSendMessage, messages, className,
     };
   }, [isEmojiPickerOpen]);
 
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
   return (
-    <div className={`flex flex-col h-full bg-gray-900 rounded-lg shadow-sm ${className}`}>
+    <div className={cn("flex flex-col h-full", className)}>
       <div className="flex-none h-[40px] p-2 border-b border-gray-200 dark:border-gray-700">
         <h3 className="text-sm font-semibold text-gray-800 dark:text-white">Chat</h3>
       </div>
 
-
-      <ScrollArea className="flex-1" ref={chatContainerRef}>
-        <div className="p-4 space-y-2">
-          {messages.map((message, index) => (
-            <div
-              key={`${message.userId}-${index}`}
-              className={`flex ${message.userId === currentUser.id ? 'justify-end' : 'justify-start'} gap-2`}
-            >
+      <ScrollAreaPrimitive.Root className="flex-1">
+        <ScrollAreaPrimitive.Viewport ref={chatContainerRef} className="h-full w-full">
+          <div className="p-4 space-y-2">
+            {messages.map((message, index) => (
               <div
-                className={`max-w-[85%] rounded-lg p-2 text-sm ${
-                  message.userId === currentUser.id
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-800'
-                }`}
+                key={`${message.userId}-${index}`}
+                className={`flex ${
+                  message.userId === currentUser.id ? 'justify-end' : 'justify-start'
+                } gap-2`}
               >
-                {message.userId !== currentUser.id && (
-                  <p className="text-md font-medium mb-1 text-gray-600 dark:text-gray-400">
-                    {message.username}
-                  </p>
-                )}
-                <p className="text-sm break-words">{message.message}</p>
-                <div className="flex items-center justify-end text-xs mt-1 opacity-70">
-                  <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
+                <div
+                  className={`max-w-[85%] rounded-lg p-2 text-sm ${
+                    message.userId === currentUser.id
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}
+                >
+                  {message.userId !== currentUser.id && (
+                    <p className="text-md font-medium mb-1 text-gray-600 dark:text-gray-400">
+                      {message.username}
+                    </p>
+                  )}
+                  <p className="text-sm break-words">{message.message}</p>
+                  <div className="flex items-center justify-end text-xs mt-1 opacity-70">
+                    <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
-      </ScrollArea>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+        </ScrollAreaPrimitive.Viewport>
+        <ScrollAreaPrimitive.Scrollbar orientation="vertical">
+          <ScrollAreaPrimitive.Thumb />
+        </ScrollAreaPrimitive.Scrollbar>
+      </ScrollAreaPrimitive.Root>
 
       <div className="flex-none p-2 border-t border-gray-200 dark:border-gray-700">
         <div  className="flex gap-2">

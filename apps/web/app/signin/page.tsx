@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { BackgroundBeams } from "@repo/ui/background-beams";
 import { motion } from "framer-motion";
 import axios from "axios";
 import Link from 'next/link';
@@ -98,7 +97,6 @@ export default function SignIn() {
 
   return (
     <div className={`min-h-screen flex items-center justify-center bg-[conic-gradient(at_bottom_left,_var(--tw-gradient-stops))] from-black via-gray-950 to-gray-900 relative ${GeistMono.className}`} suppressHydrationWarning>
-      <BackgroundBeams />
       <motion.div 
         suppressHydrationWarning
         initial={{ opacity: 0, y: 20 }}

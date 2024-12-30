@@ -5,7 +5,6 @@ import { S3Client, GetObjectCommand, PutObjectCommand, DeleteObjectCommand } fro
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { useDropzone } from "react-dropzone";
 import { Upload, FileIcon, X, Loader, Axis3DIcon } from "lucide-react";
-import { useToast } from "./toaster/use-toast.js";
 import { v4 as uuidv4 } from 'uuid';
 
 
@@ -84,8 +83,6 @@ export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPd
     setIsLoading(false);
   };
 
-  const { toast } = useToast();
-
   return (
     <div className="w-full bg-teal-500/10 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-800">
       <div
@@ -136,14 +133,7 @@ export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPd
       <button
         onClick={() => {
           handleSubmit();
-          toast({
-            title: "Uploaded Successfully",
-            description: "Your files have been uploaded successfully",
-          });
         }}
-        className={`rounded-lg px-4 py-2 text-lg bg-blue-600 hover:bg-blue-700 mt-6 ${
-          files.length > 0 ? "" : "hidden"
-        } `}
       >
         Submit
       </button>

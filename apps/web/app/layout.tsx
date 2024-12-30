@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { Toaster } from "@repo/ui/toaster";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -28,7 +27,6 @@ export default function RootLayout({
           
             <header className="bg-gray-100 "></header>
             <main className="flex-grow">{children}</main>
-            <Toaster />
             <footer className="bg-gray-100 mt-auto"></footer>
         </body>
     </html>

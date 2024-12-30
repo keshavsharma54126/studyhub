@@ -68,10 +68,7 @@ export default function ProfilePage() {
             width={40}
             height={40}
             className="rounded-full object-cover w-[40px] h-[40px]"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = '/default-avatar.png';
-            }}
+           
           />
           <div>
             <h2 className="text-xl font-bold text-gray-100">{user?.username}</h2>
@@ -91,7 +88,7 @@ export default function ProfilePage() {
                 outline-none bg-black/50 text-gray-100
                 transition-all duration-200
                 shadow-sm"
-              defaultValue="John Doe"
+              defaultValue={user?.username}
             />
           </div>
 
@@ -106,7 +103,7 @@ export default function ProfilePage() {
                 outline-none bg-black/50 text-gray-100
                 transition-all duration-200
                 shadow-sm"
-              defaultValue="john.doe@example.com"
+              defaultValue={user?.email}
             />
           </div>
 

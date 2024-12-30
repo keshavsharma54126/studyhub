@@ -26,14 +26,15 @@ export const FloatingLines = () => {
     const particleCount = 50;
 
     class Particle {
-      x: number;
-      y: number;
-      speedX: number;
-      speedY: number;
-      size: number;
-      color: string;
+      x: number = 0;
+      y: number = 0;
+      speedX: number = 0;
+      speedY: number = 0;
+      size: number = 0;
+      color: string = '';
 
       constructor() {
+        if (!canvas) return;
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
         this.speedX = Math.random() * 0.5 - 0.25;
@@ -46,6 +47,7 @@ export const FloatingLines = () => {
         this.x += this.speedX;
         this.y += this.speedY;
 
+        if (!canvas) return;
         if (this.x > canvas.width) this.x = 0;
         if (this.x < 0) this.x = canvas.width;
         if (this.y > canvas.height) this.y = 0;
