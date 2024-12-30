@@ -1,0 +1,22 @@
+FROM node:20-alpine AS base
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json* ./
+COPY packages/db/package.json ./packages/db/package.json
+COPY apps/upload-worker/package.json ./apps/upload-worker/package.json
+
+# Install dependencies
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Generate Prisma Client
+RUN npm run db:generate
+
+# Build the application
+RUN cd apps/upload-worker && npm run build
+
+CMD ["node", "apps/upload-worker/dist/index.js"]
