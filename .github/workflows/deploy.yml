@@ -68,18 +68,19 @@ jobs:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
       - name: Deploy to DigitalOcean droplet
+        env:
+          DROPLET_NAME: ${{ secrets.DROPLET_NAME }}
         run: |
           # Configure SSH to not check host keys
           mkdir -p ~/.ssh
           echo "StrictHostKeyChecking no" >> ~/.ssh/config
           
           # Copy files to droplet
-          doctl compute ssh ${{ secrets.DROPLET_NAME }} --ssh-command 'mkdir -p /root/app'
-          doctl compute scp docker-compose.yml root@${{ secrets.DROPLET_NAME }}:/root/app/
-          doctl compute scp .env root@${{ secrets.DROPLET_NAME }}:/root/app/
+          scp docker-compose.yml root@$(doctl compute droplet get $DROPLET_NAME --format PublicIPv4 --no-header):/root/app/
+          scp .env root@$(doctl compute droplet get $DROPLET_NAME --format PublicIPv4 --no-header):/root/app/
           
           # Deploy using docker-compose
-          doctl compute ssh ${{ secrets.DROPLET_NAME }} --ssh-command '
+          ssh root@$(doctl compute droplet get $DROPLET_NAME --format PublicIPv4 --no-header) '
             cd /root/app && \
             docker system prune -f && \
             docker-compose pull && \
