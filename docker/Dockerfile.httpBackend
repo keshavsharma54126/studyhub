@@ -2,23 +2,23 @@ FROM node:20-alpine AS base
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json package-lock.json* ./
+
+COPY package.json package-lock.json ./
+COPY turbo.json ./
+COPY packages/ui/package.json ./packages/ui/package.json
 COPY packages/db/package.json ./packages/db/package.json
 COPY apps/http-backend/package.json ./apps/http-backend/package.json
+COPY apps/upload-worker/package.json ./apps/upload-worker/package.json
+COPY apps/wsServer/package.json ./apps/wsServer/package.json
+COPY apps/web/package.json ./apps/web/package.json
 
-# Install dependencies
 RUN npm install
 
-# Copy source code
-COPY . .
+COPY apps/http-backend ./apps/http-backend
+COPY packages/db ./packages/db
 
-# Generate Prisma Client
 RUN npm run db:generate
 
-# Build the application
-RUN cd apps/http-backend && npm run build
+RUN cd apps/http-backend && npm run build && cd ../..
 
-EXPOSE 3001
-
-CMD ["node", "apps/http-backend/dist/index.js"]
+CMD ["npm", "run", "start-http-backend"]
