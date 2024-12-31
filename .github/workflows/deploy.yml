@@ -69,9 +69,9 @@ jobs:
       - name: Deploy to DigitalOcean droplet
         run: |
           # Copy files to droplet
-          doctl compute ssh ${{ secrets.DROPLET_NAME }} --ssh-command 'mkdir -p /root/app'
-          doctl compute scp docker-compose.yml root@${{ secrets.DROPLET_NAME }}:/root/app/
-          doctl compute scp .env root@${{ secrets.DROPLET_NAME }}:/root/app/
+          doctl compute ssh ${{ secrets.DROPLET_NAME }} --ssh-command 'mkdir -p /root/app' --ssh-strict-host-key-checking=false
+          doctl compute scp --ssh-strict-host-key-checking=false docker-compose.yml root@${{ secrets.DROPLET_NAME }}:/root/app/
+          doctl compute scp --ssh-strict-host-key-checking=false .env root@${{ secrets.DROPLET_NAME }}:/root/app/
           
           # Deploy using docker-compose
           doctl compute ssh ${{ secrets.DROPLET_NAME }} --ssh-command '
@@ -81,5 +81,5 @@ jobs:
             docker-compose down --remove-orphans && \
             docker-compose up -d && \
             docker-compose ps
-          '
+          ' --ssh-strict-host-key-checking=false
           
