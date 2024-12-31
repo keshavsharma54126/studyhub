@@ -61,26 +61,25 @@ jobs:
           known_hosts: unnecessary
           if_key_exists: replace
 
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
       - name: Deploy to DigitalOcean droplet
-        env:
-          DROPLET_IP: ${{ secrets.DROPLET_IP }}
         run: |
-          # Add droplet host key to known hosts
-          mkdir -p ~/.ssh
-          ssh-keyscan -H $DROPLET_IP >> ~/.ssh/known_hosts
+          # Copy files to droplet
+          doctl compute ssh ${{ secrets.DROPLET_NAME }} --ssh-command 'mkdir -p /root/app'
+          doctl compute scp docker-compose.yml root@${{ secrets.DROPLET_NAME }}:/root/app/
+          doctl compute scp .env root@${{ secrets.DROPLET_NAME }}:/root/app/
           
-          # Verify SSH connection first
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@$DROPLET_IP 'echo "SSH connection successful"'
-          
-          # Continue with deployment
-          scp -i ~/.ssh/id_rsa docker-compose.yml .env root@$DROPLET_IP:/root/
-          
-          ssh -i ~/.ssh/id_rsa root@$DROPLET_IP << 'ENDSSH'
-            cd /root
-            docker system prune -f
+          # Deploy using docker-compose
+          doctl compute ssh ${{ secrets.DROPLET_NAME }} --ssh-command '
+            cd /root/app && \
+            docker system prune -f && \
             docker-compose pull && \
             docker-compose down --remove-orphans && \
             docker-compose up -d && \
             docker-compose ps
-          ENDSSH
+          '
           
