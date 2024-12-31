@@ -59,7 +59,22 @@ services:
       - NODE_ENV=production
     ports:
       - "3009:3009"
-
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.web
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_LIVEKIT_API_KEY: ${NEXT_PUBLIC_LIVEKIT_API_KEY}
+        NEXT_PUBLIC_LIVEKIT_API_SECRET: ${NEXT_PUBLIC_LIVEKIT_API_SECRET}
+        NEXT_PUBLIC_LIVEKIT_URL: ${NEXT_PUBLIC_LIVEKIT_URL}
+        NEXT_PUBLIC_ACCESS_KEY_ID: ${NEXT_PUBLIC_ACCESS_KEY_ID}
+        NEXT_PUBLIC_SECRET_ACCESS_KEY: ${NEXT_PUBLIC_SECRET_ACCESS_KEY}
+        NEXT_PUBLIC_REGION: ${NEXT_PUBLIC_REGION}
+        NEXT_PUBLIC_BUCKET_NAME: ${NEXT_PUBLIC_BUCKET_NAME}
+        NEXT_PUBLIC_AWS_URL: ${NEXT_PUBLIC_AWS_URL}
+        NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL}
+        FRONTEND_URL: ${FRONTEND_URL}
+        NEXT_PUBLIC_FRONTEND_URL: ${NEXT_PUBLIC_FRONTEND_URL}
   http-backend:
     image: sharmakeshav54126293/studyhub-backend:latest
     env_file: .env
@@ -74,6 +89,23 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.http-backend
+      args:
+        GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+        GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+        GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}
+        FRONTEND_URL: ${FRONTEND_URL}
+        NEXT_PUBLIC_FRONTEND_URL: ${NEXT_PUBLIC_FRONTEND_URL}
+        LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
+        LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
+        LIVEKIT_URL: ${LIVEKIT_URL}
+        RABBITMQ_URL: ${RABBITMQ_URL}
+        ACCESS_KEY_ID: ${ACCESS_KEY_ID}
+        SECRET_ACCESS_KEY: ${SECRET_ACCESS_KEY}
+        REGION: ${REGION}
+        BUCKET_NAME: ${BUCKET_NAME}
 
   wsserver:
     image: sharmakeshav54126293/wsserver:latest
@@ -95,6 +127,15 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.upload-worker
+      args:
+        REDIS_HOST: ${REDIS_HOST}
+        REDIS_PORT: ${REDIS_PORT}
+        ACCESS_KEY_ID: ${ACCESS_KEY_ID}
+        SECRET_ACCESS_KEY: ${SECRET_ACCESS_KEY}
+        REGION: ${REGION}
 
   # RabbitMQ Service
   rabbitmq:
@@ -112,9 +153,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-
-  # Zookeeper Service (required for Kafka)
-
 
 volumes:
   rabbitmq_data:

@@ -26,4 +26,4 @@ RUN cd apps/wsServer && npm run build && cd ../..
 
 EXPOSE 8081
 
-CMD ["npm", "run", "start-wsserver"]
+CMD ["npm", "run", "start-wsServer"]
