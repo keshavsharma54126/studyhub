@@ -36,3 +36,11 @@ jobs:
           file: ./docker/Dockerfile.httpBackend
           push: true
           tags: sharmakeshav54126293/studyhub-backend:latest
+
+      - name: Build and push docker image for upload worker
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./docker/Dockerfile.upload-worker
+          push: true
+          tags: sharmakeshav54126293/upload-worker:latest
