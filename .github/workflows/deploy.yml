@@ -76,12 +76,12 @@ jobs:
           echo "StrictHostKeyChecking no" >> ~/.ssh/config
           
           # Copy files to droplet
-          scp docker-compose.yml root@$(doctl compute droplet get $DROPLET_NAME --format PublicIPv4 --no-header):/root/app/
-          scp .env root@$(doctl compute droplet get $DROPLET_NAME --format PublicIPv4 --no-header):/root/app/
+          scp -i ${{ secrets.SSH_PRIVATE_KEY }} docker-compose.yml root@${{ secrets.DROPLET_IP }}:/root
+          scp -i ${{ secrets.SSH_PRIVATE_KEY }} .env root@${{ secrets.DROPLET_IP }}:/root
           
           # Deploy using docker-compose
-          ssh root@$(doctl compute droplet get $DROPLET_NAME --format PublicIPv4 --no-header) '
-            cd /root/app && \
+          ssh -i ${{ secrets.SSH_PRIVATE_KEY }} root@${{ secrets.DROPLET_IP }} '
+            cd /root && \
             docker system prune -f && \
             docker-compose pull && \
             docker-compose down --remove-orphans && \
