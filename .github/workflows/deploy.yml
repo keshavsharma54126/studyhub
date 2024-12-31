@@ -27,7 +27,7 @@ jobs:
           push: true
           tags: sharmakeshav54126293/studyhub-frontend:latest
       - name: Verify Pushed Image
-        run: docker pull sharmakeshav54126293/studyhub-frontend:latest
+        run: docker pull sharmakeshav54126293/studyhub-frontend:${{ github.sha }}
 
       - name: Build and push docker image for http backend 
         uses: docker/build-push-action@v2
@@ -35,7 +35,7 @@ jobs:
           context: .
           file: ./docker/Dockerfile.httpBackend
           push: true
-          tags: sharmakeshav54126293/studyhub-backend:latest
+          tags: sharmakeshav54126293/studyhub-backend:${{ github.sha }}
 
       - name: Build and push docker image for upload worker
         uses: docker/build-push-action@v2
@@ -43,7 +43,7 @@ jobs:
           context: .
           file: ./docker/Dockerfile.upload-worker
           push: true
-          tags: sharmakeshav54126293/upload-worker:latest
+          tags: sharmakeshav54126293/upload-worker:${{ github.sha }}
 
       - name: Build and push docker image for ws server
         uses: docker/build-push-action@v2
@@ -51,4 +51,21 @@ jobs:
           context: .
           file: ./docker/Dockerfile.wsserver
           push: true
-          tags: sharmakeshav54126293/wsserver:latest
+          tags: sharmakeshav54126293/wsserver:${{ github.sha }}
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          
+      - name: Deploy to DigitalOcean droplet
+        run: |
+          scp docker-compose.yml root@${{ secrets.DROPLET_IP }}:/root/
+          scp .env root@${{ secrets.DROPLET_IP }}:/root/
+          ssh root@${{ secrets.DROPLET_IP }} << 'EOF'
+            cd /root
+            docker-compose pull
+            docker-compose down
+            docker-compose up -d
+          EOF
+          
