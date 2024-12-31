@@ -1,54 +1,7 @@
 version: '3.8'
 
 services:
-  web:
-    image: sharmakeshav54126293/studyhub-frontend:latest
-    env_file: .env
-    environment:
-      - NODE_ENV=production
-    ports:
-      - "3009:3009"
 
-  http-backend:
-    image: sharmakeshav54126293/studyhub-backend:latest
-    env_file: .env
-    environment:
-      - NODE_ENV=production
-    ports:
-      - "3007:3007"
-
-  wsserver:
-    image: sharmakeshav54126293/wsserver:latest
-    env_file: .env
-    environment:
-      - NODE_ENV=production
-    ports:
-      - "8081:8081"
-
-  upload-worker:
-    image: sharmakeshav54126293/upload-worker:latest
-    env_file: .env
-    environment:
-      - NODE_ENV=production
-
-  # RabbitMQ Service
-  rabbitmq:
-    image: rabbitmq:3-management
-    ports:
-      - "5672:5672"   # AMQP protocol port
-      - "15672:15672" # Management UI port
-    environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
-  # Zookeeper Service (required for Kafka)
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     ports:
@@ -99,6 +52,69 @@ services:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+  web:
+    image: sharmakeshav54126293/studyhub-frontend:latest
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "3009:3009"
+
+  http-backend:
+    image: sharmakeshav54126293/studyhub-backend:latest
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - KAFKA_BROKERS=kafka:9092
+    ports:
+      - "3007:3007"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  wsserver:
+    image: sharmakeshav54126293/wsserver:latest
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+      - KAFKA_BROKERS=kafka:9092
+    ports:
+      - "8081:8081"
+    depends_on:
+      - kafka
+
+  upload-worker:
+    image: sharmakeshav54126293/upload-worker:latest
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  # RabbitMQ Service
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"   # AMQP protocol port
+      - "15672:15672" # Management UI port
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Zookeeper Service (required for Kafka)
+
 
 volumes:
   rabbitmq_data:

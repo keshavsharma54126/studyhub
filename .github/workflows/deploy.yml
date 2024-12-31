@@ -53,39 +53,39 @@ jobs:
           push: true
           tags: sharmakeshav54126293/wsserver:latest
 
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          name: id_rsa
-          known_hosts: unnecessary
-          if_key_exists: replace
-          chmod: '600'
+      # - name: Install SSH key
+      #   uses: shimataro/ssh-key-action@v2
+      #   with:
+      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     name: id_rsa
+      #     known_hosts: unnecessary
+      #     if_key_exists: replace
+      #     chmod: '600'
 
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      # - name: Install doctl
+      #   uses: digitalocean/action-doctl@v2
+      #   with:
+      #     token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
-      - name: Deploy to DigitalOcean droplet
-        env:
-          DROPLET_NAME: ${{ secrets.DROPLET_NAME }}
-        run: |
-          # Configure SSH to not check host keys
-          mkdir -p ~/.ssh
-          echo "StrictHostKeyChecking no" >> ~/.ssh/config
+      # - name: Deploy to DigitalOcean droplet
+      #   env:
+      #     DROPLET_NAME: ${{ secrets.DROPLET_NAME }}
+      #   run: |
+      #     # Configure SSH to not check host keys
+      #     mkdir -p ~/.ssh
+      #     echo "StrictHostKeyChecking no" >> ~/.ssh/config
           
-          # Copy files to droplet
-          scp -i ${{ secrets.SSH_PRIVATE_KEY }} docker-compose.yml root@${{ secrets.DROPLET_IP }}:/root
-          scp -i ${{ secrets.SSH_PRIVATE_KEY }} .env root@${{ secrets.DROPLET_IP }}:/root
+      #     # Copy files to droplet
+      #     scp -i ${{ secrets.SSH_PRIVATE_KEY }} docker-compose.yml root@${{ secrets.DROPLET_IP }}:/root
+      #     scp -i ${{ secrets.SSH_PRIVATE_KEY }} .env root@${{ secrets.DROPLET_IP }}:/root
           
-          # Deploy using docker-compose
-          ssh -i ${{ secrets.SSH_PRIVATE_KEY }} root@${{ secrets.DROPLET_IP }} '
-            cd /root && \
-            docker system prune -f && \
-            docker-compose pull && \
-            docker-compose down --remove-orphans && \
-            docker-compose up -d && \
-            docker-compose ps
-          '
+      #     # Deploy using docker-compose
+      #     ssh -i ${{ secrets.SSH_PRIVATE_KEY }} root@${{ secrets.DROPLET_IP }} '
+      #       cd /root && \
+      #       docker system prune -f && \
+      #       docker-compose pull && \
+      #       docker-compose down --remove-orphans && \
+      #       docker-compose up -d && \
+      #       docker-compose ps
+      #     '
           
