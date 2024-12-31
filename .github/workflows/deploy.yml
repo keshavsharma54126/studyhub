@@ -60,6 +60,7 @@ jobs:
           name: id_rsa
           known_hosts: unnecessary
           if_key_exists: replace
+          chmod: '600'
 
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
