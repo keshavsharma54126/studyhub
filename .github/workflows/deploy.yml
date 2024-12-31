@@ -57,13 +57,23 @@ jobs:
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          known_hosts: "just a placeholder so we don't get an error"
-          
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+          config: |
+            Host *
+              StrictHostKeyChecking no
+              UserKnownHostsFile=/dev/null
+
       - name: Deploy to DigitalOcean droplet
+        env:
+          DROPLET_IP: ${{ secrets.DROPLET_IP }}
         run: |
-          scp docker-compose.yml root@${{ secrets.DROPLET_IP }}:/root/
-          scp .env root@${{ secrets.DROPLET_IP }}:/root/
-          ssh root@${{ secrets.DROPLET_IP }} << 'EOF'
+          # Add droplet host key to known hosts
+          ssh-keyscan -H $DROPLET_IP >> ~/.ssh/known_hosts
+          
+          # Continue with deployment
+          scp docker-compose.yml root@$DROPLET_IP:/root/
+          scp .env root@$DROPLET_IP:/root/
+          ssh root@$DROPLET_IP << 'EOF'
             cd /root
             docker-compose pull
             docker-compose down
