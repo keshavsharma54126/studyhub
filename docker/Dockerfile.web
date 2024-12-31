@@ -17,8 +17,7 @@ RUN npm install
 FROM base AS builder 
 WORKDIR /app 
 COPY --from=deps /app/node_modules ./node_modules
-COPY packages ./packages
-COPY apps/web ./apps/web
+COPY . .
 
 RUN npm run db:generate
 
