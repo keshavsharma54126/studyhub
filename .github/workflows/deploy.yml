@@ -44,3 +44,11 @@ jobs:
           file: ./docker/Dockerfile.upload-worker
           push: true
           tags: sharmakeshav54126293/upload-worker:latest
+
+      - name: Build and push docker image for ws server
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./docker/Dockerfile.wsserver
+          push: true
+          tags: sharmakeshav54126293/wsserver:latest

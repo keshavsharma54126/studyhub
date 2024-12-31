@@ -2,23 +2,26 @@ FROM node:20-alpine AS base
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json ./
+COPY turbo.json ./
+COPY packages/ui/package.json ./packages/ui/package.json
 COPY packages/db/package.json ./packages/db/package.json
-COPY apps/wsserver/package.json ./apps/wsserver/package.json
+COPY apps/http-backend/package.json ./apps/http-backend/package.json
+COPY apps/upload-worker/package.json ./apps/upload-worker/package.json
+COPY apps/wsServer/package.json ./apps/wsServer/package.json
+COPY apps/web/package.json ./apps/web/package.json
 
 # Install dependencies
 RUN npm install
 
-# Copy source code
-COPY . .
+COPY apps/wsServer ./apps/wsServer
+COPY packages/db ./packages/db
 
-# Generate Prisma Client
 RUN npm run db:generate
 
-# Build the application
-RUN cd apps/wsserver && npm run build
+RUN cd apps/wsServer && npm run build && cd ../..
+
 
 EXPOSE 8081
 
-CMD ["node", "apps/wsserver/dist/index.js"]
+CMD ["npm", "run", "start-wsserver"]

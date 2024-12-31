@@ -9,7 +9,8 @@
     "db:generate":"cd packages/db && npx prisma generate && cd ../..",
     "start-web":"cd ./apps/web && npm run start && cd ../..",
     "start-http-backend":"cd ./apps/http-backend && npm run start && cd ../..",
-    "start-upload-worker":"cd ./apps/upload-worker && npm run start && cd ../.."
+    "start-upload-worker":"cd ./apps/upload-worker && npm run start && cd ../..",
+    "start-wsserver":"cd ./apps/wsserver && npm run start && cd ../.."
   },
   "devDependencies": {
     "@types/uuid": "^10.0.0",
