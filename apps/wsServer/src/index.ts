@@ -8,7 +8,7 @@ import client from "@repo/db/client"
 
 const kafka = new Kafka({
   clientId: "session-recorder",
-  brokers: ["localhost:9092"],
+  brokers: [process.env.KAFKA_BROKERS || "kafka:9092"],
 });
 
 const producer = kafka.producer();
