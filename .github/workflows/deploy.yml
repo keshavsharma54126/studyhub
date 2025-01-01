@@ -166,6 +166,7 @@ jobs:
             DATABASE_URL=${{ secrets.DATABASE_URL }}
             LIVEKIT_URL=${{ secrets.LIVEKIT_URL }}
             NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            
 
       # - name: Install SSH key
       #   uses: shimataro/ssh-key-action@v2
