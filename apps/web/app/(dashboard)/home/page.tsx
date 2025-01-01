@@ -308,6 +308,7 @@ enum SessionStatus {
                       <div>
                         <h3 className="text-xl font-semibold text-white mb-2">{session.title}</h3>
                         <p className="text-gray-400">{session.description || 'No description provided'}</p>
+                        <p className="text-gray-400">Session Code: {session.secretCode}</p>
                       </div>
                       <button 
                         onClick={() => router.push(`/room/${session.id}`)}
