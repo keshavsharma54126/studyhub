@@ -46,6 +46,7 @@ export default function SignIn() {
             return;
         }
         setLoading(true);
+        console.log(process.env.NEXT_PUBLIC_API_URL);
         const urlResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/auth/google/url`);
         if(urlResponse.status!==200){
             setLoading(false);
