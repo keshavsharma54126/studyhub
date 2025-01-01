@@ -13,6 +13,14 @@ ENV SECRET_ACCESS_KEY=${SECRET_ACCESS_KEY}
 ENV REGION=${REGION}
 
 RUN apk add --no-cache openssl
+RUN apk add --no-cache \
+    graphicsmagick \
+    imagemagick \
+    ghostscript \
+    poppler-utils \
+    fontconfig \
+    fonts-liberation \
+    && fc-cache -f
 
 WORKDIR /app
 
@@ -33,5 +41,9 @@ COPY packages/db ./packages/db
 RUN npm run db:generate
 
 RUN cd apps/upload-worker && npm run build && cd ../..
+
+RUN gm version
+
+EXPOSE 8081
 
 CMD ["npm", "run", "start-upload-worker"]
