@@ -63,7 +63,10 @@ export default function SignIn() {
 
                 const {code} = event.data;
                 console.log("code",code);
+                console.log(process.env.NEXT_PUBLIC_API_URL);
                 const tokenResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/auth/google/callback?code=${code}`);
+                console.log(tokenResponse.data);
+
                 if(tokenResponse.data.status!==200){
                     setError("Failed to get token");
                     setLoading(false);

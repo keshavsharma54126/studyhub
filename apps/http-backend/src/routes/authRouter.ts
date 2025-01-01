@@ -169,6 +169,13 @@ authRouter.get("/google/callback", async(req: Request, res: Response): Promise<a
 
     let token;
     if (user) {
+      await client.user.update({
+        where: { id: user.id },
+        data: {
+          profilePicture: userInfo.data.picture || ""
+        }
+      });
+      
       token = await jwt.sign({
         userId: user.id,
         username: user.username
@@ -181,7 +188,8 @@ authRouter.get("/google/callback", async(req: Request, res: Response): Promise<a
           email: userInfo.data.email,
           username: userInfo.data.name || "",
           googleId: userInfo.data.id,
-          password: ""
+          password: "",
+          profilePicture: userInfo.data.picture || ""
         }
       });
       token = await jwt.sign({
