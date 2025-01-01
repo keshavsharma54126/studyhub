@@ -238,7 +238,7 @@ export default function RoomPage() {
     useEffect(() => {
         const wsFunc = async () => {
             const token = localStorage.getItem("auth_token");
-            roomWebSocketRef.current = new RoomWebSocket(`ws://localhost:8081/?token=${token}`);
+            roomWebSocketRef.current = new RoomWebSocket(`${process.env.NEXT_PUBLIC_WS_URL}/?token=${token}`);
 
             const isUserAdmin = await checkAdmin();
             
