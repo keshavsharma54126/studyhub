@@ -26,6 +26,36 @@ jobs:
           file: ./docker/Dockerfile.web
           push: true
           tags: sharmakeshav54126293/studyhub-frontend:latest
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_LIVEKIT_API_KEY=${{ secrets.NEXT_PUBLIC_LIVEKIT_API_KEY }}
+            NEXT_PUBLIC_LIVEKIT_API_SECRET=${{ secrets.NEXT_PUBLIC_LIVEKIT_API_SECRET }}
+            NEXT_PUBLIC_LIVEKIT_URL=${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }}
+            NEXT_PUBLIC_ACCESS_KEY_ID=${{ secrets.NEXT_PUBLIC_ACCESS_KEY_ID }}
+            NEXT_PUBLIC_SECRET_ACCESS_KEY=${{ secrets.NEXT_PUBLIC_SECRET_ACCESS_KEY }}
+            NEXT_PUBLIC_REGION=${{ secrets.NEXT_PUBLIC_REGION }}
+            NEXT_PUBLIC_BUCKET_NAME=${{ secrets.NEXT_PUBLIC_BUCKET_NAME }}
+            NEXT_PUBLIC_WS_URL=${{ secrets.NEXT_PUBLIC_WS_URL }}
+            FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+            NEXT_PUBLIC_FRONTEND_URL=${{ secrets.NEXT_PUBLIC_FRONTEND_URL }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }}
+            LIVEKIT_API_KEY=${{ secrets.LIVEKIT_API_KEY }}
+            LIVEKIT_API_SECRET=${{ secrets.LIVEKIT_API_SECRET }}
+            LIVEKIT_URL=${{ secrets.LIVEKIT_URL }}
+            RABBITMQ_URL=${{ secrets.RABBITMQ_URL }}
+            ACCESS_KEY_ID=${{ secrets.ACCESS_KEY_ID }}
+            SECRET_ACCESS_KEY=${{ secrets.SECRET_ACCESS_KEY }}
+            REGION=${{ secrets.REGION }}
+            BUCKET_NAME=${{ secrets.BUCKET_NAME }}
+            REDIS_HOST=${{ secrets.REDIS_HOST }}
+            REDIS_PORT=${{ secrets.REDIS_PORT }}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            LIVEKIT_URL=${{ secrets.LIVEKIT_URL }}
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+
+
       - name: Verify Pushed Image
         run: docker pull sharmakeshav54126293/studyhub-frontend:latest
 
@@ -36,6 +66,34 @@ jobs:
           file: ./docker/Dockerfile.httpBackend
           push: true
           tags: sharmakeshav54126293/studyhub-backend:latest
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_LIVEKIT_API_KEY=${{ secrets.NEXT_PUBLIC_LIVEKIT_API_KEY }}
+            NEXT_PUBLIC_LIVEKIT_API_SECRET=${{ secrets.NEXT_PUBLIC_LIVEKIT_API_SECRET }}
+            NEXT_PUBLIC_LIVEKIT_URL=${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }}
+            NEXT_PUBLIC_ACCESS_KEY_ID=${{ secrets.NEXT_PUBLIC_ACCESS_KEY_ID }}
+            NEXT_PUBLIC_SECRET_ACCESS_KEY=${{ secrets.NEXT_PUBLIC_SECRET_ACCESS_KEY }}
+            NEXT_PUBLIC_REGION=${{ secrets.NEXT_PUBLIC_REGION }}
+            NEXT_PUBLIC_BUCKET_NAME=${{ secrets.NEXT_PUBLIC_BUCKET_NAME }}
+            NEXT_PUBLIC_WS_URL=${{ secrets.NEXT_PUBLIC_WS_URL }}
+            FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+            NEXT_PUBLIC_FRONTEND_URL=${{ secrets.NEXT_PUBLIC_FRONTEND_URL }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }}
+            LIVEKIT_API_KEY=${{ secrets.LIVEKIT_API_KEY }}
+            LIVEKIT_API_SECRET=${{ secrets.LIVEKIT_API_SECRET }}
+            LIVEKIT_URL=${{ secrets.LIVEKIT_URL }}
+            RABBITMQ_URL=${{ secrets.RABBITMQ_URL }}
+            ACCESS_KEY_ID=${{ secrets.ACCESS_KEY_ID }}
+            SECRET_ACCESS_KEY=${{ secrets.SECRET_ACCESS_KEY }}
+            REGION=${{ secrets.REGION }}
+            BUCKET_NAME=${{ secrets.BUCKET_NAME }}
+            REDIS_HOST=${{ secrets.REDIS_HOST }}
+            REDIS_PORT=${{ secrets.REDIS_PORT }}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            LIVEKIT_URL=${{ secrets.LIVEKIT_URL }}
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
 
       - name: Build and push docker image for upload worker
         uses: docker/build-push-action@v2
@@ -44,6 +102,34 @@ jobs:
           file: ./docker/Dockerfile.upload-worker
           push: true
           tags: sharmakeshav54126293/upload-worker:latest
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_LIVEKIT_API_KEY=${{ secrets.NEXT_PUBLIC_LIVEKIT_API_KEY }}
+            NEXT_PUBLIC_LIVEKIT_API_SECRET=${{ secrets.NEXT_PUBLIC_LIVEKIT_API_SECRET }}
+            NEXT_PUBLIC_LIVEKIT_URL=${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }}
+            NEXT_PUBLIC_ACCESS_KEY_ID=${{ secrets.NEXT_PUBLIC_ACCESS_KEY_ID }}
+            NEXT_PUBLIC_SECRET_ACCESS_KEY=${{ secrets.NEXT_PUBLIC_SECRET_ACCESS_KEY }}
+            NEXT_PUBLIC_REGION=${{ secrets.NEXT_PUBLIC_REGION }}
+            NEXT_PUBLIC_BUCKET_NAME=${{ secrets.NEXT_PUBLIC_BUCKET_NAME }}
+            NEXT_PUBLIC_WS_URL=${{ secrets.NEXT_PUBLIC_WS_URL }}
+            FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+            NEXT_PUBLIC_FRONTEND_URL=${{ secrets.NEXT_PUBLIC_FRONTEND_URL }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }}
+            LIVEKIT_API_KEY=${{ secrets.LIVEKIT_API_KEY }}
+            LIVEKIT_API_SECRET=${{ secrets.LIVEKIT_API_SECRET }}
+            LIVEKIT_URL=${{ secrets.LIVEKIT_URL }}
+            RABBITMQ_URL=${{ secrets.RABBITMQ_URL }}
+            ACCESS_KEY_ID=${{ secrets.ACCESS_KEY_ID }}
+            SECRET_ACCESS_KEY=${{ secrets.SECRET_ACCESS_KEY }}
+            REGION=${{ secrets.REGION }}
+            BUCKET_NAME=${{ secrets.BUCKET_NAME }}
+            REDIS_HOST=${{ secrets.REDIS_HOST }}
+            REDIS_PORT=${{ secrets.REDIS_PORT }}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            LIVEKIT_URL=${{ secrets.LIVEKIT_URL }}
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
 
       - name: Build and push docker image for ws server
         uses: docker/build-push-action@v2
@@ -52,6 +138,34 @@ jobs:
           file: ./docker/Dockerfile.wsserver
           push: true
           tags: sharmakeshav54126293/wsserver:latest
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_LIVEKIT_API_KEY=${{ secrets.NEXT_PUBLIC_LIVEKIT_API_KEY }}
+            NEXT_PUBLIC_LIVEKIT_API_SECRET=${{ secrets.NEXT_PUBLIC_LIVEKIT_API_SECRET }}
+            NEXT_PUBLIC_LIVEKIT_URL=${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }}
+            NEXT_PUBLIC_ACCESS_KEY_ID=${{ secrets.NEXT_PUBLIC_ACCESS_KEY_ID }}
+            NEXT_PUBLIC_SECRET_ACCESS_KEY=${{ secrets.NEXT_PUBLIC_SECRET_ACCESS_KEY }}
+            NEXT_PUBLIC_REGION=${{ secrets.NEXT_PUBLIC_REGION }}
+            NEXT_PUBLIC_BUCKET_NAME=${{ secrets.NEXT_PUBLIC_BUCKET_NAME }}
+            NEXT_PUBLIC_WS_URL=${{ secrets.NEXT_PUBLIC_WS_URL }}
+            FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+            NEXT_PUBLIC_FRONTEND_URL=${{ secrets.NEXT_PUBLIC_FRONTEND_URL }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }}
+            LIVEKIT_API_KEY=${{ secrets.LIVEKIT_API_KEY }}
+            LIVEKIT_API_SECRET=${{ secrets.LIVEKIT_API_SECRET }}
+            LIVEKIT_URL=${{ secrets.LIVEKIT_URL }}
+            RABBITMQ_URL=${{ secrets.RABBITMQ_URL }}
+            ACCESS_KEY_ID=${{ secrets.ACCESS_KEY_ID }}
+            SECRET_ACCESS_KEY=${{ secrets.SECRET_ACCESS_KEY }}
+            REGION=${{ secrets.REGION }}
+            BUCKET_NAME=${{ secrets.BUCKET_NAME }}
+            REDIS_HOST=${{ secrets.REDIS_HOST }}
+            REDIS_PORT=${{ secrets.REDIS_PORT }}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            LIVEKIT_URL=${{ secrets.LIVEKIT_URL }}
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
 
       # - name: Install SSH key
       #   uses: shimataro/ssh-key-action@v2
@@ -85,7 +199,7 @@ jobs:
             # docker system prune -f && \
             # docker-compose pull && \
             # docker-compose down --remove-orphans && \
-            # docker-compose up -d && \
+            # docker-compose up -d --force-recreate && \
             # docker-compose ps
-      #     '
+      # '
           
