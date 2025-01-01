@@ -17,9 +17,10 @@ RUN apk add --no-cache \
     graphicsmagick \
     imagemagick \
     ghostscript \
-    poppler-utils \
+    poppler \
     fontconfig \
-    fonts-liberation \
+    msttcorefonts-installer \
+    && update-ms-fonts \
     && fc-cache -f
 
 WORKDIR /app
@@ -42,6 +43,7 @@ RUN npm run db:generate
 
 RUN cd apps/upload-worker && npm run build && cd ../..
 
+# Verify GraphicsMagick installation
 RUN gm version
 
 EXPOSE 8081
