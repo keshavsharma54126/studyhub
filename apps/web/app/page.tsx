@@ -4,12 +4,15 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import { BackgroundBeams } from "@repo/ui/background-beams";
 import { TypewriterEffect } from "@repo/ui/typewriter-effect.tsx";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { ThemeToggle } from "@repo/ui/themetoggle";
 import { GeistMono } from 'geist/font/mono';
 import { FloatingLines } from "@repo/ui/floating-lines";
+import { Link as ScrollLink } from 'react-scroll';
+
 export default function Home() {
   const targetRef = useRef<HTMLDivElement>(null);
+  const[menuOpen,setMenuOpen] = useState(false);
   const { scrollYProgress } = useScroll({
     target: targetRef,
     offset: ["start start", "end start"],
@@ -56,19 +59,29 @@ export default function Home() {
               <div className="text-xl sm:text-2xl font-light tracking-tight text-white hover:text-teal-500 transition-colors cursor-pointer">
                 TeachStream
               </div>
-              <button className="md:hidden p-2 text-white">
+              <button className="md:hidden p-2 text-white" onClick={() => setMenuOpen(!menuOpen)}>
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
               <div className="hidden md:flex items-center space-x-4 lg:space-x-8">
                 <ThemeToggle />
-                <Link href="/features" className="text-gray-400 hover:text-teal-500 transition-colors">
+                <ScrollLink 
+                  to="features" 
+                  smooth={true} 
+                  duration={500} 
+                  className="text-gray-400 hover:text-teal-500 transition-colors cursor-pointer"
+                >
                   Features
-                </Link>
-                <Link href="/pricing" className="text-gray-400 hover:text-teal-500 transition-colors">
+                </ScrollLink>
+                <ScrollLink 
+                  to="pricing" 
+                  smooth={true} 
+                  duration={500} 
+                  className="text-gray-400 hover:text-teal-500 transition-colors cursor-pointer"
+                >
                   Pricing
-                </Link>
+                </ScrollLink>
                 <div className="relative group">
                   <div className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-6 py-2 rounded-xl flex items-center space-x-2 hover:from-teal-600 hover:to-cyan-600 transition-all duration-200">
                     <Link href="/signin" className="hover:text-white/90 transition-colors">
@@ -86,6 +99,63 @@ export default function Home() {
         </nav>
 
         {/* Rest of the sections */}
+        {menuOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-0 left-0 right-0 bottom-0 bg-black/90 backdrop-blur-md z-50 flex flex-col"
+          >
+            <div className="flex justify-between items-center p-4 border-b border-gray-800">
+              <div className="text-xl font-light text-white">TeachStream</div>
+              <button 
+                onClick={() => setMenuOpen(false)}
+                className="p-2 text-gray-400 hover:text-white transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex flex-col p-6 space-y-6">
+              <ThemeToggle />
+              <ScrollLink 
+                to="features" 
+                smooth={true} 
+                duration={500} 
+                className="text-gray-400 hover:text-teal-500 transition-colors text-lg cursor-pointer"
+                onClick={() => setMenuOpen(false)}
+              >
+                Features
+              </ScrollLink>
+              <ScrollLink 
+                to="pricing" 
+                smooth={true} 
+                duration={500} 
+                className="text-gray-400 hover:text-teal-500 transition-colors text-lg cursor-pointer"
+                onClick={() => setMenuOpen(false)}
+              >
+                Pricing
+              </ScrollLink>
+              <div className="pt-6 border-t border-gray-800 flex flex-col space-y-4">
+                <Link 
+                  href="/signin"
+                  onClick={() => setMenuOpen(false)}
+                  className="bg-black/50 text-white px-6 py-3 rounded-xl text-center hover:bg-black/70 transition-colors"
+                >
+                  Sign in
+                </Link>
+                <Link 
+                  href="/signup"
+                  onClick={() => setMenuOpen(false)}
+                  className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-6 py-3 rounded-xl text-center hover:from-teal-600 hover:to-cyan-600 transition-all"
+                >
+                  Sign up
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        )}
         <div ref={targetRef} className="relative min-h-screen w-full">
           <motion.div 
             style={{ opacity, scale, position }}
@@ -94,7 +164,7 @@ export default function Home() {
             <FloatingLines />
             
             {/* Keep existing content but update styling to match dark theme */}
-            <div className="text-center relative z-10 max-w-5xl mx-auto">
+            <div className="text-center relative z-10  mx-auto ">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -131,9 +201,15 @@ export default function Home() {
                 </motion.div>
 
                 {/* Keep TypewriterEffect components */}
-                <div className="flex flex-col items-center justify-center px-10 text-white">
-                  <TypewriterEffect words={words} className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight" />
-                  <TypewriterEffect words={words2} className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight" />
+                <div className="flex flex-col items-center justify-center px-4 sm:px-10 text-white">
+                  <TypewriterEffect 
+                    words={words} 
+                    className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-center" 
+                  />
+                  <TypewriterEffect 
+                    words={words2} 
+                    className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-center" 
+                  />
                 </div>
 
                 {/* Update paragraph text color */}
@@ -141,7 +217,7 @@ export default function Home() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
-                  className="text-base sm:text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mt-6 sm:mt-8 leading-relaxed px-4"
+                  className="text-sm sm:text-base md:text-lg text-gray-400 max-w-2xl mx-auto mt-4 sm:mt-6 leading-relaxed px-4 text-center"
                 >
                   Create engaging, interactive teaching sessions and connect with your students in real-time through our 
                   <motion.span className="text-teal-500 font-medium"> innovative AI-powered platform</motion.span>
@@ -152,40 +228,25 @@ export default function Home() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.7 }}
-                  className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8 sm:mt-12 px-4"
+                  className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mt-6 sm:mt-8 px-4 w-full"
                 >
                   <Link 
-                    href="/create-session" 
-                    className="w-full sm:w-auto bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-8 py-4 rounded-xl 
+                    href="/home" 
+                    className="w-full sm:w-auto bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl 
                       hover:from-teal-600 hover:to-cyan-600 transition-all duration-200 transform hover:scale-105
-                      flex items-center justify-center space-x-2 group"
+                      flex items-center justify-center space-x-2 group text-sm sm:text-base"
                   >
                     <span>Get Started Free</span>
-                    <svg 
-                      className="w-5 h-5 group-hover:translate-x-1 transition-transform" 
-                      fill="none" 
-                      viewBox="0 0 24 24" 
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform"  />
                   </Link>
                   
                   <Link 
-                    href="/demo" 
-                    className="w-full sm:w-auto group px-8 py-4 rounded-xl border border-gray-800 hover:border-teal-500/50 
+                    href="/home" 
+                    className="w-full sm:w-auto group px-6 sm:px-8 py-3 sm:py-4 rounded-xl border border-gray-800 hover:border-teal-500/50 
                       transition-all duration-200 flex items-center justify-center space-x-2 text-gray-400 hover:text-teal-500
-                      bg-black/50 backdrop-blur-sm"
+                      bg-black/50 backdrop-blur-sm text-sm sm:text-base"
                   >
-                    <svg 
-                      className="w-5 h-5" 
-                      fill="none" 
-                      viewBox="0 0 24 24" 
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5"  />
                     <span>Watch Demo</span>
                   </Link>
                 </motion.div>
@@ -195,7 +256,7 @@ export default function Home() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1 }}
-                  className="mt-12 pt-8 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-center gap-8 text-sm text-gray-400"
+                  className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-xs sm:text-sm text-gray-400"
                 >
                   <div className="flex items-center gap-2">
                     <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -215,7 +276,7 @@ export default function Home() {
         </div>
 
         {/* Features Section */}
-        <div className="py-24 relative z-10">
+        <div id="features" className="py-24 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 text-white">Why TeachStream?</h2>
             <p className="text-gray-400 max-w-2xl mx-auto">
@@ -287,7 +348,7 @@ export default function Home() {
         </div>
 
         {/* New Pricing Section */}
-        <div className="py-24 relative z-10">
+        <div id="pricing" className="py-24 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 text-white">Simple, Transparent Pricing</h2>
             <p className="text-gray-400 max-w-2xl mx-auto">Choose the perfect plan for your teaching needs</p>
