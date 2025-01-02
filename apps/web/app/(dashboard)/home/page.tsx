@@ -36,14 +36,31 @@ export default function HomePage() {
   const [sessionToDelete, setSessionToDelete] = useState<Session | null>(null);
   const [sessionToJoin, setSessionToJoin] = useState<string>("");
   const [loading,setLoading] = useState(true);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 enum SessionStatus {
   PENDING = 'PENDING',
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE'
 }
 
+  const isFormValid = () => {
+    return title.trim() !== '' && 
+           description.trim() !== '' && 
+           sessionDate !== null && 
+           pdfUrls.length > 0 &&
+           hasSubmitted;
+  };
+
   const handleStartSession = async () =>{
     try{
+      if (!isFormValid()) {
+        alert("Please fill all the required fields");
+        return;
+      }
+      if(title.trim() === "" || description.trim() === "" || sessionDate?.trim() === "" || pdfUrls.length === 0){
+        alert("Please fill all the fields");
+        return;
+      }
       const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session`,{
         sessionCode: sessionCode,
         title: title,
@@ -479,13 +496,19 @@ enum SessionStatus {
                 secretAccessKey={process.env.NEXT_PUBLIC_SECRET_ACCESS_KEY!} 
                 region={process.env.NEXT_PUBLIC_REGION!} 
                 bucketName={process.env.NEXT_PUBLIC_BUCKET_NAME!}
+                setHasSubmitted={setHasSubmitted}
               />
             </div>
             
             <div className="flex space-x-4">
               <button
-                className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-6 py-3 rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-300"
-                onClick={() => {handleStartSession()}}
+                className={`flex-1 px-6 py-3 rounded-xl transition-all duration-300 ${
+                  isFormValid()
+                    ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600'
+                    : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                }`}
+                onClick={handleStartSession}
+                disabled={!isFormValid()}
               >
                 Start Session
               </button>

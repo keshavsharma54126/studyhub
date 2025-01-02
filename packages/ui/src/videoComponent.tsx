@@ -69,40 +69,44 @@ import axios from 'axios';
       >
         <MyVideoConference isHost={isHost} />
         <RoomAudioRenderer />
-        <div className='absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent'>
+        <div className='absolute bottom-0 left-0 right-0'>
           <ControlBar 
-            className='flex justify-center items-center gap-2 p-2'
+            className='flex justify-center items-center gap-2 p-2 !bg-transparent'
             controls={{
               microphone: isHost,
               camera: isHost,
-              screenShare:isHost,
+              screenShare: isHost,
               leave: isHost
             }}
             variation="minimal"
           />
-          {isHost && (
-            <div className='absolute top-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent'> 
-              <button onClick={isRecording ? stopRecording : startRecording} className={`${isRecording ? 'bg-red-500' : 'bg-green-500'} px-4 py-2 rounded-full flex items-center gap-2`}>
+        </div>
+        {isHost && (
+            <div className='absolute top-4 left-4'> 
+              <button 
+                onClick={isRecording ? stopRecording : startRecording} 
+                className={`${isRecording ? 'bg-red-500' : 'bg-green-500'} 
+                  px-4 py-2 rounded-full flex items-center gap-2 
+                  text-white hover:opacity-90 transition-opacity`}
+              >
                 {isRecording ? (
                   <>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 " viewBox="0 0 24 24" fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                       <rect x="6" y="6" width="12" height="12" />
                     </svg>
+                    <span>Stop Recording</span>
                   </>
                 ) : (
                   <>
-                    
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                      <span className='text-white'>Start Recording</span>
                       <circle cx="12" cy="12" r="6" className="animate-pulse" />
                     </svg>
+                    <span>Start Recording</span>
                   </>
                 )}
               </button>
             </div>
           )}
-
-        </div>
       </LiveKitRoom>
     );
   }

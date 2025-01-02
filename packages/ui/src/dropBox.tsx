@@ -4,12 +4,12 @@ import React, { useState, useCallback } from "react";
 import { S3Client, GetObjectCommand, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { useDropzone } from "react-dropzone";
-import { Upload, FileIcon, X, Loader, Axis3DIcon } from "lucide-react";
+import { Upload, FileIcon, X, Loader, CheckCircle, AlertCircle } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
 
 
 
-export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPdfUrls}: {accessKeyId: string, secretAccessKey: string, region: string, bucketName: string, setPdfUrls: (urls: string[]) => void}  ) {
+export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPdfUrls, setHasSubmitted}: {accessKeyId: string, secretAccessKey: string, region: string, bucketName: string, setPdfUrls: (urls: string[]) => void, setHasSubmitted: (hasSubmitted: boolean) => void}  ) {
 
   const s3Client = new S3Client({
     region: region,
@@ -20,17 +20,22 @@ export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPd
   });
   const [files, setFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const[hasUploaded, setHasUploaded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
 
   // console.log("this is the project id" ,projectId)
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setFiles((prev) => [...prev, ...acceptedFiles]);
+    setHasUploaded(true);
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   const removeFile = (file: File) => {
     setFiles(files.filter((f) => f !== file));
+    setHasUploaded(false);
   };
 
   const handleUploading = async (currentFile: File) => {
@@ -68,11 +73,15 @@ export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPd
       }, 10000);
 
     }catch(error){
-      console.log(error)
+      setError("Failed to upload file. Please try again.");
+      console.log(error);
     }
   };
 
   const handleSubmit = async () => {
+    if(files.length === 0){
+      return;
+    }
     setIsLoading(true);
     files.map((file: File) => {
       if(file.type === "application/pdf"){
@@ -81,10 +90,16 @@ export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPd
     });
     setFiles([]);
     setIsLoading(false);
+    setSubmitted(true);
+    setHasSubmitted(true);
+    setHasUploaded(false);
+    setTimeout(() => {
+      setSubmitted(false);
+    }, 10000);
   };
 
   return (
-    <div className="w-full bg-teal-500/10 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-800">
+    <div className="w-full bg-teal-500/10 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-800 p-6">
       <div
         {...getRootProps()}
         className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors duration-300 ${
@@ -105,14 +120,15 @@ export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPd
 
       {files.length > 0 && (
         <div className="mt-6">
-          <h3 className="text-lg font-semibold text-primary-400 mb-3">
-            Selected Files:
+          <h3 className="text-lg font-semibold text-primary-400 mb-3 flex items-center gap-2">
+            <FileIcon className="h-5 w-5" />
+            Selected Files ({files.length})
           </h3>
           <ul className="space-y-2">
             {files.map((file, index) => (
               <li
                 key={index}
-                className="flex items-center justify-between bg-slate-700 rounded-lg p-3 border border-gray-600"
+                className="flex items-center justify-between bg-slate-700/50 rounded-lg p-3 border border-gray-600 hover:bg-slate-700 transition-all"
               >
                 <div className="flex items-center">
                   <FileIcon className="h-5 w-5 text-primary-400 mr-2" />
@@ -127,18 +143,45 @@ export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPd
               </li>
             ))}
           </ul>
-          {isLoading && <Loader className="w-5 h-5 text-primary-400" />}
         </div>
       )}
-      <div className="flex justify-center items-center mt-4 ">
-      <button
-       className="bg-teal-500 text-white px-4 py-2 rounded-lg w-full mt-4"
-        onClick={() => {
-          handleSubmit();
-        }}
-      >
-        Submit
-      </button>
+
+      <div className="mt-6 flex flex-col items-center gap-4">
+        {isLoading && (
+          <div className="flex items-center gap-2 text-primary-400">
+            <Loader className="w-5 h-5 animate-spin" />
+            <span>Uploading files...</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="flex items-center gap-2 text-red-400 bg-red-400/10 p-3 rounded-lg">
+            <AlertCircle className="h-5 w-5" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {submitted && (
+          <div className="flex items-center gap-2 text-teal-400 bg-neon-400/10 p-3 rounded-lg">
+            <CheckCircle className="h-5 w-5" />
+            <span>Files submitted successfully!</span>
+          </div>
+        )}
+
+        {hasUploaded && (
+          <button
+            className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-lg transition-colors duration-300 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleSubmit}
+            disabled={isLoading || files.length === 0}
+          >
+            {isLoading ? (
+              <Loader className="h-4 w-4 animate-spin" />
+            ) : (
+              <CheckCircle className="h-4 w-4" />
+            )}
+            {isLoading ? "Uploading..." : "Submit Files"}
+          </button>
+        )}
       </div>
     </div>
   );
