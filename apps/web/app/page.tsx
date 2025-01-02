@@ -120,7 +120,7 @@ export default function Home() {
   ];
 
   return (
-    <div className={`min-h-screen bg-[conic-gradient(at_bottom_left,_var(--tw-gradient-stops))] from-black via-gray-950 to-gray-900 overflow-hidden ${GeistMono.className}`}>
+    <div suppressHydrationWarning className={`min-h-screen bg-[conic-gradient(at_bottom_left,_var(--tw-gradient-stops))] from-black via-gray-950 to-gray-900 overflow-hidden ${GeistMono.className}`}>
       <div className="fixed inset-0 w-full h-full">
         <BackgroundBeams className="absolute inset-0" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/0" />
@@ -141,21 +141,21 @@ export default function Home() {
                   : 'text-4xl sm:text-5xl'
               }`}
               initial={{
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight,
+                x: Math.random() * 1000,
+                y: Math.random() * 1000,
                 scale: 0.5,
                 rotate: Math.random() * 360,
               }}
               animate={{
                 x: [
-                  Math.random() * window.innerWidth,
-                  Math.random() * window.innerWidth,
-                  Math.random() * window.innerWidth,
+                  Math.random() * 1000,
+                  Math.random() * 1000,
+                  Math.random() * 1000,
                 ],
                 y: [
-                  Math.random() * window.innerHeight,
-                  Math.random() * window.innerHeight,
-                  Math.random() * window.innerHeight,
+                  Math.random() * 1000,
+                  Math.random() * 1000,
+                  Math.random() * 1000,
                 ],
                 rotate: [0, 180, 360],
                 scale: [0.5, 0.8, 0.5],
@@ -180,8 +180,8 @@ export default function Home() {
                 width: Math.random() * 200 + 100,
               }}
               initial={{
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight,
+                x: Math.random() * 1000,
+                y: Math.random() * 1000,
                 rotate: Math.random() * 360,
                 scale: 0,
               }}
@@ -204,8 +204,8 @@ export default function Home() {
               key={`spark-${i}`}
               className="absolute w-1 h-1 bg-cyan-400 rounded-full"
               initial={{
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight,
+                x: Math.random() * 1000,
+                y: Math.random() * 1000,
                 scale: 0,
               }}
               animate={{
