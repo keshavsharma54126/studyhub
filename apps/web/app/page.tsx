@@ -102,7 +102,7 @@ export default function Home() {
       text: "your",
     },
     {
-      text: "teaching",
+      text: "Teaching",
     },
     {
       text:"and"
@@ -230,7 +230,7 @@ export default function Home() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="text-xl sm:text-2xl font-light tracking-tight text-white hover:text-teal-500 transition-colors cursor-pointer">
-                TeachStream
+                StudySpace
               </div>
               <button className="md:hidden p-2 text-white" onClick={() => setMenuOpen(!menuOpen)}>
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -280,7 +280,7 @@ export default function Home() {
             className="fixed top-0 left-0 right-0 bottom-0 bg-black/90 backdrop-blur-md z-50 flex flex-col"
           >
             <div className="flex justify-between items-center p-4 border-b border-gray-800">
-              <div className="text-xl font-light text-white">TeachStream</div>
+              <div className="text-xl font-light text-white">StudySpace</div>
               <button 
                 onClick={() => setMenuOpen(false)}
                 className="p-2 text-gray-400 hover:text-white transition-colors"
@@ -447,7 +447,7 @@ export default function Home() {
         {/* Features Section */}
         <div id="features" className="py-24 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-white">Why TeachStream?</h2>
+            <h2 className="text-4xl font-bold mb-4 text-white">Why StudySpace?</h2>
             <p className="text-gray-400 max-w-2xl mx-auto">
               Discover how our platform revolutionizes online teaching
             </p>
@@ -496,9 +496,9 @@ export default function Home() {
             className="bg-black/40 backdrop-blur-sm rounded-3xl p-6 sm:p-8 md:p-12 mx-4 border border-gray-800"
           >
             <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-white">See TeachStream in Action</h2>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-white">See StudySpace in Action</h2>
               <p className="text-lg sm:text-xl mb-6 sm:mb-8 text-gray-400">
-                Schedule a personalized demo with our team and discover how TeachStream can transform your teaching experience.
+                Schedule a personalized demo with our team and discover how StudySpace can transform your learning experience.
               </p>
               <form className="flex flex-col sm:flex-row gap-4 justify-center">
                 <input
@@ -593,16 +593,16 @@ export default function Home() {
             className="bg-black/40 backdrop-blur-sm rounded-3xl p-6 sm:p-8 md:p-12 mx-4 text-center border border-gray-800
               hover:border-teal-500/50 hover:shadow-[0_0_30px_rgba(20,184,166,0.15)]"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-white">Ready to transform your teaching?</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-white">Ready to transform your learning?</h2>
             <p className="text-gray-400 max-w-2xl mx-auto mb-6 sm:mb-8 text-base sm:text-lg">
-              Join thousands of educators who are already using TeachStream to create engaging learning experiences.
+              Join thousands of students who are already using StudySpace to achieve their learning goals.
             </p>
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-8 py-4 rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-200"
             >
-              Start Teaching Today
+              Start Learning Today
             </motion.button>
           </motion.div>
         </div>
