@@ -8,10 +8,91 @@ import { JWT_SECRET } from "../config";
 import * as jwt from "jsonwebtoken"
 import { OAuth2Client } from "google-auth-library";
 import { google } from 'googleapis'
+
+/**
+ * @swagger
+ * tags:
+ *   name: Authentication
+ *   description: User authentication endpoints
+ * 
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - email
+ *         - username
+ *         - password
+ *       properties:
+ *         email:
+ *           type: string
+ *           format: email
+ *         username:
+ *           type: string
+ *         password:
+ *           type: string
+ *           format: password
+ *   
+ *   responses:
+ *     UnauthorizedError:
+ *       description: Authentication information is missing or invalid
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               message:
+ *                 type: string
+ */
+
 const authRouter = Router();
 
-
-
+/**
+ * @swagger
+ * /signup:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - username
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 format: password
+ *               username:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 userId:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *       400:
+ *         description: Invalid input
+ *       409:
+ *         description: User already exists
+ *       500:
+ *         description: Internal server error
+ */
 authRouter.post("/signup", async (req: Request, res: Response): Promise<any> => {
   try {
     const parsedData = signupSchema.safeParse(req.body);
@@ -55,6 +136,49 @@ authRouter.post("/signup", async (req: Request, res: Response): Promise<any> => 
   }
 })
 
+/**
+ * @swagger
+ * /signin:
+ *   post:
+ *     summary: Authenticate existing user
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: User signed in successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 token:
+ *                   type: string
+ *                 userId:
+ *                   type: string
+ *       400:
+ *         description: Bad Request
+ *       401:
+ *         description: Invalid credentials
+ *       500:
+ *         description: Internal server error
+ */
 authRouter.post("/signin",async(req:Request,res:Response):Promise<any>=>{
   try{
     const parsedData = signinSchema.safeParse(req.body);
@@ -119,6 +243,30 @@ if (!googleClientId || !googleClientSecret || !googleRedirectUri) {
 
 const oauth2Client = new OAuth2Client(googleClientId, googleClientSecret, googleRedirectUri);
 
+/**
+ * @swagger
+ * /google/url:
+ *   get:
+ *     summary: Get Google OAuth2 authentication URL
+ *     tags: [Authentication]
+ *     responses:
+ *       200:
+ *         description: Successfully generated Google auth URL
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 url:
+ *                   type: string
+ *                   format: uri
+ *       400:
+ *         description: Failed to generate auth URL
+ *       500:
+ *         description: Internal server error
+ */
 authRouter.get("/google/url",async(req:Request,res:Response):Promise<any>=>{
   try{
     const authUrl = oauth2Client.generateAuthUrl({
@@ -145,6 +293,32 @@ authRouter.get("/google/url",async(req:Request,res:Response):Promise<any>=>{
   }
 })
 
+/**
+ * @swagger
+ * /google/callback:
+ *   get:
+ *     summary: Handle Google OAuth2 callback
+ *     tags: [Authentication]
+ *     parameters:
+ *       - in: query
+ *         name: code
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The authorization code from Google
+ *     responses:
+ *       302:
+ *         description: Redirects to frontend with authentication token
+ *         headers:
+ *           Location:
+ *             schema:
+ *               type: string
+ *             description: URL to redirect to
+ *       400:
+ *         description: Failed to get user info
+ *       500:
+ *         description: Authentication failed
+ */
 authRouter.get("/google/callback", async(req: Request, res: Response): Promise<any> => {
   try {
     const code = req.query.code as string;

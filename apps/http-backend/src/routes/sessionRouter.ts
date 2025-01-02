@@ -40,6 +40,90 @@ initializeRabbitMQ()
 
 export const sessionRouter = Router();
 
+/**
+ * @swagger
+ * tags:
+ *   name: Sessions
+ *   description: Session management endpoints
+ * 
+ * components:
+ *   schemas:
+ *     Session:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         title:
+ *           type: string
+ *         description:
+ *           type: string
+ *         startTime:
+ *           type: string
+ *           format: date-time
+ *         endTime:
+ *           type: string
+ *           format: date-time
+ *         secretCode:
+ *           type: string
+ *         status:
+ *           type: string
+ *           enum: [PENDING, ACTIVE, INACTIVE]
+ *         userId:
+ *           type: string
+ *     Error:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ */
+
+/**
+ * @swagger
+ * /session:
+ *   post:
+ *     summary: Create a new session
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - description
+ *               - sessionDate
+ *               - sessionCode
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               sessionDate:
+ *                 type: string
+ *                 format: date-time
+ *               sessionCode:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Session created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 sessionId:
+ *                   type: string
+ *       400:
+ *         description: Invalid input or unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+
 sessionRouter.post("/session", userMiddleware, async (req:any, res: any) => {
   try {
     const parsedData = sessionSchema.safeParse(req.body);
@@ -76,6 +160,32 @@ sessionRouter.post("/session", userMiddleware, async (req:any, res: any) => {
   }
 })
 
+/**
+ * @swagger
+ * /sessions:
+ *   get:
+ *     summary: Get all sessions
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all sessions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sessions:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Session'
+ *       400:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+
 sessionRouter.get("/sessions",userMiddleware,async(req:any,res:any)=>{
   try{
     const userId = req.userId;
@@ -96,6 +206,33 @@ sessionRouter.get("/sessions",userMiddleware,async(req:any,res:any)=>{
   }
 })
 
+/**
+ * @swagger
+ * /session/{sessionId}:
+ *   get:
+ *     summary: Get a specific session by ID
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Session details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 session:
+ *                   $ref: '#/components/schemas/Session'
+ *       500:
+ *         description: Internal server error
+ */
 
 sessionRouter.get("/session/:sessionId",userMiddleware,async(req:any,res:any)=>{
   try{
@@ -114,6 +251,38 @@ sessionRouter.get("/session/:sessionId",userMiddleware,async(req:any,res:any)=>{
     })
   }
 })
+
+/**
+ * @swagger
+ * /sessions/{userId}:
+ *   get:
+ *     summary: Get all active and pending sessions for a user
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of user's sessions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sessions:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Session'
+ *       400:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
 
 sessionRouter.get("/sessions/:userId",userMiddleware,async(req:any,res:any)=>{
   try{
@@ -157,6 +326,27 @@ sessionRouter.get("/sessions/:userId",userMiddleware,async(req:any,res:any)=>{
   }
 })
 
+/**
+ * @swagger
+ * /ended/{userId}:
+ *   get:
+ *     summary: Get all ended sessions for a user
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of ended sessions
+ *       500:
+ *         description: Internal server error
+ */
+
 sessionRouter.get("/ended/:userId",userMiddleware,async(req:any,res:any)=>{
   try{
     const userId = req.params.userId;
@@ -191,6 +381,29 @@ sessionRouter.get("/ended/:userId",userMiddleware,async(req:any,res:any)=>{
   }
 })
 
+/**
+ * @swagger
+ * /session/{sessionId}:
+ *   delete:
+ *     summary: Delete a session
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Session deleted successfully
+ *       400:
+ *         description: Session not found
+ *       500:
+ *         description: Internal server error
+ */
+
 sessionRouter.delete("/session/:sessionId",userMiddleware,async(req:any,res:any)=>{
   try{
     const sessionId = req.params.sessionId;
@@ -213,6 +426,29 @@ sessionRouter.delete("/session/:sessionId",userMiddleware,async(req:any,res:any)
     })
   }
 })
+
+/**
+ * @swagger
+ * /session/{sessionId}/start:
+ *   put:
+ *     summary: Start a session
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Session started successfully
+ *       400:
+ *         description: Session ID is required
+ *       500:
+ *         description: Internal server error
+ */
 
 sessionRouter.put("/session/:sessionId/start",userMiddleware,async(req:any,res:any)=>{
   try{
@@ -242,6 +478,29 @@ sessionRouter.put("/session/:sessionId/start",userMiddleware,async(req:any,res:a
   }
 })
 
+/**
+ * @swagger
+ * /session/{sessionId}/end:
+ *   put:
+ *     summary: End a session
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Session ended successfully
+ *       400:
+ *         description: Session ID is required
+ *       500:
+ *         description: Internal server error
+ */
+
 sessionRouter.put("/session/:sessionId/end",userMiddleware,async(req:any,res:any)=>{
   try{
     const sessionId = req.params.sessionId;
@@ -270,6 +529,42 @@ sessionRouter.put("/session/:sessionId/end",userMiddleware,async(req:any,res:any
     })
   }
 })
+
+/**
+ * @swagger
+ * /session/{sessionId}/slides/upload:
+ *   post:
+ *     summary: Upload slides to a session
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - pdfUrls
+ *             properties:
+ *               pdfUrls:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: PDF uploaded successfully
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Internal server error
+ */
 
 sessionRouter.post("/session/:sessionId/slides/upload",userMiddleware,async(req:any,res:any)=>{
   try{
@@ -308,6 +603,27 @@ sessionRouter.post("/session/:sessionId/slides/upload",userMiddleware,async(req:
   }
 })
 
+/**
+ * @swagger
+ * /session/{sessionId}/slides/images:
+ *   get:
+ *     summary: Get all slides images for a session
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of slide images
+ *       500:
+ *         description: Internal server error
+ */
+
 sessionRouter.get("/session/:sessionId/slides/images",userMiddleware,async(req:any,res:any)=>{
   try{
     const sessionId = req.params.sessionId;
@@ -325,6 +641,29 @@ sessionRouter.get("/session/:sessionId/slides/images",userMiddleware,async(req:a
     })
   }
 })
+
+/**
+ * @swagger
+ * /session/{sessionId}/slides:
+ *   post:
+ *     summary: Add an empty slide to a session
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Empty slide added successfully
+ *       400:
+ *         description: Session not found
+ *       500:
+ *         description: Internal server error
+ */
 
 sessionRouter.post("/session/:sessionId/slides",userMiddleware,async(req:any,res:any)=>{
   try{
@@ -362,6 +701,34 @@ sessionRouter.post("/session/:sessionId/slides",userMiddleware,async(req:any,res
   }
 })
 
+/**
+ * @swagger
+ * /session/{sessionId}/slides/{slideId}:
+ *   delete:
+ *     summary: Delete a slide from a session
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: slideId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Slide deleted successfully
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Internal server error
+ */
+
 sessionRouter.delete("/session/:sessionId/slides/:slideId",userMiddleware,async(req:any,res:any)=>{
   try{
     const slideId = req.params.slideId;
@@ -387,6 +754,36 @@ sessionRouter.delete("/session/:sessionId/slides/:slideId",userMiddleware,async(
     })
   }
 })
+
+/**
+ * @swagger
+ * /session/tojoin/{sessionToJoin}:
+ *   get:
+ *     summary: Join a session using session code
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionToJoin
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Session found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sessionId:
+ *                   type: string
+ *       404:
+ *         description: Session not found
+ *       500:
+ *         description: Internal server error
+ */
 
 sessionRouter.get("/session/tojoin/:sessionToJoin", userMiddleware, async(req:any, res:any) => {
   try {
@@ -418,7 +815,28 @@ sessionRouter.get("/session/tojoin/:sessionToJoin", userMiddleware, async(req:an
   }
 });
 
-
+/**
+ * @swagger
+ * /session/{sessionId}/status:
+ *   get:
+ *     summary: Get session status
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Session status
+ *       400:
+ *         description: Session not found
+ *       500:
+ *         description: Internal server error
+ */
 
 sessionRouter.get("/session/:sessionId/status",userMiddleware,async(req:any,res:any)=>{
   try{
@@ -466,6 +884,49 @@ const createToken = async (roomname:string,participantname:string,isHost:boolean
   return await at.toJwt();
 };
 
+/**
+ * @swagger
+ * /token:
+ *   post:
+ *     summary: Generate a LiveKit token for room access
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - roomName
+ *               - participantName
+ *               - sessionId
+ *             properties:
+ *               roomName:
+ *                 type: string
+ *               participantName:
+ *                 type: string
+ *               sessionId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Token generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                 isHost:
+ *                   type: boolean
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Internal server error
+ */
+
 sessionRouter.post("/token",userMiddleware,async(req:any,res:any)=>{
   try{
     const userId = req.userId;
@@ -503,6 +964,29 @@ sessionRouter.post("/token",userMiddleware,async(req:any,res:any)=>{
   }
 })  
 
+/**
+ * @swagger
+ * /session/{sessionId}/recording:
+ *   get:
+ *     summary: Get session recordings
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Session recordings retrieved successfully
+ *       400:
+ *         description: Session recording not found
+ *       500:
+ *         description: Internal server error
+ */
+
 sessionRouter.get("/session/:sessionId/recording",userMiddleware,async(req:any,res:any)=>{
    try{
     const sessionId = req.params.sessionId;
@@ -529,6 +1013,38 @@ sessionRouter.get("/session/:sessionId/recording",userMiddleware,async(req:any,r
     })
    }
 })
+
+/**
+ * @swagger
+ * /session/{sessionId}/start-recording:
+ *   post:
+ *     summary: Start recording a session
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Recording started successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 egressId:
+ *                   type: string
+ *       400:
+ *         description: Session not found
+ *       500:
+ *         description: Internal server error
+ */
 
 sessionRouter.post("/session/:sessionId/start-recording", userMiddleware, async(req:any, res:any) => {
   try {
@@ -577,6 +1093,38 @@ sessionRouter.post("/session/:sessionId/start-recording", userMiddleware, async(
     });
   }
 });
+
+/**
+ * @swagger
+ * /session/{sessionId}/stop-recording:
+ *   post:
+ *     summary: Stop recording a session
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - egressId
+ *             properties:
+ *               egressId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Recording stopped successfully
+ *       500:
+ *         description: Internal server error
+ */
 
 sessionRouter.post("/session/:sessionId/stop-recording",userMiddleware,async(req:any,res:any)=>{
   try{
