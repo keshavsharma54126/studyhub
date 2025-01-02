@@ -122,20 +122,22 @@ function SessionReplayPage() {
 
     const fetchSlides = async ()=>{
         try{
-            const token = localStorage.getItem("auth_token");
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}/slides/images`,{
-                headers:{
-                    "Authorization": `Bearer ${token}`
+            if (typeof window !== 'undefined') {
+                const token = localStorage.getItem("auth_token");
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}/slides/images`,{
+                    headers:{
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+                console.log(response.data);
+                setSlides(response.data.images.map((slide:any)=>({
+                    url:slide.url,
+                    sessionId:sessionId,
+                    id:slide.id
+                }))); 
+                if(response.data.images.length > 0){
+                    displaySlide(response.data.images[0]?.url||"");
                 }
-            });
-            console.log(response.data);
-            setSlides(response.data.images.map((slide:any)=>({
-                url:slide.url,
-                sessionId:sessionId,
-                id:slide.id
-            }))); 
-            if(response.data.images.length > 0){
-                displaySlide(response.data.images[0]?.url||"");
             }
         }catch(error){
             console.error(error);
@@ -144,21 +146,23 @@ function SessionReplayPage() {
 
     const fetchSessionRecording = async () => {
         try {
-            const token = localStorage.getItem("auth_token");
-            if(sessionId){
-            const recordingResponse = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}/recording`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
+            if (typeof window !== 'undefined') {
+                const token = localStorage.getItem("auth_token");
+                if(sessionId){
+                    const recordingResponse = await axios.get(
+                        `${process.env.NEXT_PUBLIC_API_URL}/sessions/session/${sessionId}/recording`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`
+                            }
+                        }
+                    )
+                    const eventWithDates = recordingResponse.data.sessionRecording.map((event:any)=>({
+                        ...event,
+                        timestamp:new Date(event.timestamp)
+                    }));
+                    setEvents(eventWithDates);
                 }
-            )
-            const eventWithDates = recordingResponse.data.sessionRecording.map((event:any)=>({
-                ...event,
-                timestamp:new Date(event.timestamp)
-            }));
-            setEvents(eventWithDates);
             }
         } catch (error) {
             console.error('Failed to fetch session recording:', error);
