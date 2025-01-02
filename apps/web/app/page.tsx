@@ -12,19 +12,67 @@ import { Link as ScrollLink } from 'react-scroll';
 
 // Educational elements that float and animate
 const EDUCATION_ELEMENTS = [
+  // Math & Physics
   { text: "A²+B²=C²", type: "formula" },
   { text: "E=mc²", type: "formula" },
-  { text: "∫", type: "symbol" },
-  { text: "📚", type: "icon" },
-  { text: "✏️", type: "icon" },
-  { text: "DNA", type: "text" },
-  { text: "H₂O", type: "formula" },
-  { text: "⚡", type: "icon" },
-  { text: "🧬", type: "icon" },
-  { text: "π", type: "symbol" },
+  { text: "∫f(x)dx", type: "formula" },
   { text: "∑", type: "symbol" },
-  { text: "🔬", type: "icon" },
+  { text: "π", type: "symbol" },
+  { text: "∞", type: "symbol" },
+  { text: "Δx", type: "formula" },
+  { text: "√", type: "symbol" },
+  { text: "±", type: "symbol" },
+  { text: "θ", type: "symbol" },
+  { text: "λ", type: "symbol" },
+  { text: "∇", type: "symbol" },
+  { text: "ω", type: "symbol" },
+  
+  // Chemistry & Biology
+  { text: "H₂O", type: "formula" },
+  { text: "CO₂", type: "formula" },
+  { text: "NaCl", type: "formula" },
+  { text: "DNA", type: "text" },
+  { text: "RNA", type: "text" },
+  { text: "ATP", type: "text" },
+  { text: "pH", type: "formula" },
+  { text: "C₆H₁₂O₆", type: "formula" },
+  { text: "O₂", type: "formula" },
+  
+  // Computer Science
+  { text: "if()", type: "code" },
+  { text: "while()", type: "code" },
+  { text: "</>", type: "code" },
+  { text: "{ }", type: "code" },
+  { text: "&&", type: "code" },
+  
+  // Languages
+  { text: "¡Hola!", type: "text" },
+  { text: "你好", type: "text" },
+  { text: "Bonjour", type: "text" },
+  { text: "こんにちは", type: "text" },
+  
+  // Geography & History
+  { text: "🌍", type: "icon" },
+  { text: "1776", type: "text" },
+  { text: "BCE", type: "text" },
+  { text: "→", type: "symbol" },
+  
+  // Icons
+  { text: "📚", type: "icon" },
+  { text: "🧬", type: "icon" },
   { text: "⚛️", type: "icon" },
+  { text: "🔬", type: "icon" },
+  { text: "🧪", type: "icon" },
+  { text: "🔭", type: "icon" },
+  { text: "📐", type: "icon" },
+  { text: "✏️", type: "icon" },
+  { text: "💻", type: "icon" },
+  { text: "🎨", type: "icon" },
+  { text: "🗺️", type: "icon" },
+  { text: "🔋", type: "icon" },
+  { text: "📊", type: "icon" },
+  { text: "🎵", type: "icon" },
+  { text: "🎭", type: "icon" },
 ];
 
 export default function Home() {
@@ -85,10 +133,12 @@ export default function Home() {
               key={`element-${i}`}
               className={`absolute select-none ${
                 EDUCATION_ELEMENTS[i % EDUCATION_ELEMENTS.length]?.type === 'formula' 
-                  ? 'text-teal-500/40 font-mono text-lg'
+                  ? 'text-teal-500/40 font-mono text-3xl sm:text-4xl'
                   : EDUCATION_ELEMENTS[i % EDUCATION_ELEMENTS.length]?.type === 'symbol'
-                  ? 'text-cyan-400/40 text-2xl'
-                  : 'text-2xl'
+                  ? 'text-cyan-400/40 text-4xl sm:text-5xl'
+                  : EDUCATION_ELEMENTS[i % EDUCATION_ELEMENTS.length]?.type === 'code'
+                  ? 'text-purple-400/40 font-mono text-3xl sm:text-4xl'
+                  : 'text-4xl sm:text-5xl'
               }`}
               initial={{
                 x: Math.random() * window.innerWidth,
