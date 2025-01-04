@@ -69,6 +69,23 @@ function SessionReplayPage() {
         controls:false,
         responsive:true,
         fluid:true,
+        html5:{
+            hls:{
+                enableLowInitialPlaylist:true,
+                smoothQualityChange:true,
+                overrideNative:true,
+                enableWorker:true,
+                enableSubtitles:true,
+                enableSubtitlesCaptions:true,
+                enableAudioTracks:true,
+                enablePictureInPicture:true,
+                enableFullScreen:true,
+                enableNativeControls:true,
+                enableNativeAudioTracks:true,
+                enableNativeSubtitles:true,
+                enableNativeCaptions:true,
+            }
+        },
         sources:[{
             src:videoUrl,
             type:"application/x-mpegURL"
