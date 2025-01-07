@@ -50,6 +50,7 @@ COPY apps/wsServer/package.json ./apps/wsServer/package.json
 COPY apps/web/package.json ./apps/web/package.json
 
 RUN npm install
+RUN npm install @videojs/http-streaming hls.js
 
 FROM base AS builder 
 WORKDIR /app 
