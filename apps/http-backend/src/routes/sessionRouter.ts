@@ -1073,7 +1073,8 @@ sessionRouter.post("/session/:sessionId/start-recording", userMiddleware, async(
             accessKey: process.env.ACCESS_KEY_ID,
             secret: process.env.SECRET_ACCESS_KEY,
             region: process.env.REGION,
-            forcePathStyle: true
+            forcePathStyle: true,
+            
           }
         }
       })

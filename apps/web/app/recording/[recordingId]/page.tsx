@@ -95,6 +95,7 @@ function SessionReplayPage() {
     useEffect(() => {
         setLoading(true);
         const initializeSession = async () => {
+           try{
             await fetchSessionRecording();
             await fetchSlides();
             initCanvas();
@@ -118,7 +119,9 @@ function SessionReplayPage() {
                         console.log("Video is restarted");
                     })
                 })
-            
+           }catch(error){
+            console.error(error);
+           }
         };
 
         initializeSession();
