@@ -375,7 +375,8 @@ authRouter.get("/google/callback", async(req: Request, res: Response): Promise<a
     }
 
     // Redirect to frontend with token
-    res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}`);
+    const frontendUrl = process.env.FRONTEND_URL?.replace(/\/$/, '');
+    res.redirect(`${frontendUrl}/auth/callback?token=${token}`);
   } catch (error) {
     console.error('Google callback error:', error);
     res.redirect(`${process.env.FRONTEND_URL}/signin?error=authentication_failed`);
